@@ -61,8 +61,8 @@ function LoginPage() {
       >
         <Stack gap={6}>
           <Stack gap={2} align="start">
+            <img src={helpingHandLogo} alt="Helping Hand 伸手助人協會" style={{ height: 64, width: "auto" }} />
             <div className="font-extrabold tracking-tight" style={{ fontSize: 28, color: "var(--color-onyx-900)" }}>HMS</div>
-            <Heading level={1}>Helping Hand HMS</Heading>
             <Text color="secondary">{t("app.name")}</Text>
           </Stack>
 
@@ -76,7 +76,7 @@ function LoginPage() {
               <FormField label={t("auth.password")} required>
                 <PasswordField value={password} onChange={(e) => setPassword(e.target.value)} required />
               </FormField>
-              <Button type="submit" fullWidth loading={loading}>{t("actions.signIn")} · 登入</Button>
+              <Button type="submit" fullWidth loading={loading}>{t("actions.signIn")}</Button>
               <button type="button" className="type-body-sm text-center hover:underline" style={{ color: "var(--text-link)" }}>
                 {t("auth.forgotPassword")}
               </button>
