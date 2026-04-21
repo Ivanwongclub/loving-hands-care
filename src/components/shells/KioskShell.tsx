@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Wifi, WifiOff } from "lucide-react";
 import { Inline } from "@/components/hms";
 
@@ -30,6 +30,10 @@ export function KioskShell({ children, online = true }: { children: ReactNode; o
 }
 
 function ClockDisplay() {
-  const now = new Date();
+  const [now, setNow] = useState<Date>(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
   return <span className="type-body-md font-mono" style={{ color: "var(--text-secondary)" }}>{now.toLocaleTimeString()}</span>;
 }

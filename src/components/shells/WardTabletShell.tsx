@@ -39,7 +39,7 @@ export function WardTabletShell({ children }: { children: ReactNode }) {
           </button>
         </Inline>
       </header>
-      <main style={{ padding: `var(--space-5) var(--page-gutter-tablet)` }}>{children}</main>
+      <main className="[&_button]:min-h-11 [&_a]:min-h-11 [&_input]:min-h-11" style={{ padding: `var(--space-5) var(--page-gutter-tablet)`, fontSize: 15 }}>{children}</main>
     </div>
   );
 }
