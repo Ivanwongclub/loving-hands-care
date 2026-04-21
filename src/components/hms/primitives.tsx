@@ -105,13 +105,11 @@ interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
 }
 export function Heading({ level = 2, className, children, ...rest }: HeadingProps) {
   const cls = level === "display" ? "type-display" : level === 1 ? "type-h1" : level === 2 ? "type-h2" : "type-h3";
-  const Tag: keyof JSX.IntrinsicElements =
-    level === "display" || level === 1 ? "h1" : level === 2 ? "h2" : "h3";
-  return (
-    <Tag className={cn(cls, className)} style={{ color: "var(--text-primary)" }} {...rest}>
-      {children}
-    </Tag>
-  );
+  const tag = level === "display" || level === 1 ? "h1" : level === 2 ? "h2" : "h3";
+  const props = { className: cn(cls, className), style: { color: "var(--text-primary)" }, ...rest };
+  if (tag === "h1") return <h1 {...props}>{children}</h1>;
+  if (tag === "h2") return <h2 {...props}>{children}</h2>;
+  return <h3 {...props}>{children}</h3>;
 }
 
 type TextSize = "lg" | "md" | "sm" | "caption" | "label";
