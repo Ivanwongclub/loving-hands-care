@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -57,6 +57,22 @@ export function TasksTab({ residentId, branchId, staffId, logAction }: TasksTabP
   const [err, setErr] = useState<string | null>(null);
 
   const { tasks, isLoading } = useTasks({ residentId, status: statusFilter });
+
+  // Auto-flag overdue tasks for this resident on mount (silent, no audit)
+  useEffect(() => {
+    if (!residentId) return;
+    const now = new Date().toISOString();
+    void supabase
+      .from("tasks")
+      .update({ status: "OVERDUE" })
+      .eq("resident_id", residentId)
+      .in("status", ["PENDING", "IN_PROGRESS"])
+      .lt("due_at", now)
+      .then(({ error }) => {
+        if (!error) void qc.invalidateQueries({ queryKey: ["tasks", residentId] });
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [residentId]);
 
   const groups: Record<TaskStatus, TaskRow[]> = {
     OVERDUE: [], PENDING: [], IN_PROGRESS: [], COMPLETED: [], CANCELLED: [],
@@ -166,6 +182,12 @@ export function TasksTab({ residentId, branchId, staffId, logAction }: TasksTabP
 
   return (
     <Stack gap={4}>
+      {groups.OVERDUE.length > 0 && (
+        <Alert
+          severity="warning"
+          description={t("tasks.overdueWarning", { count: groups.OVERDUE.length })}
+        />
+      )}
       <FilterBar>
         <div style={{ width: 220 }}>
           <Select
