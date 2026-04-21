@@ -279,6 +279,22 @@ function ResidentDetailPage() {
           )}
           {tab === "bed" && <BedHistoryTab rows={bedHistory} />}
           {tab === "activity" && <ActivityTab rows={activityLog} />}
+          {tab === "vitals" && (
+            <VitalsTab
+              residentId={id}
+              branchId={resident.branch_id}
+              staffId={staff?.id ?? null}
+              logAction={logAction}
+            />
+          )}
+          {tab === "wounds" && (
+            <WoundsTab
+              residentId={id}
+              branchId={resident.branch_id}
+              staffId={staff?.id ?? null}
+              logAction={logAction}
+            />
+          )}
           {tab === "icp" && (
             <ICPTab
               residentId={id}
