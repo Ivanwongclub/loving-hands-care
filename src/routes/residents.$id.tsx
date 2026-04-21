@@ -363,10 +363,10 @@ function ProfileHeader({
             </Stack>
           </Inline>
           <Inline gap={2} align="start">
-            <Button variant="soft" onClick={() => toast(t("residents.comingSoon"))}>
+            <Button variant="soft" onClick={onTransfer}>
               {t("residents.transfer")}
             </Button>
-            <Button variant="destructive" onClick={() => toast(t("residents.comingSoon"))}>
+            <Button variant="destructive" onClick={onDischarge}>
               {t("residents.startDischarge")}
             </Button>
             {canEdit && !editMode && (
