@@ -678,6 +678,8 @@
     "new": "New Incident",
     "list": "Incidents",
     "detail": "Incident Detail",
+    "typeLabel": "Type",
+    "severityLabel": "Severity",
     "ref": "Incident Ref",
     "type": {
       "FALL": "Fall",

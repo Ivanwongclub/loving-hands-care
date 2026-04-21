@@ -133,7 +133,7 @@ export function NewIncidentModal({ open, onClose, residentId, branchId, staffId,
         )}
         <Inline gap={3} className="w-full">
           <div style={{ flex: 1 }}>
-            <FormField label={t("residents.columns.status").replace(t("residents.columns.status"), t("settings.sections.alerts"))} required>
+            <FormField label={t("incidents.typeLabel")} required>
               <Select
                 value={type}
                 onChange={(e) => setType((e.target as HTMLSelectElement).value as IncidentType)}
@@ -142,7 +142,7 @@ export function NewIncidentModal({ open, onClose, residentId, branchId, staffId,
             </FormField>
           </div>
           <div style={{ flex: 1 }}>
-            <FormField label={t("incidents.severity.LOW") ? "" : ""} required>
+            <FormField label={t("incidents.severityLabel")} required>
               <Select
                 value={severity}
                 onChange={(e) => setSeverity((e.target as HTMLSelectElement).value as Severity)}

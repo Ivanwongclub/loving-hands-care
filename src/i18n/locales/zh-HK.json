@@ -678,6 +678,8 @@
     "new": "新增事故報告",
     "list": "事故列表",
     "detail": "事故詳情",
+    "typeLabel": "類型",
+    "severityLabel": "嚴重程度",
     "ref": "事故編號",
     "type": {
       "FALL": "跌倒",
