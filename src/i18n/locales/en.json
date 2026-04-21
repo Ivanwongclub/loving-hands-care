@@ -30,7 +30,7 @@
     "search": "Search", "filter": "Filter", "back": "Back", "next": "Next",
     "done": "Done", "close": "Close", "add": "Add", "remove": "Remove",
     "deactivate": "Deactivate", "activate": "Activate", "unlock": "Unlock", "override": "Override",
-    "signIn": "Sign In", "signOut": "Sign Out", "rescan": "Rescan"
+    "signIn": "Sign In", "signOut": "Sign Out", "rescan": "Rescan", "retry": "Retry"
   },
   "alertStatus": {
     "open": "Open", "acknowledged": "Acknowledged", "assigned": "Assigned",
@@ -84,7 +84,10 @@
     "comingSoon": "Coming in next sprint",
     "branch": "Branch", "ward": "Ward", "shift": "Shift",
     "morningShift": "Morning Shift",
-    "language": "Language"
+    "language": "Language",
+    "retry": "Retry",
+    "saved": "Saved",
+    "loading": "Loading..."
   },
   "settings": {
     "comingSoon": "Coming in a future sprint",
@@ -105,7 +108,7 @@
     "statusInactive": "Inactive",
     "searchPlaceholder": "Search branch name...",
     "emptyTitle": "No branches configured",
-    "emptyDescription": "Add a branch to begin managing facilities.",
+    "emptyDescription": "Contact a system admin to add a branch.",
     "toastCreated": "Branch created",
     "toastSaved": "Saved",
     "columns": {
@@ -143,17 +146,44 @@
   "residents": {
     "title": "Residents", "list": "Residents List", "detail": "Resident Profile",
     "newAdmission": "New Admission", "transfer": "Transfer Bed", "discharge": "Discharge",
+    "startDischarge": "Start Discharge",
+    "editProfile": "Edit Profile",
+    "viewProfile": "View Profile",
     "profile": "Profile", "contacts": "Contacts", "documents": "Documents",
+    "bedHistory": "Bed History", "activity": "Activity",
     "medicalHistory": "Medical History", "allergies": "Allergies",
     "doNotShareFamily": "Do Not Share with Family",
     "doNotShareWarning": "This resident's information is marked as not to be shared with family",
+    "doNotShareConflictWarning": "This resident is marked Do Not Share, but contacts still have notifications enabled",
     "admissionDate": "Admission Date", "dischargeDate": "Discharge Date",
     "bedAssignment": "Bed Assignment", "currentBed": "Current Bed",
+    "bedBoard": "Bed Board", "residentsList": "Residents List",
+    "noBed": "—",
+    "ageYears": "yrs",
+    "notFound": "Resident not found",
+    "comingSoon": "Coming soon",
+    "noneRecorded": "None recorded",
+    "private": "Private",
     "riskLevel": { "LOW": "Low Risk", "MEDIUM": "Medium Risk", "HIGH": "High Risk" },
     "gender": { "M": "Male", "F": "Female", "OTHER": "Other" },
     "status": {
       "ADMITTED": "Admitted", "DISCHARGED": "Discharged", "LOA": "Leave of Absence", "DECEASED": "Deceased"
     },
+    "filters": { "allStatus": "All statuses", "allRisk": "All risk levels" },
+    "columns": {
+      "photo": "Photo", "name": "Name", "bed": "Bed", "admission": "Admission",
+      "risk": "Risk", "status": "Status", "private": "Private"
+    },
+    "demographics": {
+      "title": "Demographics",
+      "dob": "Date of Birth", "gender": "Gender", "language": "Language", "preferredName": "Preferred Name"
+    },
+    "allergiesSection": {
+      "title": "Allergies & Medical",
+      "diagnoses": "Diagnoses", "specialInstructions": "Special Instructions",
+      "severity": { "MILD": "Mild", "MODERATE": "Moderate", "SEVERE": "Severe" }
+    },
+    "diet": { "title": "Dietary Requirements" },
     "admissionWizard": {
       "step1": "Personal Details", "step2": "Medical History", "step3": "Emergency Contacts",
       "step4": "Upload Documents", "step5": "Bed Assignment", "step6": "Consent", "step7": "Review & Confirm"
@@ -161,7 +191,67 @@
     "hkid": "HKID", "hkidHint": "Only a hash is stored; the original number is not retained",
     "dischargeChecklist": "Discharge Checklist",
     "transferReason": "Transfer Reason",
-    "searchPlaceholder": "Search resident name or room..."
+    "searchPlaceholder": "Search resident name or room...",
+    "emptyList": "No resident records",
+    "bedDrawer": {
+      "viewResident": "View Resident",
+      "availableInfo": "This bed is currently available"
+    }
+  },
+  "contacts": {
+    "title": "Emergency Contacts",
+    "add": "Add Contact",
+    "edit": "Edit Contact",
+    "delete": "Delete Contact",
+    "deleteConfirm": "Delete this contact?",
+    "primary": "Primary",
+    "emergency": "Emergency",
+    "notifications": "Notifications",
+    "empty": "No contacts on file",
+    "fields": {
+      "nameZh": "Chinese Name", "name": "English Name",
+      "relationship": "Relationship",
+      "whatsapp": "WhatsApp", "sms": "SMS", "email": "Email",
+      "isPrimary": "Primary contact", "isEmergency": "Emergency contact",
+      "consentNotifications": "Receive notifications"
+    },
+    "columns": {
+      "name": "Name", "relationship": "Relationship",
+      "whatsapp": "WhatsApp", "sms": "SMS",
+      "primary": "Primary", "emergency": "Emergency", "notifications": "Notifications"
+    }
+  },
+  "documents": {
+    "title": "Documents",
+    "upload": "Upload Document",
+    "download": "Download",
+    "protected": "Protected document",
+    "empty": "No documents",
+    "uploaded": "Uploaded",
+    "uploadedBy": "Uploaded By",
+    "fileName": "File Name",
+    "type": "Type",
+    "uploadFailed": "Upload failed",
+    "uploadSuccess": "Document uploaded",
+    "selectFile": "Choose file",
+    "types": {
+      "CONSENT_FORM": "Consent Form",
+      "MEDICAL_REFERRAL": "Medical Referral",
+      "ID_COPY": "ID Copy",
+      "ADVANCE_DIRECTIVE": "Advance Directive",
+      "OTHER": "Other"
+    }
+  },
+  "bedHistory": {
+    "columns": {
+      "bed": "Bed", "from": "From", "to": "To", "reason": "Reason", "by": "By"
+    },
+    "current": "Current",
+    "empty": "No bed transfer history"
+  },
+  "activity": {
+    "system": "System",
+    "empty": "No activity"
   },
   "audit": { "by": "Actor", "at": "Time", "action": "Action", "entity": "Entity" }
 }

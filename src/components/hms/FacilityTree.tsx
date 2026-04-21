@@ -219,7 +219,7 @@ function TreeNode(props: TreeNodeProps) {
 
   // Row visual state
   const rowBg = isSelected ? "var(--bg-selected)" : (hovered ? "var(--bg-hover-subtle)" : "transparent");
-  const rowBorderLeft = isSelected ? "3px solid var(--iris-500)" : "3px solid transparent";
+  const rowBorderLeft = isSelected ? "3px solid var(--color-iris-500)" : "3px solid transparent";
   const cursor = isBed ? (bedSelectable ? "pointer" : (selectable ? "not-allowed" : "default")) : (hasChildren ? "pointer" : "default");
   const opacity = bedDimmed ? 0.5 : 1;
 
