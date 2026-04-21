@@ -220,6 +220,8 @@ function ResidentDetailPage() {
             canEdit={canEdit}
             editMode={editMode}
             onEdit={() => { setTab("profile"); setEditMode(true); }}
+            onTransfer={() => setTransferOpen(true)}
+            onDischarge={() => setDischargeOpen(true)}
           />
 
           <div>
