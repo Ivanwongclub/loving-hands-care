@@ -203,9 +203,9 @@ function TasksDashboardPage() {
       cell: (row) => (
         <Inline gap={2} align="center">
           <Avatar size="sm" name={row.resident?.name_zh ?? row.resident?.name ?? "?"} />
-          <Stack gap={0}>
+          <Stack gap={1}>
             <Text size="sm" className="font-medium">{row.resident?.name_zh ?? "—"}</Text>
-            <Text size="xs" color="tertiary">{row.resident?.name ?? ""}</Text>
+            <Text size="sm" color="tertiary">{row.resident?.name ?? ""}</Text>
           </Stack>
         </Inline>
       ),
