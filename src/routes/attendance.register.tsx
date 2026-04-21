@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Download, Inbox } from "lucide-react";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
+import { supabase } from "@/integrations/supabase/client";
 import {
   PageHeader, FilterBar, Table, Badge, Button, StatCard, TextField,
   Stack, Inline, Skeleton, EmptyState, type Column,
@@ -38,6 +39,7 @@ function AttendanceRegisterPage() {
 
   const [dateFrom, setDateFrom] = useState(todayStr());
   const [dateTo, setDateTo] = useState(todayStr());
+  const [exporting, setExporting] = useState(false);
 
   const { sessions, summary, isLoading } = useAttendanceSessions(branchId, dateFrom, dateTo);
 
@@ -117,6 +119,32 @@ function AttendanceRegisterPage() {
     },
   ];
 
+  const handleExportSWD = async () => {
+    if (!branchId) return;
+    setExporting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("swd-report-generate", {
+        body: { branch_id: branchId, date_from: dateFrom, date_to: dateTo },
+      });
+      if (error) throw error;
+
+      // data is a Blob from the Edge Function binary response
+      const blob = new Blob([data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `SWD_Attendance_${dateFrom}_${dateTo}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Export failed");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <ProtectedRoute>
       <AdminDesktopShell pageTitle={t("nav.attendance")}>
@@ -126,7 +154,9 @@ function AttendanceRegisterPage() {
             <Button
               variant="soft"
               leadingIcon={<Download size={16} />}
-              onClick={() => toast.info(t("attendance.exportComingSoon"))}
+              onClick={handleExportSWD}
+              loading={exporting}
+              disabled={exporting}
             >
               {t("attendance.exportSWD")}
             </Button>
