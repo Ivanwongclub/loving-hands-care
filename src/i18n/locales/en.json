@@ -352,7 +352,8 @@
     "discharge": "Mark Discharged",
     "qrLabel": "QR Status",
     "cardFooter": "If lost, contact staff",
-    "cardSubtitle": "Day Care Unit"
+    "cardSubtitle": "Day Care Unit",
+    "selectedResident": "Selected"
   },
   "kiosk": {
     "title": "Attendance Check-In",
