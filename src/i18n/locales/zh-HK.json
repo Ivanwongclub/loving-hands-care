@@ -86,10 +86,50 @@
     "morningShift": "早班",
     "language": "語言"
   },
+  "settings": {
+    "comingSoon": "即將推出",
+    "sections": {
+      "branches": "院舍管理",
+      "alerts": "警報設定",
+      "notifications": "通知設定",
+      "emar": "eMAR 設定",
+      "system": "系統設定"
+    }
+  },
   "branches": {
     "title": "院舍管理", "list": "院舍列表", "detail": "院舍詳情",
     "settings": "院舍設定", "bedBoard": "床位概覽", "occupancy": "入住率",
     "addBranch": "新增院舍",
+    "allTypes": "所有類型",
+    "statusActive": "啟用中",
+    "statusInactive": "已停用",
+    "searchPlaceholder": "搜尋院舍名稱...",
+    "emptyTitle": "尚未設定院舍",
+    "emptyDescription": "請先新增院舍以開始管理。",
+    "toastCreated": "院舍已新增",
+    "toastSaved": "已儲存",
+    "columns": {
+      "name": "院舍名稱",
+      "type": "類型",
+      "swdCode": "SWD 編號",
+      "address": "地址",
+      "status": "狀態"
+    },
+    "tabs": {
+      "basic": "基本資料",
+      "settings": "設定",
+      "locations": "位置管理"
+    },
+    "fields": {
+      "nameZh": "中文名稱",
+      "name": "英文名稱",
+      "type": "類型",
+      "address": "地址",
+      "swdCode": "SWD 登記編號",
+      "phone": "電話",
+      "email": "電郵",
+      "isActive": "啟用"
+    },
     "branchType": {
       "CARE_HOME": "護老院", "DCU": "日間護理單位",
       "HOUSING": "老人之家", "REHABILITATION": "復康服務"

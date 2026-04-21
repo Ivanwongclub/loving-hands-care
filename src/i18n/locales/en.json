@@ -86,10 +86,50 @@
     "morningShift": "Morning Shift",
     "language": "Language"
   },
+  "settings": {
+    "comingSoon": "Coming in a future sprint",
+    "sections": {
+      "branches": "Branches",
+      "alerts": "Alert Settings",
+      "notifications": "Notification Settings",
+      "emar": "eMAR Settings",
+      "system": "System Config"
+    }
+  },
   "branches": {
     "title": "Branch Management", "list": "Branch List", "detail": "Branch Detail",
     "settings": "Branch Settings", "bedBoard": "Bed Board", "occupancy": "Occupancy",
     "addBranch": "Add Branch",
+    "allTypes": "All Types",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "searchPlaceholder": "Search branch name...",
+    "emptyTitle": "No branches configured",
+    "emptyDescription": "Add a branch to begin managing facilities.",
+    "toastCreated": "Branch created",
+    "toastSaved": "Saved",
+    "columns": {
+      "name": "Branch Name",
+      "type": "Type",
+      "swdCode": "SWD Code",
+      "address": "Address",
+      "status": "Status"
+    },
+    "tabs": {
+      "basic": "Basic Info",
+      "settings": "Settings",
+      "locations": "Locations"
+    },
+    "fields": {
+      "nameZh": "Chinese Name",
+      "name": "English Name",
+      "type": "Type",
+      "address": "Address",
+      "swdCode": "SWD Registration Code",
+      "phone": "Phone",
+      "email": "Email",
+      "isActive": "Active"
+    },
     "branchType": {
       "CARE_HOME": "Care Home", "DCU": "Day Care Unit",
       "HOUSING": "Housing", "REHABILITATION": "Rehabilitation"
