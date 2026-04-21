@@ -7,7 +7,7 @@ import {
   Upload, Settings, LogOut, Bell, Languages, ChevronDown,
 } from "lucide-react";
 import { Avatar, ContextSwitcher, Inline, Stack, Text } from "@/components/hms";
-import { signOut } from "@/lib/auth";
+import { useAuth } from "@/lib/AuthContext";
 
 interface NavItem { to: string; labelKey: string; icon: ReactNode }
 interface NavSection { titleKey: string; items: NavItem[] }

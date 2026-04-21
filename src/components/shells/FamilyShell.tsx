@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { LogOut, Languages } from "lucide-react";
 import { Inline } from "@/components/hms";
-import { signOut } from "@/lib/auth";
+import { useAuth } from "@/lib/AuthContext";
 
 export function FamilyShell({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation();
