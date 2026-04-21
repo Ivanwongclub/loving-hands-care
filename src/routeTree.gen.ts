@@ -35,6 +35,7 @@ import { Route as EmarResidentIdRouteImport } from './routes/emar.$residentId'
 import { Route as CarePlansIdRouteImport } from './routes/care-plans.$id'
 import { Route as AttendanceRegisterRouteImport } from './routes/attendance.register'
 import { Route as AttendanceKioskRouteImport } from './routes/attendance.kiosk'
+import { Route as AttendanceEnrollmentsRouteImport } from './routes/attendance.enrollments'
 import { Route as AlertsWallboardRouteImport } from './routes/alerts.wallboard'
 
 const VitalsRoute = VitalsRouteImport.update({
@@ -167,6 +168,11 @@ const AttendanceKioskRoute = AttendanceKioskRouteImport.update({
   path: '/attendance/kiosk',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AttendanceEnrollmentsRoute = AttendanceEnrollmentsRouteImport.update({
+  id: '/attendance/enrollments',
+  path: '/attendance/enrollments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlertsWallboardRoute = AlertsWallboardRouteImport.update({
   id: '/wallboard',
   path: '/wallboard',
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof TasksRouteWithChildren
   '/vitals': typeof VitalsRouteWithChildren
   '/alerts/wallboard': typeof AlertsWallboardRoute
+  '/attendance/enrollments': typeof AttendanceEnrollmentsRoute
   '/attendance/kiosk': typeof AttendanceKioskRoute
   '/attendance/register': typeof AttendanceRegisterRoute
   '/care-plans/$id': typeof CarePlansIdRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof TasksRouteWithChildren
   '/vitals': typeof VitalsRouteWithChildren
   '/alerts/wallboard': typeof AlertsWallboardRoute
+  '/attendance/enrollments': typeof AttendanceEnrollmentsRoute
   '/attendance/kiosk': typeof AttendanceKioskRoute
   '/attendance/register': typeof AttendanceRegisterRoute
   '/care-plans/$id': typeof CarePlansIdRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/tasks': typeof TasksRouteWithChildren
   '/vitals': typeof VitalsRouteWithChildren
   '/alerts/wallboard': typeof AlertsWallboardRoute
+  '/attendance/enrollments': typeof AttendanceEnrollmentsRoute
   '/attendance/kiosk': typeof AttendanceKioskRoute
   '/attendance/register': typeof AttendanceRegisterRoute
   '/care-plans/$id': typeof CarePlansIdRoute
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/vitals'
     | '/alerts/wallboard'
+    | '/attendance/enrollments'
     | '/attendance/kiosk'
     | '/attendance/register'
     | '/care-plans/$id'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/vitals'
     | '/alerts/wallboard'
+    | '/attendance/enrollments'
     | '/attendance/kiosk'
     | '/attendance/register'
     | '/care-plans/$id'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/vitals'
     | '/alerts/wallboard'
+    | '/attendance/enrollments'
     | '/attendance/kiosk'
     | '/attendance/register'
     | '/care-plans/$id'
@@ -368,6 +380,7 @@ export interface RootRouteChildren {
   StaffRoute: typeof StaffRoute
   TasksRoute: typeof TasksRouteWithChildren
   VitalsRoute: typeof VitalsRouteWithChildren
+  AttendanceEnrollmentsRoute: typeof AttendanceEnrollmentsRoute
   AttendanceKioskRoute: typeof AttendanceKioskRoute
   AttendanceRegisterRoute: typeof AttendanceRegisterRoute
   FamilyDashboardRoute: typeof FamilyDashboardRoute
@@ -558,6 +571,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AttendanceKioskRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/attendance/enrollments': {
+      id: '/attendance/enrollments'
+      path: '/attendance/enrollments'
+      fullPath: '/attendance/enrollments'
+      preLoaderRoute: typeof AttendanceEnrollmentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/alerts/wallboard': {
       id: '/alerts/wallboard'
       path: '/wallboard'
@@ -653,6 +673,7 @@ const rootRouteChildren: RootRouteChildren = {
   StaffRoute: StaffRoute,
   TasksRoute: TasksRouteWithChildren,
   VitalsRoute: VitalsRouteWithChildren,
+  AttendanceEnrollmentsRoute: AttendanceEnrollmentsRoute,
   AttendanceKioskRoute: AttendanceKioskRoute,
   AttendanceRegisterRoute: AttendanceRegisterRoute,
   FamilyDashboardRoute: FamilyDashboardRoute,
