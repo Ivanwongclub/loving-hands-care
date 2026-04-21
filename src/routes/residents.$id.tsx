@@ -272,6 +272,18 @@ function ResidentDetailPage() {
           {tab === "bed" && <BedHistoryTab rows={bedHistory} />}
           {tab === "activity" && <ActivityTab rows={activityLog} />}
         </Stack>
+        <TransferBedModal
+          open={transferOpen}
+          onClose={() => setTransferOpen(false)}
+          resident={{ id: resident.id, branch_id: resident.branch_id, bed_id: resident.bed_id, name_zh: resident.name_zh }}
+          onTransferred={() => { void fetchResident(); void fetchContacts(); void fetchBedHistory(); }}
+        />
+        <DischargeModal
+          open={dischargeOpen}
+          onClose={() => setDischargeOpen(false)}
+          resident={{ id: resident.id, branch_id: resident.branch_id, bed_id: resident.bed_id, name_zh: resident.name_zh }}
+          onDischarged={() => { void fetchResident(); }}
+        />
       </AdminDesktopShell>
       {/* unused branchId reference suppression */}
       {branchId ? null : null}
@@ -288,11 +300,15 @@ function ProfileHeader({
   canEdit,
   editMode,
   onEdit,
+  onTransfer,
+  onDischarge,
 }: {
   resident: Resident;
   canEdit: boolean;
   editMode: boolean;
   onEdit: () => void;
+  onTransfer: () => void;
+  onDischarge: () => void;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
