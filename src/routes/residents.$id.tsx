@@ -15,6 +15,8 @@ import { TransferBedModal } from "@/components/residents/TransferBedModal";
 import { DischargeModal } from "@/components/residents/DischargeModal";
 import { ICPTab } from "@/components/icp/ICPTab";
 import { TasksTab } from "@/components/tasks/TasksTab";
+import { VitalsTab } from "@/components/vitals/VitalsTab";
+import { WoundsTab } from "@/components/wounds/WoundsTab";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
@@ -98,7 +100,7 @@ function ResidentDetailPage() {
   const [bedHistory, setBedHistory] = useState<BedAssignment[]>([]);
   const [activityLog, setActivityLog] = useState<AuditLogRow[]>([]);
 
-  const [tab, setTab] = useState<"profile" | "contacts" | "documents" | "bed" | "activity" | "icp" | "tasks">("profile");
+  const [tab, setTab] = useState<"profile" | "contacts" | "documents" | "bed" | "activity" | "vitals" | "wounds" | "icp" | "tasks">("profile");
   const [editMode, setEditMode] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [dischargeOpen, setDischargeOpen] = useState(false);
@@ -237,6 +239,8 @@ function ResidentDetailPage() {
                 { value: "documents", label: t("residents.documents") },
                 { value: "bed", label: t("residents.bedHistory") },
                 { value: "activity", label: t("residents.activity") },
+                { value: "vitals", label: t("vitals.title") },
+                { value: "wounds", label: t("wounds.title") },
                 { value: "icp", label: t("icp.title") },
                 { value: "tasks", label: t("tasks.title") },
               ]}
