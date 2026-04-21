@@ -17,6 +17,7 @@ import { ICPTab } from "@/components/icp/ICPTab";
 import { TasksTab } from "@/components/tasks/TasksTab";
 import { VitalsTab } from "@/components/vitals/VitalsTab";
 import { WoundsTab } from "@/components/wounds/WoundsTab";
+import { IncidentsTab } from "@/components/incidents/IncidentsTab";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
@@ -100,7 +101,7 @@ function ResidentDetailPage() {
   const [bedHistory, setBedHistory] = useState<BedAssignment[]>([]);
   const [activityLog, setActivityLog] = useState<AuditLogRow[]>([]);
 
-  const [tab, setTab] = useState<"profile" | "contacts" | "documents" | "bed" | "activity" | "vitals" | "wounds" | "icp" | "tasks">("profile");
+  const [tab, setTab] = useState<"profile" | "contacts" | "documents" | "bed" | "activity" | "vitals" | "wounds" | "incidents" | "icp" | "tasks">("profile");
   const [editMode, setEditMode] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [dischargeOpen, setDischargeOpen] = useState(false);
@@ -241,6 +242,7 @@ function ResidentDetailPage() {
                 { value: "activity", label: t("residents.activity") },
                 { value: "vitals", label: t("vitals.title") },
                 { value: "wounds", label: t("wounds.title") },
+                { value: "incidents", label: t("incidents.title") },
                 { value: "icp", label: t("icp.title") },
                 { value: "tasks", label: t("tasks.title") },
               ]}
@@ -289,6 +291,14 @@ function ResidentDetailPage() {
           )}
           {tab === "wounds" && (
             <WoundsTab
+              residentId={id}
+              branchId={resident.branch_id}
+              staffId={staff?.id ?? null}
+              logAction={logAction}
+            />
+          )}
+          {tab === "incidents" && (
+            <IncidentsTab
               residentId={id}
               branchId={resident.branch_id}
               staffId={staff?.id ?? null}
