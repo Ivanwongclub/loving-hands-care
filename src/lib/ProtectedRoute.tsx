@@ -1,19 +1,25 @@
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { isAuthenticated } from "./auth";
+import { useAuth } from "./AuthContext";
+import { Spinner } from "@/components/hms";
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { session, loading } = useAuth();
   const navigate = useNavigate();
-  const [ok, setOk] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      void navigate({ to: "/login" });
-    } else {
-      setOk(true);
+    if (!loading && !session) {
+      void navigate({ to: "/login", replace: true });
     }
-  }, [navigate]);
+  }, [loading, session, navigate]);
 
-  if (!ok) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full grid place-items-center" style={{ backgroundColor: "var(--bg-page)" }}>
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+  if (!session) return null;
   return <>{children}</>;
 }
