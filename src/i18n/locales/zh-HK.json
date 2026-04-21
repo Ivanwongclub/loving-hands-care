@@ -49,7 +49,7 @@
     "superseded": "已取代", "rejected": "已拒絕"
   },
   "bedStatus": {
-    "available": "空置", "occupied": "已入住", "reserved": "已預留", "outOfService": "停用"
+    "available": "空置", "occupied": "已佔用", "reserved": "已預留", "outOfService": "停用"
   },
   "incidentSeverity": {
     "low": "輕微", "medium": "中度", "high": "嚴重", "critical": "危急"
