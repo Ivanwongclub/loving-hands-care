@@ -13,6 +13,8 @@ import {
 } from "@/components/hms";
 import { TransferBedModal } from "@/components/residents/TransferBedModal";
 import { DischargeModal } from "@/components/residents/DischargeModal";
+import { ICPTab } from "@/components/icp/ICPTab";
+import { TasksTab } from "@/components/tasks/TasksTab";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
@@ -96,7 +98,7 @@ function ResidentDetailPage() {
   const [bedHistory, setBedHistory] = useState<BedAssignment[]>([]);
   const [activityLog, setActivityLog] = useState<AuditLogRow[]>([]);
 
-  const [tab, setTab] = useState<"profile" | "contacts" | "documents" | "bed" | "activity">("profile");
+  const [tab, setTab] = useState<"profile" | "contacts" | "documents" | "bed" | "activity" | "icp" | "tasks">("profile");
   const [editMode, setEditMode] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [dischargeOpen, setDischargeOpen] = useState(false);
@@ -235,6 +237,8 @@ function ResidentDetailPage() {
                 { value: "documents", label: t("residents.documents") },
                 { value: "bed", label: t("residents.bedHistory") },
                 { value: "activity", label: t("residents.activity") },
+                { value: "icp", label: t("icp.title") },
+                { value: "tasks", label: t("tasks.title") },
               ]}
             />
           </div>
@@ -271,6 +275,23 @@ function ResidentDetailPage() {
           )}
           {tab === "bed" && <BedHistoryTab rows={bedHistory} />}
           {tab === "activity" && <ActivityTab rows={activityLog} />}
+          {tab === "icp" && (
+            <ICPTab
+              residentId={id}
+              branchId={resident.branch_id}
+              staffId={staff?.id ?? null}
+              staffRole={staff?.role ?? null}
+              logAction={logAction}
+            />
+          )}
+          {tab === "tasks" && (
+            <TasksTab
+              residentId={id}
+              branchId={resident.branch_id}
+              staffId={staff?.id ?? null}
+              logAction={logAction}
+            />
+          )}
         </Stack>
         <TransferBedModal
           open={transferOpen}
