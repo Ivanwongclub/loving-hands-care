@@ -352,7 +352,8 @@
     "discharge": "完成登記",
     "qrLabel": "QR 狀態",
     "cardFooter": "如遺失請聯絡職員",
-    "cardSubtitle": "日間護理單位"
+    "cardSubtitle": "日間護理單位",
+    "selectedResident": "已選擇"
   },
   "kiosk": {
     "title": "出席登記",
