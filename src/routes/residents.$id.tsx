@@ -98,6 +98,8 @@ function ResidentDetailPage() {
 
   const [tab, setTab] = useState<"profile" | "contacts" | "documents" | "bed" | "activity">("profile");
   const [editMode, setEditMode] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [dischargeOpen, setDischargeOpen] = useState(false);
 
   const fetchResident = async () => {
     setResidentLoading(true);
