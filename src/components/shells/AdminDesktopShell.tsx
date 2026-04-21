@@ -4,12 +4,12 @@ import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard, Users, ClipboardCheck, ListTodo, Activity, Pill,
   AlertTriangle, BellRing, ClipboardList, UserCog, FileBarChart2, ScrollText,
-  Upload, Settings, LogOut, Bell, Languages, ChevronDown,
+  Upload, Settings, LogOut, Bell, Languages, ChevronDown, UserPlus, ExternalLink,
 } from "lucide-react";
 import { Avatar, ContextSwitcher, Inline, Stack, Text } from "@/components/hms";
 import { useAuth } from "@/lib/AuthContext";
 
-interface NavItem { to: string; labelKey: string; icon: ReactNode }
+interface NavItem { to: string; labelKey: string; icon: ReactNode; external?: boolean }
 interface NavSection { titleKey: string; items: NavItem[] }
 
 const sections: NavSection[] = [
@@ -18,7 +18,9 @@ const sections: NavSection[] = [
     items: [
       { to: "/dashboard", labelKey: "nav.dashboard", icon: <LayoutDashboard size={16} /> },
       { to: "/residents", labelKey: "nav.residents", icon: <Users size={16} /> },
-      { to: "/attendance/register", labelKey: "nav.attendance", icon: <ClipboardCheck size={16} /> },
+      { to: "/attendance/register", labelKey: "nav.attendanceRegister", icon: <ClipboardCheck size={16} /> },
+      { to: "/attendance/enrollments", labelKey: "nav.enrollmentMgmt", icon: <UserPlus size={16} /> },
+      { to: "/attendance/kiosk", labelKey: "nav.dcuKiosk", icon: <ExternalLink size={16} />, external: true },
       { to: "/tasks", labelKey: "nav.tasks", icon: <ListTodo size={16} /> },
       { to: "/vitals", labelKey: "nav.vitals", icon: <Activity size={16} /> },
       { to: "/emar", labelKey: "nav.emar", icon: <Pill size={16} /> },
