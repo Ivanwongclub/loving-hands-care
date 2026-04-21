@@ -1,12 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Languages } from "lucide-react";
 import {
   Stack, Heading, Text, FormField, TextField, PasswordField,
   Button, Alert,
 } from "@/components/hms";
-import { signIn } from "@/lib/auth";
+import { useAuth } from "@/lib/AuthContext";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -15,24 +15,29 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { signInWithPassword, session } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const submit = (e: React.FormEvent) => {
+  // If session restored, bounce to dashboard
+  useEffect(() => {
+    if (session) void navigate({ to: "/dashboard", replace: true });
+  }, [session, navigate]);
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setTimeout(() => {
-      if (!email || !password) {
-        setError(t("auth.invalidCredentials"));
-        setLoading(false);
-        return;
-      }
-      signIn();
-      void navigate({ to: "/dashboard" });
-    }, 400);
+    const { error: err } = await signInWithPassword(email, password);
+    setLoading(false);
+    if (err) {
+      setError(t("auth.invalidCredentials"));
+      return;
+    }
+    void navigate({ to: "/dashboard" });
   };
 
   return (
@@ -65,10 +70,10 @@ function LoginPage() {
           <form onSubmit={submit}>
             <Stack gap={4}>
               <FormField label={t("auth.email")} required>
-                <TextField type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@helpinghand.org.hk" />
+                <TextField type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@helpinghand.org.hk" required />
               </FormField>
               <FormField label={t("auth.password")} required>
-                <PasswordField value={password} onChange={(e) => setPassword(e.target.value)} />
+                <PasswordField value={password} onChange={(e) => setPassword(e.target.value)} required />
               </FormField>
               <Button type="submit" fullWidth loading={loading}>{t("actions.signIn")} · 登入</Button>
               <button type="button" className="type-body-sm text-center hover:underline" style={{ color: "var(--text-link)" }}>
