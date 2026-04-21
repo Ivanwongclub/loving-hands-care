@@ -30,13 +30,13 @@ function SettingsPage() {
   const isSysAdmin = staff?.role === "SYSTEM_ADMIN";
   const [section, setSection] = useState<SectionKey>(isSysAdmin ? "branches" : "alerts");
 
-  const sections: { key: SectionKey; label: string; icon: React.ReactNode; gated?: boolean }[] = [
-    { key: "branches", label: t("settings.sections.branches"), icon: <Building size={16} />, gated: true },
-    { key: "alerts", label: t("settings.sections.alerts"), icon: <AlertCircle size={16} /> },
-    { key: "notifications", label: t("settings.sections.notifications"), icon: <Bell size={16} /> },
-    { key: "emar", label: t("settings.sections.emar"), icon: <Pill size={16} /> },
-    { key: "system", label: t("settings.sections.system"), icon: <SlidersHorizontal size={16} /> },
-  ].filter((s) => !s.gated || isSysAdmin);
+  const sections: { key: SectionKey; label: string; icon: React.ReactNode; gated?: boolean }[] = ([
+    { key: "branches" as SectionKey, label: t("settings.sections.branches"), icon: <Building size={16} />, gated: true },
+    { key: "alerts" as SectionKey, label: t("settings.sections.alerts"), icon: <AlertCircle size={16} /> },
+    { key: "notifications" as SectionKey, label: t("settings.sections.notifications"), icon: <Bell size={16} /> },
+    { key: "emar" as SectionKey, label: t("settings.sections.emar"), icon: <Pill size={16} /> },
+    { key: "system" as SectionKey, label: t("settings.sections.system"), icon: <SlidersHorizontal size={16} /> },
+  ]).filter((s) => !s.gated || isSysAdmin);
 
   return (
     <ProtectedRoute>
