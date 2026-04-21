@@ -58,8 +58,14 @@ serve(async (req: Request) => {
 
     // Build Excel rows
     const rows = (sessions ?? []).map((s) => {
-      const enrollment = s.dcu_enrollments as { resident_id: string; residents: { name: string; name_zh: string } | null } | null
-      const resident = enrollment?.residents
+      // Supabase typings model the embedded relation as an array, but with a
+      // single FK it returns a single object; cast through `unknown`.
+      const rawEnrollment = s.dcu_enrollments as unknown
+      const enrollment = (Array.isArray(rawEnrollment) ? rawEnrollment[0] : rawEnrollment) as
+        | { resident_id: string; residents: { name: string; name_zh: string } | { name: string; name_zh: string }[] | null }
+        | null
+      const rawRes = enrollment?.residents
+      const resident = (Array.isArray(rawRes) ? rawRes[0] : rawRes) ?? null
       const checkIn = s.check_in_at ? new Date(s.check_in_at).toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false }) : ''
       const checkOut = s.check_out_at ? new Date(s.check_out_at).toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false }) : ''
       const hours = s.duration_minutes ? `${Math.floor(s.duration_minutes / 60)}h ${s.duration_minutes % 60}m` : ''
