@@ -377,7 +377,20 @@
     "queuedScans": "{{count}} scans queued",
     "syncing": "Syncing...",
     "syncComplete": "Sync complete",
-    "greeting": "Hello, {{name}}!"
+    "greeting": "Hello, {{name}}!",
+    "standby": "Scan your QR card to check in or out",
+    "scanAgainCheckout": "Scan again to check out",
+    "duplicateCheckout": "Already checked out today",
+    "staffOverrideTitle": "Manual Entry",
+    "staffSearch": "Search resident name",
+    "selectEventType": "Select type",
+    "overrideCheckIn": "Manual Check-In",
+    "overrideCheckOut": "Manual Check-Out",
+    "overrideReasonRequired": "Please enter a reason",
+    "confirmOverride": "Confirm entry",
+    "offlineQueueCount": "Offline queue: {{count}}",
+    "syncNow": "Sync now",
+    "notificationStubHint": "Family notification pending setup"
   },
   "attendance": {
     "title": "Attendance",

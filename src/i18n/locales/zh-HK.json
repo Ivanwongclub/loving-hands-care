@@ -377,7 +377,20 @@
     "queuedScans": "{{count}} 筆待同步記錄",
     "syncing": "正在同步...",
     "syncComplete": "同步完成",
-    "greeting": "你好，{{name}}！"
+    "greeting": "你好，{{name}}！",
+    "standby": "請掃描 QR 卡簽到或簽退",
+    "scanAgainCheckout": "再次掃描以簽退",
+    "duplicateCheckout": "今日已完成簽退",
+    "staffOverrideTitle": "手動登記",
+    "staffSearch": "搜尋院友姓名",
+    "selectEventType": "選擇類型",
+    "overrideCheckIn": "手動簽到",
+    "overrideCheckOut": "手動簽退",
+    "overrideReasonRequired": "請輸入原因",
+    "confirmOverride": "確認登記",
+    "offlineQueueCount": "離線佇列：{{count}} 筆",
+    "syncNow": "立即同步",
+    "notificationStubHint": "家屬通知功能待設定"
   },
   "attendance": {
     "title": "出席記錄",
