@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { LogOut, Languages } from "lucide-react";
 import { Avatar, Badge, Inline } from "@/components/hms";
-import { signOut } from "@/lib/auth";
+import { useAuth } from "@/lib/AuthContext";
 
 export function WardTabletShell({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const toggleLang = () => void i18n.changeLanguage(i18n.language === "en" ? "zh-HK" : "en");
 
   return (
@@ -34,12 +35,12 @@ export function WardTabletShell({ children }: { children: ReactNode }) {
             <Languages size={16} />{i18n.language === "en" ? "EN" : "中"}
           </button>
           <Avatar name="Wong KM" />
-          <button onClick={() => { signOut(); navigate({ to: "/login" }); }} className="p-2 rounded hover:bg-[var(--bg-hover-subtle)]" style={{ minHeight: 44, minWidth: 44 }} aria-label="Sign out">
+          <button onClick={async () => { await signOut(); void navigate({ to: "/login" }); }} className="p-2 rounded hover:bg-[var(--bg-hover-subtle)]" style={{ minHeight: 44, minWidth: 44 }} aria-label="Sign out">
             <LogOut size={18} />
           </button>
         </Inline>
       </header>
-      <main style={{ padding: `var(--space-5) var(--page-gutter-tablet)` }}>{children}</main>
+      <main className="[&_button]:min-h-11 [&_a]:min-h-11 [&_input]:min-h-11" style={{ padding: `var(--space-5) var(--page-gutter-tablet)`, fontSize: 15 }}>{children}</main>
     </div>
   );
 }

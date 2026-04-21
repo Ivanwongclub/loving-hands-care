@@ -7,7 +7,7 @@ import {
   Upload, Settings, LogOut, Bell, Languages, ChevronDown,
 } from "lucide-react";
 import { Avatar, ContextSwitcher, Inline, Stack, Text } from "@/components/hms";
-import { signOut } from "@/lib/auth";
+import { useAuth } from "@/lib/AuthContext";
 
 interface NavItem { to: string; labelKey: string; icon: ReactNode }
 interface NavSection { titleKey: string; items: NavItem[] }
@@ -53,15 +53,16 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
   const { t, i18n } = useTranslation();
   const loc = useLocation();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const toggleLang = () => {
     const next = i18n.language === "en" ? "zh-HK" : "en";
     void i18n.changeLanguage(next);
   };
 
-  const handleSignOut = () => {
-    signOut();
-    navigate({ to: "/login" });
+  const handleSignOut = async () => {
+    await signOut();
+    void navigate({ to: "/login" });
   };
 
   return (

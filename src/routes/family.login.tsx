@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Languages } from "lucide-react";
 import { Stack, Heading, Text, FormField, TextField, Button, Alert } from "@/components/hms";
+import { useAuth } from "@/lib/AuthContext";
 
 export const Route = createFileRoute("/family/login")({
   component: FamilyLoginPage,
@@ -10,8 +11,22 @@ export const Route = createFileRoute("/family/login")({
 
 function FamilyLoginPage() {
   const { t, i18n } = useTranslation();
+  const { signInWithMagicLink } = useAuth();
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const redirectTo = `${window.location.origin}/family/dashboard`;
+    const { error: err } = await signInWithMagicLink(email, redirectTo);
+    setLoading(false);
+    if (err) { setError(err); return; }
+    setSent(true);
+  };
 
   return (
     <div className="min-h-screen w-full grid place-items-center px-4 relative" style={{ backgroundColor: "var(--bg-page)" }}>
@@ -38,13 +53,14 @@ function FamilyLoginPage() {
           </Stack>
 
           {sent && <Alert severity="success" title={t("auth.magicLinkSent")} />}
+          {error && <Alert severity="error" title={error} />}
 
-          <form onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
+          <form onSubmit={submit}>
             <Stack gap={4}>
               <FormField label={t("auth.email")} required>
-                <TextField type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <TextField type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </FormField>
-              <Button type="submit" fullWidth>{t("auth.magicLinkSend")}</Button>
+              <Button type="submit" fullWidth loading={loading}>{t("auth.magicLinkSend")}</Button>
             </Stack>
           </form>
         </Stack>

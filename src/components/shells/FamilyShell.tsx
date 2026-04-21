@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { LogOut, Languages } from "lucide-react";
 import { Inline } from "@/components/hms";
-import { signOut } from "@/lib/auth";
+import { useAuth } from "@/lib/AuthContext";
 
 export function FamilyShell({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   return (
     <div className="min-h-screen w-full" style={{ backgroundColor: "var(--bg-page)" }}>
       <header
@@ -25,7 +26,7 @@ export function FamilyShell({ children }: { children: ReactNode }) {
           <button onClick={() => void i18n.changeLanguage(i18n.language === "en" ? "zh-HK" : "en")} className="type-body-sm font-semibold flex items-center gap-1 px-3 py-1.5 rounded hover:bg-[var(--bg-hover-subtle)]">
             <Languages size={14} />{i18n.language === "en" ? "EN" : "中"}
           </button>
-          <button onClick={() => { signOut(); navigate({ to: "/family/login" }); }} className="p-2 rounded hover:bg-[var(--bg-hover-subtle)]" aria-label="Sign out">
+          <button onClick={async () => { await signOut(); void navigate({ to: "/family/login" }); }} className="p-2 rounded hover:bg-[var(--bg-hover-subtle)]" aria-label="Sign out">
             <LogOut size={16} />
           </button>
         </Inline>
