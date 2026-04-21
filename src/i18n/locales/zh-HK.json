@@ -670,5 +670,62 @@
     "assessedBy": "記錄人",
     "uploadPhoto": "上載照片",
     "photoOptional": "照片（選填）"
+  },
+  "incidents": {
+    "title": "事故報告",
+    "overviewTitle": "事故報告總覽",
+    "overviewSoon": "院舍事故總覽看板將於 S5-L3 推出",
+    "new": "新增事故報告",
+    "list": "事故列表",
+    "detail": "事故詳情",
+    "ref": "事故編號",
+    "type": {
+      "FALL": "跌倒",
+      "MEDICATION_ERROR": "藥物事故",
+      "BEHAVIOUR": "行為事故",
+      "MEDICAL_EMERGENCY": "醫療緊急事故",
+      "EQUIPMENT": "設備事故",
+      "OTHER": "其他"
+    },
+    "severity": {
+      "LOW": "低",
+      "MEDIUM": "中",
+      "HIGH": "高",
+      "CRITICAL": "緊急"
+    },
+    "status": {
+      "OPEN": "待處理",
+      "UNDER_REVIEW": "審查中",
+      "CLOSED": "已關閉"
+    },
+    "occurredAt": "事發時間",
+    "location": "事發地點",
+    "reporter": "報告人員",
+    "description": "事故描述",
+    "immediateAction": "即時處理措施",
+    "followUpDue": "跟進截止日期",
+    "closedAt": "關閉時間",
+    "closureNotes": "關閉備註",
+    "closeIncident": "關閉事故報告",
+    "closeConfirm": "確認關閉此事故報告？關閉後將無法再新增跟進記錄。",
+    "followUps": "跟進行動",
+    "addFollowUp": "新增跟進",
+    "followUpAction": "跟進行動",
+    "followUpDueAt": "截止日期",
+    "followUpAssigned": "負責人員",
+    "followUpComplete": "標記完成",
+    "followUpCompleted": "已完成",
+    "noIncidents": "未有事故記錄",
+    "noFollowUps": "未有跟進記錄",
+    "createSuccess": "事故報告已建立",
+    "updateSuccess": "事故報告已更新",
+    "closeSuccess": "事故報告已關閉",
+    "followUpSuccess": "跟進記錄已新增",
+    "followUpCompleteSuccess": "跟進已標記完成",
+    "highSeverityAlert": "此為高危或緊急事故，請立即通知院舍管理員",
+    "tabs": {
+      "details": "事故詳情",
+      "followUps": "跟進記錄"
+    }
   }
 }

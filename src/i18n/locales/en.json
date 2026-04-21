@@ -670,5 +670,62 @@
     "assessedBy": "Assessed by",
     "uploadPhoto": "Upload photo",
     "photoOptional": "Photo (optional)"
+  },
+  "incidents": {
+    "title": "Incidents",
+    "overviewTitle": "Incidents Overview",
+    "overviewSoon": "Branch-wide incidents dashboard coming in S5-L3",
+    "new": "New Incident",
+    "list": "Incidents",
+    "detail": "Incident Detail",
+    "ref": "Incident Ref",
+    "type": {
+      "FALL": "Fall",
+      "MEDICATION_ERROR": "Medication Error",
+      "BEHAVIOUR": "Behaviour",
+      "MEDICAL_EMERGENCY": "Medical Emergency",
+      "EQUIPMENT": "Equipment",
+      "OTHER": "Other"
+    },
+    "severity": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CRITICAL": "Critical"
+    },
+    "status": {
+      "OPEN": "Open",
+      "UNDER_REVIEW": "Under Review",
+      "CLOSED": "Closed"
+    },
+    "occurredAt": "Occurred at",
+    "location": "Location",
+    "reporter": "Reporter",
+    "description": "Description",
+    "immediateAction": "Immediate Action",
+    "followUpDue": "Follow-up Due",
+    "closedAt": "Closed at",
+    "closureNotes": "Closure Notes",
+    "closeIncident": "Close Incident",
+    "closeConfirm": "Confirm closing this incident? No further follow-ups can be added after closure.",
+    "followUps": "Follow-ups",
+    "addFollowUp": "Add Follow-up",
+    "followUpAction": "Follow-up Action",
+    "followUpDueAt": "Due Date",
+    "followUpAssigned": "Assigned To",
+    "followUpComplete": "Mark Complete",
+    "followUpCompleted": "Completed",
+    "noIncidents": "No incidents recorded",
+    "noFollowUps": "No follow-ups",
+    "createSuccess": "Incident created",
+    "updateSuccess": "Incident updated",
+    "closeSuccess": "Incident closed",
+    "followUpSuccess": "Follow-up added",
+    "followUpCompleteSuccess": "Follow-up marked complete",
+    "highSeverityAlert": "This is a high or critical incident — notify the branch administrator immediately.",
+    "tabs": {
+      "details": "Details",
+      "followUps": "Follow-ups"
+    }
   }
 }
