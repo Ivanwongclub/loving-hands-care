@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Languages } from "lucide-react";
 import {
-  Stack, Heading, Text, FormField, TextField, PasswordField,
+  Stack, FormField, TextField, PasswordField,
   Button, Alert,
 } from "@/components/hms";
 import { useAuth } from "@/lib/AuthContext";
@@ -60,10 +60,9 @@ function LoginPage() {
         }}
       >
         <Stack gap={6}>
-          <Stack gap={2} align="start">
-            <img src={helpingHandLogo} alt="Helping Hand 伸手助人協會" style={{ height: 64, width: "auto" }} />
-            <div className="font-extrabold tracking-tight" style={{ fontSize: 28, color: "var(--color-onyx-900)" }}>HMS</div>
-            <Text color="secondary">{t("app.name")}</Text>
+          <Stack gap={4} align="center">
+            <img src={helpingHandLogo} alt="Helping Hand" style={{ height: 140, width: "auto", marginTop: 16 }} />
+            <div className="font-extrabold tracking-tight" style={{ fontSize: 32, color: "var(--color-onyx-900)" }}>HMS</div>
           </Stack>
 
           {error && <Alert severity="error" title={error} />}
