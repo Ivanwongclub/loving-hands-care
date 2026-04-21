@@ -97,25 +97,47 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
               <div className="type-label px-3 py-2" style={{ color: "var(--text-tertiary)" }}>{t(sec.titleKey)}</div>
               <ul className="flex flex-col gap-0.5">
                 {sec.items.map((it) => {
-                  const active = loc.pathname === it.to || loc.pathname.startsWith(it.to + "/");
+                  const active = !it.external && (loc.pathname === it.to || loc.pathname.startsWith(it.to + "/"));
+                  const sharedClass = "flex items-center gap-2.5 px-3 transition-colors w-full text-left";
+                  const sharedStyle = {
+                    height: 40,
+                    borderRadius: "var(--radius-sm)",
+                    backgroundColor: active ? "var(--bg-selected)" : "transparent",
+                    color: "var(--text-primary)",
+                    transitionDuration: "var(--duration-normal)",
+                  } as const;
+                  const onEnter = (e: React.MouseEvent<HTMLElement>) => { if (!active) (e.currentTarget as HTMLElement).style.backgroundColor = "var(--bg-hover-subtle)"; };
+                  const onLeave = (e: React.MouseEvent<HTMLElement>) => { if (!active) (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; };
+                  const inner = (
+                    <>
+                      <span style={{ color: active ? "var(--color-iris-500)" : "var(--text-secondary)" }}>{it.icon}</span>
+                      <span className="type-body-md font-medium">{t(it.labelKey)}</span>
+                    </>
+                  );
                   return (
                     <li key={it.to}>
-                      <Link
-                        to={it.to}
-                        className="flex items-center gap-2.5 px-3 transition-colors"
-                        style={{
-                          height: 40,
-                          borderRadius: "var(--radius-sm)",
-                          backgroundColor: active ? "var(--bg-selected)" : "transparent",
-                          color: "var(--text-primary)",
-                          transitionDuration: "var(--duration-normal)",
-                        }}
-                        onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.backgroundColor = "var(--bg-hover-subtle)"; }}
-                        onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; }}
-                      >
-                        <span style={{ color: active ? "var(--color-iris-500)" : "var(--text-secondary)" }}>{it.icon}</span>
-                        <span className="type-body-md font-medium">{t(it.labelKey)}</span>
-                      </Link>
+                      {it.external ? (
+                        <button
+                          type="button"
+                          onClick={() => window.open(it.to, "_blank")}
+                          className={sharedClass}
+                          style={sharedStyle}
+                          onMouseEnter={onEnter}
+                          onMouseLeave={onLeave}
+                        >
+                          {inner}
+                        </button>
+                      ) : (
+                        <Link
+                          to={it.to}
+                          className={sharedClass}
+                          style={sharedStyle}
+                          onMouseEnter={onEnter}
+                          onMouseLeave={onLeave}
+                        >
+                          {inner}
+                        </Link>
+                      )}
                     </li>
                   );
                 })}
