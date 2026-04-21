@@ -1388,6 +1388,7 @@ export type Database = {
         Row: {
           consent_notifications: boolean
           created_at: string
+          deleted_at: string | null
           email: string | null
           id: string
           is_emergency: boolean
@@ -1403,6 +1404,7 @@ export type Database = {
         Insert: {
           consent_notifications?: boolean
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           id?: string
           is_emergency?: boolean
@@ -1418,6 +1420,7 @@ export type Database = {
         Update: {
           consent_notifications?: boolean
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           id?: string
           is_emergency?: boolean
@@ -2065,6 +2068,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      can_access_resident_document: {
+        Args: { object_name: string }
+        Returns: boolean
       }
       has_branch_access: { Args: { p_branch_id: string }; Returns: boolean }
       show_limit: { Args: never; Returns: number }
