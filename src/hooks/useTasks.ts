@@ -5,9 +5,16 @@ import type { Tables, Enums } from "@/integrations/supabase/types";
 export type TaskStatus = Enums<"task_status">;
 export type TaskType = Enums<"task_type">;
 
+export interface ResidentLite {
+  id: string;
+  name: string;
+  name_zh: string;
+}
+
 export type TaskRow = Tables<"tasks"> & {
   assignee: { name: string; name_zh: string | null } | null;
   completer: { name: string; name_zh: string | null } | null;
+  resident: ResidentLite | null;
 };
 
 interface UseTasksParams {
@@ -37,7 +44,7 @@ export function useTasks({
       let q = supabase
         .from("tasks")
         .select(
-          "*, assignee:assigned_to(name, name_zh), completer:completed_by(name, name_zh)",
+          "*, assignee:assigned_to(name, name_zh), completer:completed_by(name, name_zh), resident:resident_id(id, name, name_zh)",
           { count: "exact" },
         );
 
