@@ -407,8 +407,8 @@ function KioskPage() {
             description={syncing ? t("kiosk.syncing") : undefined}
           />
           <div className="mt-2 flex justify-end">
-            <Button size="sm" variant="ghost" onClick={() => void syncOfflineQueue()} disabled={syncing || !online}>
-              {syncing ? <Spinner size="sm" /> : t("kiosk.syncNow")}
+            <Button size="compact" variant="ghost" onClick={() => void syncOfflineQueue()} disabled={syncing || !online}>
+              {syncing ? <Spinner size="compact" /> : t("kiosk.syncNow")}
             </Button>
           </div>
         </div>
@@ -447,7 +447,7 @@ function KioskPage() {
               }}
             />
             <Text size="lg" color="secondary">{t("kiosk.standby")}</Text>
-            <Text size="sm" color="tertiary">{t("kiosk.notificationStubHint")}</Text>
+            <Text size="compact" color="tertiary">{t("kiosk.notificationStubHint")}</Text>
           </Stack>
         )}
 
@@ -491,7 +491,7 @@ function KioskPage() {
             <Stack gap={3} align="center">
               <XCircle size={80} style={{ color: "var(--status-error-accent)" }} />
               <Heading level={2}>{errorMsg || t("kiosk.invalidQR")}</Heading>
-              <Text size="sm" color="secondary">{t("kiosk.invalidQRHint")}</Text>
+              <Text size="compact" color="secondary">{t("kiosk.invalidQRHint")}</Text>
             </Stack>
           </div>
         )}
@@ -700,9 +700,9 @@ function ManualOverrideDrawer({ open, onClose, branchId, onSubmitted }: ManualOv
 
         {!selectedResident && (
           <Stack gap={2}>
-            {isLoading && <Text size="sm" color="secondary"><Spinner size="sm" /></Text>}
+            {isLoading && <Text size="compact" color="secondary"><Spinner size="compact" /></Text>}
             {!isLoading && residents.length === 0 && (
-              <Text size="sm" color="tertiary">{t("attendance.noRecords")}</Text>
+              <Text size="compact" color="tertiary">{t("attendance.noRecords")}</Text>
             )}
             {residents.map((r) => (
               <button
@@ -713,10 +713,10 @@ function ManualOverrideDrawer({ open, onClose, branchId, onSubmitted }: ManualOv
                 style={{ border: "1px solid var(--border-subtle)" }}
               >
                 <Inline gap={3} align="center">
-                  <Avatar name={r.name_zh ?? r.name} size="sm" />
-                  <Stack gap={0}>
+                  <Avatar name={r.name_zh ?? r.name} size="compact" />
+                  <Stack gap={1}>
                     <Text size="md">{r.name_zh}</Text>
-                    <Text size="sm" color="secondary">{r.name}</Text>
+                    <Text size="compact" color="secondary">{r.name}</Text>
                   </Stack>
                 </Inline>
               </button>
@@ -728,11 +728,11 @@ function ManualOverrideDrawer({ open, onClose, branchId, onSubmitted }: ManualOv
           <Stack gap={4}>
             <Inline gap={3} align="center">
               <Avatar name={selectedResident.name_zh ?? selectedResident.name} size="md" />
-              <Stack gap={0}>
+              <Stack gap={1}>
                 <Text size="md">{selectedResident.name_zh}</Text>
-                <Text size="sm" color="secondary">{selectedResident.name}</Text>
+                <Text size="compact" color="secondary">{selectedResident.name}</Text>
               </Stack>
-              <Button size="sm" variant="ghost" onClick={() => setSelectedResidentId(null)}>×</Button>
+              <Button size="compact" variant="ghost" onClick={() => setSelectedResidentId(null)}>×</Button>
             </Inline>
 
             <FormField label={t("kiosk.selectEventType")} required>
@@ -760,7 +760,7 @@ function ManualOverrideDrawer({ open, onClose, branchId, onSubmitted }: ManualOv
               />
             </FormField>
 
-            {error && <Text size="sm" color="primary" style={{ color: "var(--status-error-accent)" }}>{error}</Text>}
+            {error && <Text size="compact" color="primary" style={{ color: "var(--status-error-accent)" }}>{error}</Text>}
 
             <Inline gap={2}>
               <Button variant="ghost" onClick={onClose} disabled={submitting}>
@@ -771,7 +771,7 @@ function ManualOverrideDrawer({ open, onClose, branchId, onSubmitted }: ManualOv
                 onClick={() => void handleConfirm()}
                 disabled={submitting || !reason.trim()}
               >
-                {submitting ? <Spinner size="sm" /> : t("kiosk.confirmOverride")}
+                {submitting ? <Spinner size="compact" /> : t("kiosk.confirmOverride")}
               </Button>
             </Inline>
           </Stack>
