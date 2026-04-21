@@ -11,6 +11,8 @@ import {
   ConfirmDialog, FormField, TextField, Select, DropdownMenu, IconButton,
   ActivityItem, Timeline, type Column,
 } from "@/components/hms";
+import { TransferBedModal } from "@/components/residents/TransferBedModal";
+import { DischargeModal } from "@/components/residents/DischargeModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
@@ -96,6 +98,8 @@ function ResidentDetailPage() {
 
   const [tab, setTab] = useState<"profile" | "contacts" | "documents" | "bed" | "activity">("profile");
   const [editMode, setEditMode] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [dischargeOpen, setDischargeOpen] = useState(false);
 
   const fetchResident = async () => {
     setResidentLoading(true);
@@ -216,6 +220,8 @@ function ResidentDetailPage() {
             canEdit={canEdit}
             editMode={editMode}
             onEdit={() => { setTab("profile"); setEditMode(true); }}
+            onTransfer={() => setTransferOpen(true)}
+            onDischarge={() => setDischargeOpen(true)}
           />
 
           <div>
@@ -266,6 +272,18 @@ function ResidentDetailPage() {
           {tab === "bed" && <BedHistoryTab rows={bedHistory} />}
           {tab === "activity" && <ActivityTab rows={activityLog} />}
         </Stack>
+        <TransferBedModal
+          open={transferOpen}
+          onClose={() => setTransferOpen(false)}
+          resident={{ id: resident.id, branch_id: resident.branch_id, bed_id: resident.bed_id, name_zh: resident.name_zh }}
+          onTransferred={() => { void fetchResident(); void fetchContacts(); void fetchBedHistory(); }}
+        />
+        <DischargeModal
+          open={dischargeOpen}
+          onClose={() => setDischargeOpen(false)}
+          resident={{ id: resident.id, branch_id: resident.branch_id, bed_id: resident.bed_id, name_zh: resident.name_zh }}
+          onDischarged={() => { void fetchResident(); }}
+        />
       </AdminDesktopShell>
       {/* unused branchId reference suppression */}
       {branchId ? null : null}
@@ -282,11 +300,15 @@ function ProfileHeader({
   canEdit,
   editMode,
   onEdit,
+  onTransfer,
+  onDischarge,
 }: {
   resident: Resident;
   canEdit: boolean;
   editMode: boolean;
   onEdit: () => void;
+  onTransfer: () => void;
+  onDischarge: () => void;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -341,10 +363,10 @@ function ProfileHeader({
             </Stack>
           </Inline>
           <Inline gap={2} align="start">
-            <Button variant="soft" onClick={() => toast(t("residents.comingSoon"))}>
+            <Button variant="soft" onClick={onTransfer}>
               {t("residents.transfer")}
             </Button>
-            <Button variant="destructive" onClick={() => toast(t("residents.comingSoon"))}>
+            <Button variant="destructive" onClick={onDischarge}>
               {t("residents.startDischarge")}
             </Button>
             {canEdit && !editMode && (
