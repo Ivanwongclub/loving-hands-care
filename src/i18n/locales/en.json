@@ -1,0 +1,89 @@
+{
+  "app": {
+    "name": "Helping Hand",
+    "system": "Helping Hand HMS",
+    "familyPortal": "Family Portal"
+  },
+  "nav": {
+    "operations": "Operations",
+    "management": "Management",
+    "system": "System",
+    "dashboard": "Dashboard",
+    "residents": "Residents",
+    "attendance": "Attendance",
+    "carePlans": "Care Plans",
+    "tasks": "Tasks",
+    "vitals": "Vitals & Assessments",
+    "emar": "eMAR",
+    "incidents": "Incidents",
+    "alerts": "Alerts",
+    "staff": "Staff",
+    "reports": "Reports",
+    "audit": "Audit",
+    "import": "Import",
+    "settings": "Settings"
+  },
+  "actions": {
+    "save": "Save", "cancel": "Cancel", "confirm": "Confirm", "delete": "Delete",
+    "edit": "Edit", "view": "View", "export": "Export", "import": "Import",
+    "approve": "Approve", "reject": "Reject", "submit": "Submit", "reset": "Reset",
+    "search": "Search", "filter": "Filter", "back": "Back", "next": "Next",
+    "done": "Done", "close": "Close", "add": "Add", "remove": "Remove",
+    "deactivate": "Deactivate", "activate": "Activate", "unlock": "Unlock", "override": "Override",
+    "signIn": "Sign In", "signOut": "Sign Out", "rescan": "Rescan"
+  },
+  "alertStatus": {
+    "open": "Open", "acknowledged": "Acknowledged", "assigned": "Assigned",
+    "resolved": "Resolved", "escalated": "Escalated"
+  },
+  "taskStatus": {
+    "pending": "Pending", "inProgress": "In Progress", "completed": "Completed",
+    "overdue": "Overdue", "cancelled": "Cancelled"
+  },
+  "emarStatus": {
+    "due": "Due", "administered": "Administered", "refused": "Refused",
+    "held": "Held", "late": "Late", "missed": "Missed"
+  },
+  "icpStatus": {
+    "draft": "Draft", "pendingApproval": "Pending Approval", "active": "Active",
+    "superseded": "Superseded", "rejected": "Rejected"
+  },
+  "bedStatus": {
+    "available": "Available", "occupied": "Occupied", "reserved": "Reserved", "outOfService": "Out of Service"
+  },
+  "incidentSeverity": {
+    "low": "Low", "medium": "Medium", "high": "High", "critical": "Critical"
+  },
+  "auth": {
+    "signInTitle": "Sign In",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "invalidCredentials": "Invalid email or password",
+    "magicLinkSend": "Send Magic Link",
+    "magicLinkSent": "Link sent to your email",
+    "familyPortalHelp": "Use your registered email and we'll send you a sign-in link.",
+    "pinSetTitle": "Set Your Shift PIN",
+    "pinSetHelp": "Set a 4-digit PIN used for medication administration verification.",
+    "pinNew": "New PIN", "pinConfirm": "Confirm PIN",
+    "pinMismatch": "PINs do not match",
+    "pinAttemptsRemaining": "{{count}} attempts remaining",
+    "pinConfirmIdentity": "Confirm Identity"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "residentsToday": "Residents Today",
+    "openAlerts": "Open Alerts",
+    "overdueTasks": "Overdue Tasks",
+    "dcuAttendance": "DCU Attendance Today",
+    "criticalAlert": "CRITICAL: Room 305 resident call bell unanswered for over 5 minutes",
+    "recentTasks": "Recent Tasks",
+    "recentActivity": "Recent Activity"
+  },
+  "common": {
+    "comingSoon": "Coming in next sprint",
+    "branch": "Branch", "ward": "Ward", "shift": "Shift",
+    "morningShift": "Morning Shift",
+    "language": "Language"
+  }
+}

@@ -9,38 +9,478 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VitalsRouteImport } from './routes/vitals'
+import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as StaffRouteImport } from './routes/staff'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ResidentsRouteImport } from './routes/residents'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as PinSetupRouteImport } from './routes/pin-setup'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as IncidentsRouteImport } from './routes/incidents'
+import { Route as ImportRouteImport } from './routes/import'
+import { Route as EmarRouteImport } from './routes/emar'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CarePlansRouteImport } from './routes/care-plans'
+import { Route as AuditRouteImport } from './routes/audit'
+import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VitalsAssessmentsRouteImport } from './routes/vitals.assessments'
+import { Route as TasksHandoverRouteImport } from './routes/tasks.handover'
+import { Route as ResidentsNewRouteImport } from './routes/residents.new'
+import { Route as ResidentsIdRouteImport } from './routes/residents.$id'
+import { Route as FamilyLoginRouteImport } from './routes/family.login'
+import { Route as FamilyDashboardRouteImport } from './routes/family.dashboard'
+import { Route as EmarResidentIdRouteImport } from './routes/emar.$residentId'
+import { Route as CarePlansIdRouteImport } from './routes/care-plans.$id'
+import { Route as AttendanceRegisterRouteImport } from './routes/attendance.register'
+import { Route as AttendanceKioskRouteImport } from './routes/attendance.kiosk'
+import { Route as AlertsWallboardRouteImport } from './routes/alerts.wallboard'
 
+const VitalsRoute = VitalsRouteImport.update({
+  id: '/vitals',
+  path: '/vitals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffRoute = StaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResidentsRoute = ResidentsRouteImport.update({
+  id: '/residents',
+  path: '/residents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PinSetupRoute = PinSetupRouteImport.update({
+  id: '/pin-setup',
+  path: '/pin-setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IncidentsRoute = IncidentsRouteImport.update({
+  id: '/incidents',
+  path: '/incidents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportRoute = ImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmarRoute = EmarRouteImport.update({
+  id: '/emar',
+  path: '/emar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarePlansRoute = CarePlansRouteImport.update({
+  id: '/care-plans',
+  path: '/care-plans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditRoute = AuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlertsRoute = AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VitalsAssessmentsRoute = VitalsAssessmentsRouteImport.update({
+  id: '/assessments',
+  path: '/assessments',
+  getParentRoute: () => VitalsRoute,
+} as any)
+const TasksHandoverRoute = TasksHandoverRouteImport.update({
+  id: '/handover',
+  path: '/handover',
+  getParentRoute: () => TasksRoute,
+} as any)
+const ResidentsNewRoute = ResidentsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => ResidentsRoute,
+} as any)
+const ResidentsIdRoute = ResidentsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ResidentsRoute,
+} as any)
+const FamilyLoginRoute = FamilyLoginRouteImport.update({
+  id: '/family/login',
+  path: '/family/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FamilyDashboardRoute = FamilyDashboardRouteImport.update({
+  id: '/family/dashboard',
+  path: '/family/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmarResidentIdRoute = EmarResidentIdRouteImport.update({
+  id: '/$residentId',
+  path: '/$residentId',
+  getParentRoute: () => EmarRoute,
+} as any)
+const CarePlansIdRoute = CarePlansIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CarePlansRoute,
+} as any)
+const AttendanceRegisterRoute = AttendanceRegisterRouteImport.update({
+  id: '/attendance/register',
+  path: '/attendance/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AttendanceKioskRoute = AttendanceKioskRouteImport.update({
+  id: '/attendance/kiosk',
+  path: '/attendance/kiosk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlertsWallboardRoute = AlertsWallboardRouteImport.update({
+  id: '/wallboard',
+  path: '/wallboard',
+  getParentRoute: () => AlertsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRouteWithChildren
+  '/audit': typeof AuditRoute
+  '/care-plans': typeof CarePlansRouteWithChildren
+  '/dashboard': typeof DashboardRoute
+  '/emar': typeof EmarRouteWithChildren
+  '/import': typeof ImportRoute
+  '/incidents': typeof IncidentsRoute
+  '/login': typeof LoginRoute
+  '/pin-setup': typeof PinSetupRoute
+  '/reports': typeof ReportsRoute
+  '/residents': typeof ResidentsRouteWithChildren
+  '/settings': typeof SettingsRoute
+  '/staff': typeof StaffRoute
+  '/tasks': typeof TasksRouteWithChildren
+  '/vitals': typeof VitalsRouteWithChildren
+  '/alerts/wallboard': typeof AlertsWallboardRoute
+  '/attendance/kiosk': typeof AttendanceKioskRoute
+  '/attendance/register': typeof AttendanceRegisterRoute
+  '/care-plans/$id': typeof CarePlansIdRoute
+  '/emar/$residentId': typeof EmarResidentIdRoute
+  '/family/dashboard': typeof FamilyDashboardRoute
+  '/family/login': typeof FamilyLoginRoute
+  '/residents/$id': typeof ResidentsIdRoute
+  '/residents/new': typeof ResidentsNewRoute
+  '/tasks/handover': typeof TasksHandoverRoute
+  '/vitals/assessments': typeof VitalsAssessmentsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRouteWithChildren
+  '/audit': typeof AuditRoute
+  '/care-plans': typeof CarePlansRouteWithChildren
+  '/dashboard': typeof DashboardRoute
+  '/emar': typeof EmarRouteWithChildren
+  '/import': typeof ImportRoute
+  '/incidents': typeof IncidentsRoute
+  '/login': typeof LoginRoute
+  '/pin-setup': typeof PinSetupRoute
+  '/reports': typeof ReportsRoute
+  '/residents': typeof ResidentsRouteWithChildren
+  '/settings': typeof SettingsRoute
+  '/staff': typeof StaffRoute
+  '/tasks': typeof TasksRouteWithChildren
+  '/vitals': typeof VitalsRouteWithChildren
+  '/alerts/wallboard': typeof AlertsWallboardRoute
+  '/attendance/kiosk': typeof AttendanceKioskRoute
+  '/attendance/register': typeof AttendanceRegisterRoute
+  '/care-plans/$id': typeof CarePlansIdRoute
+  '/emar/$residentId': typeof EmarResidentIdRoute
+  '/family/dashboard': typeof FamilyDashboardRoute
+  '/family/login': typeof FamilyLoginRoute
+  '/residents/$id': typeof ResidentsIdRoute
+  '/residents/new': typeof ResidentsNewRoute
+  '/tasks/handover': typeof TasksHandoverRoute
+  '/vitals/assessments': typeof VitalsAssessmentsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRouteWithChildren
+  '/audit': typeof AuditRoute
+  '/care-plans': typeof CarePlansRouteWithChildren
+  '/dashboard': typeof DashboardRoute
+  '/emar': typeof EmarRouteWithChildren
+  '/import': typeof ImportRoute
+  '/incidents': typeof IncidentsRoute
+  '/login': typeof LoginRoute
+  '/pin-setup': typeof PinSetupRoute
+  '/reports': typeof ReportsRoute
+  '/residents': typeof ResidentsRouteWithChildren
+  '/settings': typeof SettingsRoute
+  '/staff': typeof StaffRoute
+  '/tasks': typeof TasksRouteWithChildren
+  '/vitals': typeof VitalsRouteWithChildren
+  '/alerts/wallboard': typeof AlertsWallboardRoute
+  '/attendance/kiosk': typeof AttendanceKioskRoute
+  '/attendance/register': typeof AttendanceRegisterRoute
+  '/care-plans/$id': typeof CarePlansIdRoute
+  '/emar/$residentId': typeof EmarResidentIdRoute
+  '/family/dashboard': typeof FamilyDashboardRoute
+  '/family/login': typeof FamilyLoginRoute
+  '/residents/$id': typeof ResidentsIdRoute
+  '/residents/new': typeof ResidentsNewRoute
+  '/tasks/handover': typeof TasksHandoverRoute
+  '/vitals/assessments': typeof VitalsAssessmentsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/alerts'
+    | '/audit'
+    | '/care-plans'
+    | '/dashboard'
+    | '/emar'
+    | '/import'
+    | '/incidents'
+    | '/login'
+    | '/pin-setup'
+    | '/reports'
+    | '/residents'
+    | '/settings'
+    | '/staff'
+    | '/tasks'
+    | '/vitals'
+    | '/alerts/wallboard'
+    | '/attendance/kiosk'
+    | '/attendance/register'
+    | '/care-plans/$id'
+    | '/emar/$residentId'
+    | '/family/dashboard'
+    | '/family/login'
+    | '/residents/$id'
+    | '/residents/new'
+    | '/tasks/handover'
+    | '/vitals/assessments'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/alerts'
+    | '/audit'
+    | '/care-plans'
+    | '/dashboard'
+    | '/emar'
+    | '/import'
+    | '/incidents'
+    | '/login'
+    | '/pin-setup'
+    | '/reports'
+    | '/residents'
+    | '/settings'
+    | '/staff'
+    | '/tasks'
+    | '/vitals'
+    | '/alerts/wallboard'
+    | '/attendance/kiosk'
+    | '/attendance/register'
+    | '/care-plans/$id'
+    | '/emar/$residentId'
+    | '/family/dashboard'
+    | '/family/login'
+    | '/residents/$id'
+    | '/residents/new'
+    | '/tasks/handover'
+    | '/vitals/assessments'
+  id:
+    | '__root__'
+    | '/'
+    | '/alerts'
+    | '/audit'
+    | '/care-plans'
+    | '/dashboard'
+    | '/emar'
+    | '/import'
+    | '/incidents'
+    | '/login'
+    | '/pin-setup'
+    | '/reports'
+    | '/residents'
+    | '/settings'
+    | '/staff'
+    | '/tasks'
+    | '/vitals'
+    | '/alerts/wallboard'
+    | '/attendance/kiosk'
+    | '/attendance/register'
+    | '/care-plans/$id'
+    | '/emar/$residentId'
+    | '/family/dashboard'
+    | '/family/login'
+    | '/residents/$id'
+    | '/residents/new'
+    | '/tasks/handover'
+    | '/vitals/assessments'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AlertsRoute: typeof AlertsRouteWithChildren
+  AuditRoute: typeof AuditRoute
+  CarePlansRoute: typeof CarePlansRouteWithChildren
+  DashboardRoute: typeof DashboardRoute
+  EmarRoute: typeof EmarRouteWithChildren
+  ImportRoute: typeof ImportRoute
+  IncidentsRoute: typeof IncidentsRoute
+  LoginRoute: typeof LoginRoute
+  PinSetupRoute: typeof PinSetupRoute
+  ReportsRoute: typeof ReportsRoute
+  ResidentsRoute: typeof ResidentsRouteWithChildren
+  SettingsRoute: typeof SettingsRoute
+  StaffRoute: typeof StaffRoute
+  TasksRoute: typeof TasksRouteWithChildren
+  VitalsRoute: typeof VitalsRouteWithChildren
+  AttendanceKioskRoute: typeof AttendanceKioskRoute
+  AttendanceRegisterRoute: typeof AttendanceRegisterRoute
+  FamilyDashboardRoute: typeof FamilyDashboardRoute
+  FamilyLoginRoute: typeof FamilyLoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vitals': {
+      id: '/vitals'
+      path: '/vitals'
+      fullPath: '/vitals'
+      preLoaderRoute: typeof VitalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff': {
+      id: '/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof StaffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/residents': {
+      id: '/residents'
+      path: '/residents'
+      fullPath: '/residents'
+      preLoaderRoute: typeof ResidentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pin-setup': {
+      id: '/pin-setup'
+      path: '/pin-setup'
+      fullPath: '/pin-setup'
+      preLoaderRoute: typeof PinSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/incidents': {
+      id: '/incidents'
+      path: '/incidents'
+      fullPath: '/incidents'
+      preLoaderRoute: typeof IncidentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/import': {
+      id: '/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof ImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/emar': {
+      id: '/emar'
+      path: '/emar'
+      fullPath: '/emar'
+      preLoaderRoute: typeof EmarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/care-plans': {
+      id: '/care-plans'
+      path: '/care-plans'
+      fullPath: '/care-plans'
+      preLoaderRoute: typeof CarePlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit': {
+      id: '/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,21 +488,176 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vitals/assessments': {
+      id: '/vitals/assessments'
+      path: '/assessments'
+      fullPath: '/vitals/assessments'
+      preLoaderRoute: typeof VitalsAssessmentsRouteImport
+      parentRoute: typeof VitalsRoute
+    }
+    '/tasks/handover': {
+      id: '/tasks/handover'
+      path: '/handover'
+      fullPath: '/tasks/handover'
+      preLoaderRoute: typeof TasksHandoverRouteImport
+      parentRoute: typeof TasksRoute
+    }
+    '/residents/new': {
+      id: '/residents/new'
+      path: '/new'
+      fullPath: '/residents/new'
+      preLoaderRoute: typeof ResidentsNewRouteImport
+      parentRoute: typeof ResidentsRoute
+    }
+    '/residents/$id': {
+      id: '/residents/$id'
+      path: '/$id'
+      fullPath: '/residents/$id'
+      preLoaderRoute: typeof ResidentsIdRouteImport
+      parentRoute: typeof ResidentsRoute
+    }
+    '/family/login': {
+      id: '/family/login'
+      path: '/family/login'
+      fullPath: '/family/login'
+      preLoaderRoute: typeof FamilyLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/family/dashboard': {
+      id: '/family/dashboard'
+      path: '/family/dashboard'
+      fullPath: '/family/dashboard'
+      preLoaderRoute: typeof FamilyDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/emar/$residentId': {
+      id: '/emar/$residentId'
+      path: '/$residentId'
+      fullPath: '/emar/$residentId'
+      preLoaderRoute: typeof EmarResidentIdRouteImport
+      parentRoute: typeof EmarRoute
+    }
+    '/care-plans/$id': {
+      id: '/care-plans/$id'
+      path: '/$id'
+      fullPath: '/care-plans/$id'
+      preLoaderRoute: typeof CarePlansIdRouteImport
+      parentRoute: typeof CarePlansRoute
+    }
+    '/attendance/register': {
+      id: '/attendance/register'
+      path: '/attendance/register'
+      fullPath: '/attendance/register'
+      preLoaderRoute: typeof AttendanceRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/attendance/kiosk': {
+      id: '/attendance/kiosk'
+      path: '/attendance/kiosk'
+      fullPath: '/attendance/kiosk'
+      preLoaderRoute: typeof AttendanceKioskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alerts/wallboard': {
+      id: '/alerts/wallboard'
+      path: '/wallboard'
+      fullPath: '/alerts/wallboard'
+      preLoaderRoute: typeof AlertsWallboardRouteImport
+      parentRoute: typeof AlertsRoute
+    }
   }
 }
 
+interface AlertsRouteChildren {
+  AlertsWallboardRoute: typeof AlertsWallboardRoute
+}
+
+const AlertsRouteChildren: AlertsRouteChildren = {
+  AlertsWallboardRoute: AlertsWallboardRoute,
+}
+
+const AlertsRouteWithChildren =
+  AlertsRoute._addFileChildren(AlertsRouteChildren)
+
+interface CarePlansRouteChildren {
+  CarePlansIdRoute: typeof CarePlansIdRoute
+}
+
+const CarePlansRouteChildren: CarePlansRouteChildren = {
+  CarePlansIdRoute: CarePlansIdRoute,
+}
+
+const CarePlansRouteWithChildren = CarePlansRoute._addFileChildren(
+  CarePlansRouteChildren,
+)
+
+interface EmarRouteChildren {
+  EmarResidentIdRoute: typeof EmarResidentIdRoute
+}
+
+const EmarRouteChildren: EmarRouteChildren = {
+  EmarResidentIdRoute: EmarResidentIdRoute,
+}
+
+const EmarRouteWithChildren = EmarRoute._addFileChildren(EmarRouteChildren)
+
+interface ResidentsRouteChildren {
+  ResidentsIdRoute: typeof ResidentsIdRoute
+  ResidentsNewRoute: typeof ResidentsNewRoute
+}
+
+const ResidentsRouteChildren: ResidentsRouteChildren = {
+  ResidentsIdRoute: ResidentsIdRoute,
+  ResidentsNewRoute: ResidentsNewRoute,
+}
+
+const ResidentsRouteWithChildren = ResidentsRoute._addFileChildren(
+  ResidentsRouteChildren,
+)
+
+interface TasksRouteChildren {
+  TasksHandoverRoute: typeof TasksHandoverRoute
+}
+
+const TasksRouteChildren: TasksRouteChildren = {
+  TasksHandoverRoute: TasksHandoverRoute,
+}
+
+const TasksRouteWithChildren = TasksRoute._addFileChildren(TasksRouteChildren)
+
+interface VitalsRouteChildren {
+  VitalsAssessmentsRoute: typeof VitalsAssessmentsRoute
+}
+
+const VitalsRouteChildren: VitalsRouteChildren = {
+  VitalsAssessmentsRoute: VitalsAssessmentsRoute,
+}
+
+const VitalsRouteWithChildren =
+  VitalsRoute._addFileChildren(VitalsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AlertsRoute: AlertsRouteWithChildren,
+  AuditRoute: AuditRoute,
+  CarePlansRoute: CarePlansRouteWithChildren,
+  DashboardRoute: DashboardRoute,
+  EmarRoute: EmarRouteWithChildren,
+  ImportRoute: ImportRoute,
+  IncidentsRoute: IncidentsRoute,
+  LoginRoute: LoginRoute,
+  PinSetupRoute: PinSetupRoute,
+  ReportsRoute: ReportsRoute,
+  ResidentsRoute: ResidentsRouteWithChildren,
+  SettingsRoute: SettingsRoute,
+  StaffRoute: StaffRoute,
+  TasksRoute: TasksRouteWithChildren,
+  VitalsRoute: VitalsRouteWithChildren,
+  AttendanceKioskRoute: AttendanceKioskRoute,
+  AttendanceRegisterRoute: AttendanceRegisterRoute,
+  FamilyDashboardRoute: FamilyDashboardRoute,
+  FamilyLoginRoute: FamilyLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

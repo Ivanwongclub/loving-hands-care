@@ -1,0 +1,89 @@
+{
+  "app": {
+    "name": "伸手助人協會",
+    "system": "Helping Hand HMS",
+    "familyPortal": "家屬專區"
+  },
+  "nav": {
+    "operations": "營運",
+    "management": "管理",
+    "system": "系統",
+    "dashboard": "控制台",
+    "residents": "院友",
+    "attendance": "出席",
+    "carePlans": "照顧計劃",
+    "tasks": "任務",
+    "vitals": "生命體徵與評估",
+    "emar": "電子用藥記錄",
+    "incidents": "事故",
+    "alerts": "警報",
+    "staff": "員工",
+    "reports": "報告",
+    "audit": "審計",
+    "import": "匯入",
+    "settings": "設定"
+  },
+  "actions": {
+    "save": "儲存", "cancel": "取消", "confirm": "確認", "delete": "刪除",
+    "edit": "編輯", "view": "查看", "export": "匯出", "import": "匯入",
+    "approve": "批准", "reject": "拒絕", "submit": "提交", "reset": "重設",
+    "search": "搜尋", "filter": "篩選", "back": "返回", "next": "下一步",
+    "done": "完成", "close": "關閉", "add": "新增", "remove": "移除",
+    "deactivate": "停用", "activate": "啟用", "unlock": "解鎖", "override": "覆寫",
+    "signIn": "登入", "signOut": "登出", "rescan": "重新掃描"
+  },
+  "alertStatus": {
+    "open": "待處理", "acknowledged": "已確認", "assigned": "已指派",
+    "resolved": "已解決", "escalated": "已升級"
+  },
+  "taskStatus": {
+    "pending": "待辦", "inProgress": "進行中", "completed": "已完成",
+    "overdue": "逾期", "cancelled": "已取消"
+  },
+  "emarStatus": {
+    "due": "應派", "administered": "已派發", "refused": "拒服",
+    "held": "暫停", "late": "延誤", "missed": "遺漏"
+  },
+  "icpStatus": {
+    "draft": "草稿", "pendingApproval": "待批准", "active": "生效中",
+    "superseded": "已取代", "rejected": "已拒絕"
+  },
+  "bedStatus": {
+    "available": "空置", "occupied": "已入住", "reserved": "已預留", "outOfService": "停用"
+  },
+  "incidentSeverity": {
+    "low": "輕微", "medium": "中度", "high": "嚴重", "critical": "危急"
+  },
+  "auth": {
+    "signInTitle": "登入系統",
+    "email": "電郵",
+    "password": "密碼",
+    "forgotPassword": "忘記密碼？",
+    "invalidCredentials": "帳號或密碼不正確",
+    "magicLinkSend": "發送連結",
+    "magicLinkSent": "連結已發送至您的電郵",
+    "familyPortalHelp": "請使用您註冊的電郵地址，我們會發送登入連結給您。",
+    "pinSetTitle": "設定工作密碼",
+    "pinSetHelp": "請設定您的4位數工作密碼，用於藥物記錄確認",
+    "pinNew": "新密碼", "pinConfirm": "確認密碼",
+    "pinMismatch": "密碼不相符",
+    "pinAttemptsRemaining": "{{count}} 次剩餘",
+    "pinConfirmIdentity": "確認身份"
+  },
+  "dashboard": {
+    "title": "控制台",
+    "residentsToday": "今日院友",
+    "openAlerts": "待處理警報",
+    "overdueTasks": "逾期任務",
+    "dcuAttendance": "今日出席",
+    "criticalAlert": "危急警報：305 室院友未回應呼叫鈴超過 5 分鐘",
+    "recentTasks": "最近任務",
+    "recentActivity": "近期活動"
+  },
+  "common": {
+    "comingSoon": "下一期開發中",
+    "branch": "分院", "ward": "病房", "shift": "班次",
+    "morningShift": "早班",
+    "language": "語言"
+  }
+}
