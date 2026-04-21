@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Languages } from "lucide-react";
 import {
-  Stack, Heading, Text, FormField, TextField, PasswordField,
+  Stack, FormField, TextField, PasswordField,
   Button, Alert,
 } from "@/components/hms";
 import { useAuth } from "@/lib/AuthContext";
