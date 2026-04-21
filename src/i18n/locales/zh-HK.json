@@ -85,5 +85,43 @@
     "branch": "分院", "ward": "病房", "shift": "班次",
     "morningShift": "早班",
     "language": "語言"
-  }
+  },
+  "branches": {
+    "title": "院舍管理", "list": "院舍列表", "detail": "院舍詳情",
+    "settings": "院舍設定", "bedBoard": "床位概覽", "occupancy": "入住率",
+    "addBranch": "新增院舍",
+    "branchType": {
+      "CARE_HOME": "護老院", "DCU": "日間護理單位",
+      "HOUSING": "老人之家", "REHABILITATION": "復康服務"
+    }
+  },
+  "locations": {
+    "building": "大廈", "floor": "樓層", "room": "房間", "bed": "床位", "zone": "區域",
+    "addLocation": "新增位置", "editLocation": "編輯位置",
+    "outOfService": "停用", "markOOS": "標記為停用", "markAvailable": "標記為可用"
+  },
+  "residents": {
+    "title": "院友管理", "list": "院友列表", "detail": "院友資料",
+    "newAdmission": "新入住申請", "transfer": "轉床", "discharge": "辦理出院",
+    "profile": "個人資料", "contacts": "聯絡人", "documents": "文件",
+    "medicalHistory": "病歷", "allergies": "過敏記錄",
+    "doNotShareFamily": "不向家屬披露",
+    "doNotShareWarning": "此院友的資料已設定為不向家屬披露",
+    "admissionDate": "入住日期", "dischargeDate": "出院日期",
+    "bedAssignment": "床位分配", "currentBed": "現時床位",
+    "riskLevel": { "LOW": "低風險", "MEDIUM": "中等風險", "HIGH": "高風險" },
+    "gender": { "M": "男", "F": "女", "OTHER": "其他" },
+    "status": {
+      "ADMITTED": "在院", "DISCHARGED": "已出院", "LOA": "外出假", "DECEASED": "已離世"
+    },
+    "admissionWizard": {
+      "step1": "個人資料", "step2": "病歷資料", "step3": "緊急聯絡人",
+      "step4": "上載文件", "step5": "床位分配", "step6": "同意書", "step7": "確認資料"
+    },
+    "hkid": "香港身份證", "hkidHint": "只儲存雜湊值，不儲存原始號碼",
+    "dischargeChecklist": "出院核對清單",
+    "transferReason": "轉床原因",
+    "searchPlaceholder": "搜尋院友姓名或房號..."
+  },
+  "audit": { "by": "操作員", "at": "時間", "action": "操作", "entity": "對象" }
 }
