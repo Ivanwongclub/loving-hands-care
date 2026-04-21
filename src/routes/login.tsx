@@ -7,6 +7,7 @@ import {
   Button, Alert,
 } from "@/components/hms";
 import { useAuth } from "@/lib/AuthContext";
+import helpingHandLogo from "@/assets/helping-hand-logo.webp";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
