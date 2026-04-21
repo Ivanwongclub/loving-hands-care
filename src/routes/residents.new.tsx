@@ -170,7 +170,7 @@ function NewAdmissionPage() {
         language_preference: data.language_preference || null,
         do_not_share_family: data.do_not_share_family,
         medical_history: data.diagnoses ? { diagnoses: data.diagnoses } : null,
-        allergies: data.allergies.length > 0 ? data.allergies : null,
+        allergies: data.allergies.length > 0 ? (data.allergies as unknown as never) : null,
         notes: data.special_instructions || null,
       };
       const { data: resRow, error: rErr } = await supabase

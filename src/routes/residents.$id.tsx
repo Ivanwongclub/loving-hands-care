@@ -11,6 +11,8 @@ import {
   ConfirmDialog, FormField, TextField, Select, DropdownMenu, IconButton,
   ActivityItem, Timeline, type Column,
 } from "@/components/hms";
+import { TransferBedModal } from "@/components/residents/TransferBedModal";
+import { DischargeModal } from "@/components/residents/DischargeModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
