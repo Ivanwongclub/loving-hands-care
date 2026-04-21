@@ -11,6 +11,9 @@
     "dashboard": "控制台",
     "residents": "院友",
     "attendance": "出席",
+    "attendanceRegister": "出席登記冊",
+    "enrollmentMgmt": "登記管理",
+    "dcuKiosk": "日間護理入口",
     "carePlans": "照顧計劃",
     "tasks": "任務",
     "vitals": "生命體徵與評估",
@@ -352,7 +355,8 @@
     "discharge": "完成登記",
     "qrLabel": "QR 狀態",
     "cardFooter": "如遺失請聯絡職員",
-    "cardSubtitle": "日間護理單位"
+    "cardSubtitle": "日間護理單位",
+    "selectedResident": "已選擇"
   },
   "kiosk": {
     "title": "出席登記",

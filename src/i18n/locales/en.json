@@ -11,6 +11,9 @@
     "dashboard": "Dashboard",
     "residents": "Residents",
     "attendance": "Attendance",
+    "attendanceRegister": "Attendance Register",
+    "enrollmentMgmt": "Enrollment Mgmt",
+    "dcuKiosk": "DCU Kiosk",
     "carePlans": "Care Plans",
     "tasks": "Tasks",
     "vitals": "Vitals & Assessments",
@@ -352,7 +355,8 @@
     "discharge": "Mark Discharged",
     "qrLabel": "QR Status",
     "cardFooter": "If lost, contact staff",
-    "cardSubtitle": "Day Care Unit"
+    "cardSubtitle": "Day Care Unit",
+    "selectedResident": "Selected"
   },
   "kiosk": {
     "title": "Attendance Check-In",
