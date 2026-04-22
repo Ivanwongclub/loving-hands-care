@@ -167,12 +167,23 @@ function ResidentDetailPage() {
     if (!error) setActivityLog((data ?? []) as unknown as AuditLogRow[]);
   };
 
+  const fetchOpenAlertCount = async () => {
+    const { data, error } = await supabase
+      .from("alerts")
+      .select("id")
+      .eq("resident_id", id)
+      .eq("status", "OPEN")
+      .limit(50);
+    if (!error) setOpenAlertCount((data ?? []).length);
+  };
+
   useEffect(() => {
     void fetchResident();
     void fetchContacts();
     void fetchDocuments();
     void fetchBedHistory();
     void fetchActivity();
+    void fetchOpenAlertCount();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -231,6 +242,20 @@ function ResidentDetailPage() {
             onDischarge={() => setDischargeOpen(true)}
           />
 
+          {openAlertCount > 0 && (
+            <Alert
+              severity="warning"
+              description={t("alerts.residentBanner", { count: openAlertCount })}
+              onDismiss={undefined}
+            >
+              <div style={{ marginTop: 8 }}>
+                <Button variant="ghost" size="compact" onClick={() => setTab("alerts")}>
+                  {t("alerts.view")}
+                </Button>
+              </div>
+            </Alert>
+          )}
+
           <div>
             <Tabs
               style="line"
@@ -238,6 +263,7 @@ function ResidentDetailPage() {
               onChange={(v) => setTab(v as typeof tab)}
               items={[
                 { value: "profile", label: t("residents.profile") },
+                { value: "alerts", label: t("alerts.title") },
                 { value: "contacts", label: t("residents.contacts") },
                 { value: "documents", label: t("residents.documents") },
                 { value: "bed", label: t("residents.bedHistory") },
@@ -258,6 +284,14 @@ function ResidentDetailPage() {
               editMode={editMode}
               setEditMode={setEditMode}
               onSaved={fetchResident}
+              logAction={logAction}
+            />
+          )}
+          {tab === "alerts" && (
+            <AlertsTab
+              residentId={id}
+              branchId={resident.branch_id}
+              staffId={staff?.id ?? null}
               logAction={logAction}
             />
           )}
