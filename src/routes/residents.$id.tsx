@@ -19,6 +19,7 @@ import { VitalsTab } from "@/components/vitals/VitalsTab";
 import { WoundsTab } from "@/components/wounds/WoundsTab";
 import { IncidentsTab } from "@/components/incidents/IncidentsTab";
 import { AlertsTab } from "@/components/alerts/AlertsTab";
+import { MedicationTab } from "@/components/emar/MedicationTab";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
@@ -103,7 +104,7 @@ function ResidentDetailPage() {
   const [activityLog, setActivityLog] = useState<AuditLogRow[]>([]);
   const [openAlertCount, setOpenAlertCount] = useState(0);
 
-  const [tab, setTab] = useState<"profile" | "alerts" | "contacts" | "documents" | "bed" | "activity" | "vitals" | "wounds" | "incidents" | "icp" | "tasks">("profile");
+  const [tab, setTab] = useState<"profile" | "alerts" | "contacts" | "documents" | "bed" | "activity" | "vitals" | "wounds" | "incidents" | "emar" | "icp" | "tasks">("profile");
   const [editMode, setEditMode] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [dischargeOpen, setDischargeOpen] = useState(false);
@@ -271,6 +272,7 @@ function ResidentDetailPage() {
                 { value: "vitals", label: t("vitals.title") },
                 { value: "wounds", label: t("wounds.title") },
                 { value: "incidents", label: t("incidents.title") },
+                { value: "emar", label: t("emar.tab") },
                 { value: "icp", label: t("icp.title") },
                 { value: "tasks", label: t("tasks.title") },
               ]}
@@ -338,6 +340,15 @@ function ResidentDetailPage() {
               residentId={id}
               branchId={resident.branch_id}
               staffId={staff?.id ?? null}
+              logAction={logAction}
+            />
+          )}
+          {tab === "emar" && (
+            <MedicationTab
+              residentId={id}
+              branchId={resident.branch_id}
+              staffId={staff?.id ?? null}
+              staffRole={staff?.role ?? null}
               logAction={logAction}
             />
           )}
