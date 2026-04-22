@@ -5,8 +5,8 @@ import * as xlsx from 'https://esm.sh/xlsx@0.18.5'
 interface ReportRequest {
   report_type: 'dcuAttendance' | 'residentCensus' | 'emarCompliance' | 'incidentSummary'
   branch_id: string
-  from_date: string  // YYYY-MM-DD
-  to_date: string    // YYYY-MM-DD
+  from_date: string
+  to_date: string
 }
 
 const CORS_HEADERS = {
@@ -14,7 +14,6 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Traditional Chinese column headers per SWD format
 const HEADERS = {
   dcuAttendance: ['日期', '院友姓名', '身份證參考', '出席類型', '時間', '記錄方式', '備註'],
   residentCensus: ['院友姓名', '身份證參考', '入住日期', '離院日期', '床位', '狀態', '照顧計劃狀態'],
@@ -75,7 +74,6 @@ serve(async (req: Request) => {
     const fromISO = `${from_date}T00:00:00`
     const toISO = `${to_date}T23:59:59`
 
-    // Title row style
     const title = REPORT_TITLES[report_type]
     const period = `報告期間：${from_date} 至 ${to_date}`
     const generated = `生成時間：${fmtDateTime(new Date().toISOString())}`
@@ -86,20 +84,13 @@ serve(async (req: Request) => {
     if (report_type === 'dcuAttendance') {
       const { data, error } = await supabase
         .from('attendance_events')
-        .select(`
-          id, event_type, event_time, operator_type, is_manual,
-          dcu_enrollments:enrollment_id(
-            residents:resident_id(name_zh, name, hkid_hash)
-          )
-        `)
+        .select(`id, event_type, event_time, operator_type, is_manual, dcu_enrollments:enrollment_id(residents:resident_id(name_zh, name, hkid_hash))`)
         .eq('branch_id', branch_id)
         .gte('event_time', fromISO)
         .lte('event_time', toISO)
         .order('event_time', { ascending: true })
         .limit(5000)
-
       if (error) throw error
-
       rows = (data ?? []).map((r: any) => {
         const enr = Array.isArray(r.dcu_enrollments) ? r.dcu_enrollments[0] : r.dcu_enrollments
         const resident = enr ? (Array.isArray(enr.residents) ? enr.residents[0] : enr.residents) : null
@@ -118,29 +109,16 @@ serve(async (req: Request) => {
     else if (report_type === 'residentCensus') {
       const { data, error } = await supabase
         .from('residents')
-        .select(`
-          id, name_zh, name, status, admission_date, discharge_date, hkid_hash,
-          bed:bed_id(code, name, name_zh),
-          icps(status, created_at)
-        `)
+        .select(`id, name_zh, name, status, admission_date, discharge_date, hkid_hash, bed:bed_id(code, name, name_zh), icps(status, created_at)`)
         .eq('branch_id', branch_id)
         .lte('admission_date', to_date)
         .order('admission_date', { ascending: true })
         .limit(1000)
-
       if (error) throw error
-
-      const STATUS_ZH: Record<string, string> = {
-        ADMITTED: '在院', DISCHARGED: '已出院', LOA: '暫時外出', DECEASED: '已離世',
-      }
-      const ICP_ZH: Record<string, string> = {
-        ACTIVE: '生效中', DRAFT: '草稿', PENDING_APPROVAL: '待審批',
-        REJECTED: '已拒絕', SUPERSEDED: '已取代',
-      }
-
+      const STATUS_ZH: Record<string, string> = { ADMITTED: '在院', DISCHARGED: '已出院', LOA: '暫時外出', DECEASED: '已離世' }
+      const ICP_ZH: Record<string, string> = { ACTIVE: '生效中', DRAFT: '草稿', PENDING_APPROVAL: '待審批', REJECTED: '已拒絕', SUPERSEDED: '已取代' }
       rows = (data ?? []).map((r: any) => {
-        const icpArr = (r.icps ?? []).sort((a: any, b: any) =>
-          (b.created_at || '').localeCompare(a.created_at || ''))
+        const icpArr = (r.icps ?? []).sort((a: any, b: any) => (b.created_at || '').localeCompare(a.created_at || ''))
         const latestICP = icpArr[0]?.status ?? null
         const bed = Array.isArray(r.bed) ? r.bed[0] : r.bed
         return [
@@ -158,25 +136,14 @@ serve(async (req: Request) => {
     else if (report_type === 'emarCompliance') {
       const { data, error } = await supabase
         .from('emar_records')
-        .select(`
-          id, status, due_at, administered_at, barcode_verified, shift_pin_verified,
-          resident:resident_id(name_zh, name, hkid_hash),
-          order:order_id(drug_name, drug_name_zh, dose),
-          administrator:administered_by(name, name_zh)
-        `)
+        .select(`id, status, due_at, administered_at, barcode_verified, shift_pin_verified, resident:resident_id(name_zh, name, hkid_hash), order:order_id(drug_name, drug_name_zh, dose), administrator:administered_by(name, name_zh)`)
         .eq('branch_id', branch_id)
         .gte('due_at', fromISO)
         .lte('due_at', toISO)
         .order('due_at', { ascending: true })
         .limit(5000)
-
       if (error) throw error
-
-      const STATUS_ZH: Record<string, string> = {
-        ADMINISTERED: '已給藥', MISSED: '漏服', REFUSED: '拒絕服藥',
-        LATE: '逾期', HELD: '暫緩', DUE: '待給藥',
-      }
-
+      const STATUS_ZH: Record<string, string> = { ADMINISTERED: '已給藥', MISSED: '漏服', REFUSED: '拒絕服藥', LATE: '逾期', HELD: '暫緩', DUE: '待給藥' }
       rows = (data ?? []).map((r: any) => {
         const res = Array.isArray(r.resident) ? r.resident[0] : r.resident
         const ord = Array.isArray(r.order) ? r.order[0] : r.order
@@ -194,50 +161,28 @@ serve(async (req: Request) => {
           STATUS_ZH[r.status] || r.status,
         ]
       })
-
-      // Append compliance summary at the end
       const administered = rows.filter((r: any) => r[9] === '已給藥').length
       const missed = rows.filter((r: any) => r[9] === '漏服').length
       const refused = rows.filter((r: any) => r[9] === '拒絕服藥').length
       const late = rows.filter((r: any) => r[9] === '逾期').length
       const denom = administered + missed + refused + late
       const rate = denom > 0 ? Math.round((administered / denom) * 100) : 0
-      rows.push([])
-      rows.push(['合規摘要', '', '', '', '', '', '', '', '', ''])
-      rows.push(['應給藥總次數', denom, '', '', '', '', '', '', '', ''])
-      rows.push(['已給藥', administered, '', '', '', '', '', '', '', ''])
-      rows.push(['漏服', missed, '', '', '', '', '', '', '', ''])
-      rows.push(['拒絕服藥', refused, '', '', '', '', '', '', '', ''])
-      rows.push(['依從率', `${rate}%`, '', '', '', '', '', '', '', ''])
+      rows.push([], ['合規摘要'], ['應給藥總次數', denom], ['已給藥', administered], ['漏服', missed], ['拒絕服藥', refused], ['依從率', `${rate}%`])
     }
 
     else if (report_type === 'incidentSummary') {
       const { data, error } = await supabase
         .from('incidents')
-        .select(`
-          id, incident_ref, type, severity, status, occurred_at, closed_at,
-          resident:resident_id(name_zh, name, hkid_hash),
-          followups:incident_followups(id)
-        `)
+        .select(`id, incident_ref, type, severity, status, occurred_at, closed_at, resident:resident_id(name_zh, name, hkid_hash), followups:incident_followups(id)`)
         .eq('branch_id', branch_id)
         .gte('occurred_at', fromISO)
         .lte('occurred_at', toISO)
         .order('occurred_at', { ascending: true })
         .limit(1000)
-
       if (error) throw error
-
-      const TYPE_ZH: Record<string, string> = {
-        FALL: '跌倒', MEDICATION_ERROR: '藥物事故', BEHAVIOUR: '行為事故',
-        MEDICAL_EMERGENCY: '醫療緊急事故', EQUIPMENT: '設備事故', OTHER: '其他',
-      }
-      const SEV_ZH: Record<string, string> = {
-        LOW: '低', MEDIUM: '中', HIGH: '高', CRITICAL: '緊急',
-      }
-      const STATUS_ZH: Record<string, string> = {
-        OPEN: '待處理', UNDER_REVIEW: '審查中', CLOSED: '已關閉',
-      }
-
+      const TYPE_ZH: Record<string, string> = { FALL: '跌倒', MEDICATION_ERROR: '藥物事故', BEHAVIOUR: '行為事故', MEDICAL_EMERGENCY: '醫療緊急事故', EQUIPMENT: '設備事故', OTHER: '其他' }
+      const SEV_ZH: Record<string, string> = { LOW: '低', MEDIUM: '中', HIGH: '高', CRITICAL: '緊急' }
+      const STATUS_ZH: Record<string, string> = { OPEN: '待處理', UNDER_REVIEW: '審查中', CLOSED: '已關閉' }
       rows = (data ?? []).map((r: any) => {
         const res = Array.isArray(r.resident) ? r.resident[0] : r.resident
         const fuCount = Array.isArray(r.followups) ? r.followups.length : 0
@@ -255,32 +200,18 @@ serve(async (req: Request) => {
       })
     }
 
-    // Build worksheet
     const wsData: unknown[][] = [
-      [title],
-      [period],
-      [generated],
-      [swdNote],
-      [],
+      [title], [period], [generated], [swdNote], [],
       HEADERS[report_type],
       ...rows,
     ]
 
     const ws = xlsx.utils.aoa_to_sheet(wsData)
-
-    // Column widths
     ws['!cols'] = HEADERS[report_type].map(() => ({ wch: 20 }))
-
-    // Merge title row
-    ws['!merges'] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: HEADERS[report_type].length - 1 } },
-    ]
-
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: HEADERS[report_type].length - 1 } }]
     xlsx.utils.book_append_sheet(wb, ws, title.slice(0, 31))
 
-    // Generate buffer
     const buf = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' })
-
     const filename = `${title}_${from_date}_${to_date}.xlsx`
 
     return new Response(buf, {
