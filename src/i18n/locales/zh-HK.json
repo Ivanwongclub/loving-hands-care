@@ -572,6 +572,9 @@
   },
   "vitals": {
     "title": "生命體徵",
+    "dashboardTitle": "生命體徵總覽",
+    "recentAbnormal": "最近異常讀數",
+    "noRecentAbnormal": "最近沒有異常讀數",
     "record": "記錄生命體徵",
     "history": "歷史記錄",
     "thresholds": "正常範圍設定",
@@ -675,6 +678,24 @@
     "title": "事故報告",
     "overviewTitle": "事故報告總覽",
     "overviewSoon": "院舍事故總覽看板將於 S5-L3 推出",
+    "dashboardTitle": "事故報告總覽",
+    "openCount": "待處理事故",
+    "criticalCount": "緊急事故",
+    "thisMonth": "本月事故",
+    "underReviewCount": "審查中",
+    "searchPlaceholder": "搜尋描述或院友姓名…",
+    "allTypes": "所有類型",
+    "allStatuses": "所有狀態",
+    "columns": {
+      "ref": "編號",
+      "type": "類型",
+      "severity": "嚴重程度",
+      "resident": "院友",
+      "occurredAt": "事發時間",
+      "status": "狀態",
+      "reporter": "報告人員",
+      "actions": "操作"
+    },
     "new": "新增事故報告",
     "list": "事故列表",
     "detail": "事故詳情",
@@ -729,5 +750,47 @@
       "details": "事故詳情",
       "followUps": "跟進記錄"
     }
+  },
+  "alerts": {
+    "title": "警報",
+    "open": "待處理警報",
+    "acknowledge": "確認警報",
+    "acknowledged": "已確認",
+    "resolve": "標記已解決",
+    "resolved": "已解決",
+    "dismiss": "忽略",
+    "view": "查看",
+    "filterStatus": "狀態",
+    "allStatuses": "全部",
+    "residentBanner_one": "此院友有 {{count}} 個待處理警報",
+    "residentBanner_other": "此院友有 {{count}} 個待處理警報",
+    "type": {
+      "VITALS_BREACH": "生命體徵超出範圍"
+    },
+    "source": {
+      "MANUAL": "手動",
+      "VITALS": "生命體徵",
+      "INCIDENT": "事故",
+      "SYSTEM": "系統",
+      "IOT": "IoT 裝置"
+    },
+    "severity": {
+      "LOW": "低",
+      "MEDIUM": "中",
+      "HIGH": "高",
+      "CRITICAL": "緊急"
+    },
+    "status": {
+      "OPEN": "待處理",
+      "ACKNOWLEDGED": "已確認",
+      "ASSIGNED": "已指派",
+      "RESOLVED": "已解決",
+      "DISMISSED": "已忽略"
+    },
+    "noAlerts": "沒有待處理警報",
+    "vitalsBreachAlert": "生命體徵異常警報已建立",
+    "acknowledgeSuccess": "警報已確認",
+    "resolveSuccess": "警報已解決",
+    "dismissSuccess": "警報已忽略"
   }
 }
