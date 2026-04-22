@@ -207,7 +207,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
         <div style={{ padding: collapsed ? "12px 8px" : "12px 14px", borderTop: "1px solid var(--border-subtle)" }}>
           {collapsed ? (
             <div className="flex flex-col items-center gap-2">
-              <Avatar name="Wong KM" size="sm" />
+              <Avatar name={displayName} size="sm" />
               <button onClick={handleSignOut} aria-label="Sign out" title="Sign out" className="p-1.5 rounded hover:bg-[var(--bg-hover-subtle)]">
                 <LogOut size={16} style={{ color: "var(--text-secondary)" }} />
               </button>
@@ -215,10 +215,10 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
           ) : (
             <Inline justify="between">
               <Inline gap={2}>
-                <Avatar name="Wong KM" size="sm" />
+                <Avatar name={displayName} size="sm" />
                 <Stack gap={1}>
-                  <Text size="sm" className="font-semibold">Wong K.M.</Text>
-                  <Text size="caption" color="tertiary">Registered Nurse</Text>
+                  <Text size="sm" className="font-semibold">{displayName}</Text>
+                  <Text size="caption" color="tertiary">{displayRole}</Text>
                 </Stack>
               </Inline>
               <button onClick={handleSignOut} aria-label="Sign out" className="p-1.5 rounded hover:bg-[var(--bg-hover-subtle)]">
@@ -249,14 +249,8 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
             {i18n.language === "en" ? "EN" : "中"}
             <ChevronDown size={12} />
           </button>
-          <button aria-label="Notifications" className="relative p-2 rounded hover:bg-[var(--bg-hover-subtle)]">
-            <Bell size={18} style={{ color: "var(--text-secondary)" }} />
-            <span
-              className="absolute -top-0.5 -right-0.5 type-caption font-bold grid place-items-center"
-              style={{ width: 18, height: 18, borderRadius: "50%", backgroundColor: "var(--status-error-accent)", color: "#fff", fontSize: 10 }}
-            >3</span>
-          </button>
-          <Avatar name="Wong KM" size="sm" />
+          <NotificationBell />
+          <Avatar name={displayName} size="sm" />
         </Inline>
       </header>
 
