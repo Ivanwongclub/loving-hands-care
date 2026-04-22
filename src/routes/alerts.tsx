@@ -224,6 +224,15 @@ function AlertsDashboardPage() {
             <StatCard label={t("alerts.stats.escalated")} value={stats.escalated} tone="error" />
           </div>
 
+          <Inline gap={2} wrap align="center">
+            <Badge tone="neutral">
+              {t("alerts.autoEscalatedToday")}: {autoEscalatedToday.data ?? "—"} {t("alerts.timesUnit")}
+            </Badge>
+            <Badge tone="neutral">
+              {t("alerts.manualEscalatedToday")}: {manualEscalatedToday.data ?? "—"} {t("alerts.timesUnit")}
+            </Badge>
+          </Inline>
+
           <FilterBar>
             <div style={{ width: 240 }}>
               <SearchField
