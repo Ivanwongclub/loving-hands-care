@@ -50,8 +50,7 @@ function StaffManagementPage() {
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
   const { branches } = useBranches();
-  const DEMO_BRANCH_ID = '10000000-0000-0000-0000-000000000001'; // DEMO ONLY — remove before production
-  const defaultBranchId = branches.find(b => b.id === DEMO_BRANCH_ID)?.id ?? branches[0]?.id ?? null;
+  const defaultBranchId = branches[0]?.id ?? null;
   const { staff: currentStaff } = useCurrentStaff();
 
   const canCreate = currentStaff?.role === "SYSTEM_ADMIN" || currentStaff?.role === "BRANCH_ADMIN";

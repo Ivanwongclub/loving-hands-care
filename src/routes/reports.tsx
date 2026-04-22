@@ -186,8 +186,7 @@ function ReportsHubPage() {
 
   const [fromDate, setFromDate] = useState(firstOfMonth());
   const [toDate, setToDate] = useState(today());
-  const DEMO_BRANCH_ID = '10000000-0000-0000-0000-000000000001'; // DEMO ONLY — remove before production
-  const defaultBranchId = branches.find(b => b.id === DEMO_BRANCH_ID)?.id ?? branches[0]?.id ?? "";
+  const defaultBranchId = branches[0]?.id ?? "";
   const [selectedBranch, setSelectedBranch] = useState<string>(defaultBranchId);
   const [hasFetched, setHasFetched] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);

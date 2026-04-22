@@ -64,8 +64,7 @@ function TasksDashboardPage() {
   const { branches } = useBranches();
   const { logAction } = useAuditLog();
 
-  const DEMO_BRANCH_ID = '10000000-0000-0000-0000-000000000001'; // DEMO ONLY — remove before production
-  const branchId = staff?.branch_ids?.[0] ?? branches.find(b => b.id === DEMO_BRANCH_ID)?.id ?? branches[0]?.id ?? null;
+  const branchId = staff?.branch_ids?.[0] ?? branches[0]?.id ?? null;
 
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "ALL">("ALL");
   const [typeFilter, setTypeFilter] = useState<TaskType | "ALL">("ALL");

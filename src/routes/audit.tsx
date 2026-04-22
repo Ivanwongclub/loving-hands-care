@@ -62,8 +62,7 @@ function AuditLogViewerPage() {
   const { t } = useTranslation();
   const { branches } = useBranches();
   const { staff } = useCurrentStaff();
-  const DEMO_BRANCH_ID = '10000000-0000-0000-0000-000000000001'; // DEMO ONLY — remove before production
-  const branchId = branches.find(b => b.id === DEMO_BRANCH_ID)?.id ?? branches[0]?.id ?? null;
+  const branchId = branches[0]?.id ?? null;
 
   const [fromDate, setFromDate] = useState(defaultDate(7));
   const [toDate, setToDate] = useState(defaultDate(0));

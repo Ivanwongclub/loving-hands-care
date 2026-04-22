@@ -70,8 +70,7 @@ function AlertsDashboardPage() {
   const { staff } = useCurrentStaff();
   const { logAction } = useAuditLog();
 
-  const DEMO_BRANCH_ID = '10000000-0000-0000-0000-000000000001'; // DEMO ONLY — remove before production
-  const branch = branches.find(b => b.id === DEMO_BRANCH_ID) ?? branches[0] ?? null;
+  const branch = branches[0] ?? null;
   const branchId = branch?.id ?? null;
   const sla = readSLA(branch?.sla_config);
   const staffId = staff?.id ?? null;
