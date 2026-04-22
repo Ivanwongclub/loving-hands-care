@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Inbox } from "lucide-react";
+import { toast } from "sonner";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
@@ -164,7 +165,16 @@ function AuditLogViewerPage() {
     <ProtectedRoute>
       <AdminDesktopShell pageTitle={t("audit.viewerTitle")}>
         <Stack gap={4}>
-          <PageHeader title={t("audit.viewerTitle")} />
+          <PageHeader
+            title={t("audit.viewerTitle")}
+            actions={
+              rows.length > 0 && staff?.role === "SYSTEM_ADMIN" ? (
+                <Button variant="soft" size="compact" onClick={handleAuditExport}>
+                  {t("audit.exportAuditLog")}
+                </Button>
+              ) : null
+            }
+          />
 
           <Alert severity="info" title={t("audit.sensitiveWarning")} />
 
