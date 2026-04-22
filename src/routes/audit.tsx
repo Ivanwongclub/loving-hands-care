@@ -146,6 +146,30 @@ function AuditLogViewerPage() {
     },
   ], [t]);
 
+  const handleAuditExport = () => {
+    const csvRows = [
+      ["時間", "操作", "對象類型", "對象ID", "操作人員"].join(","),
+      ...rows.map((r) => [
+        r.created_at,
+        r.action,
+        r.entity_type,
+        r.entity_id,
+        r.actor?.name_zh || r.actor?.name || "系統",
+      ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")),
+    ].join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvRows], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `審計記錄_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(t("audit.exportSuccess"));
+  };
+
   if (!allowed) {
     return (
       <ProtectedRoute>
