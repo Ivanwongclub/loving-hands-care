@@ -563,6 +563,9 @@ function ReportsHubPage() {
               onExport={() => handleExport("residentCensus")}
               isExporting={exporting === "residentCensus"}
               errorMessage={censusQ.error ? (censusQ.error as Error).message : null}
+              summary={
+                <Inline gap={2} wrap>
+                  <StatPill label={t("reports.residentCensus.totalResidents")} value={censusStats.total} tone="info" />
                   <StatPill label={t("reports.residentCensus.activeCount")} value={censusStats.active} tone="success" />
                   <StatPill label={t("reports.residentCensus.dischargedCount")} value={censusStats.discharged} />
                   <StatPill label={t("reports.residentCensus.activeICP")} value={censusStats.activeICP} tone="info" />
