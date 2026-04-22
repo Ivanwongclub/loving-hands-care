@@ -901,6 +901,21 @@
     "adminConfirmTime": "給藥時間",
     "prnOutcomeLabel": "PRN 效果備註（選填）",
     "supervisorOverrideLabel": "督導員覆蓋（PIN 鎖定時）",
-    "adminFinalise": "確認給藥"
+    "adminFinalise": "確認給藥",
+    "dashboardTitle": "eMAR 總覽",
+    "todaySchedule": "今日給藥時間表",
+    "administered": "已給藥",
+    "missed": "漏服",
+    "late": "逾期",
+    "dueCount": "待給藥",
+    "administeredCount": "已完成",
+    "missedCount": "漏服",
+    "lateCount": "逾期",
+    "refusedCount": "拒絕服藥",
+    "allResidents": "所有院友",
+    "filterByDrug": "按藥物篩選",
+    "complianceRate": "服藥依從率",
+    "noEMARToday": "今日沒有給藥記錄",
+    "missedAlert": "有 {{count}} 個漏服記錄需要跟進"
   }
 }
