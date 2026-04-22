@@ -10,6 +10,7 @@ import {
 import { Avatar, ContextSwitcher, Inline, Stack, Text } from "@/components/hms";
 import { useAuth } from "@/lib/AuthContext";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
+import { useBranches } from "@/hooks/useBranches";
 import { NotificationBell } from "@/components/alerts/NotificationBell";
 import logoUrl from "@/assets/helping-hand-logo.webp";
 
@@ -63,6 +64,9 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { staff } = useCurrentStaff();
+  const { branches } = useBranches();
+  const currentBranch = branches[0];
+  const branchLabel = currentBranch ? `${currentBranch.name_zh}` : t("common.loading");
   const displayName = staff?.name_zh ?? staff?.name ?? "—";
   const displayRole = staff?.role ? t(`staff.roles.${staff.role}`) : "—";
   const [collapsed, setCollapsed] = useState(false);
@@ -139,7 +143,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
         {/* Branch context */}
         {!collapsed && (
           <div style={{ padding: "0 14px 12px" }}>
-            <ContextSwitcher label={t("common.branch")} current="Central Branch · 中央院舍" />
+            <ContextSwitcher label={t("common.branch")} current={branchLabel} />
           </div>
         )}
 
