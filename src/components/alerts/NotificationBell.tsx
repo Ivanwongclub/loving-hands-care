@@ -32,7 +32,8 @@ export function NotificationBell() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
 
-  const branchId = branches[0]?.id ?? null;
+  const DEMO_BRANCH_ID = '10000000-0000-0000-0000-000000000001'; // DEMO ONLY — remove before production
+  const branchId = branches.find(b => b.id === DEMO_BRANCH_ID)?.id ?? branches[0]?.id ?? null;
 
   const { alerts, refetch } = useAlerts({ branchId, status: "OPEN", page: 1, pageSize: 50 });
 

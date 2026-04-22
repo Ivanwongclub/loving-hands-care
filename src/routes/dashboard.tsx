@@ -7,6 +7,10 @@ import {
   TableToolbar, Badge, Timeline, ActivityItem, Inline, Stack, Text,
 } from "@/components/hms";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
+import { useResidents } from "@/hooks/useResidents";
+import { useTasks } from "@/hooks/useTasks";
+import { useAlerts } from "@/hooks/useAlerts";
+import { useBranches } from "@/hooks/useBranches";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
@@ -23,6 +27,14 @@ interface TaskRow {
 
 function DashboardPage() {
   const { t } = useTranslation();
+  const DEMO_BRANCH_ID = '10000000-0000-0000-0000-000000000001'; // DEMO ONLY — remove before production
+  const { branches } = useBranches();
+  const branchId = branches.find(b => b.id === DEMO_BRANCH_ID)?.id ?? branches[0]?.id ?? null;
+  const { residents } = useResidents({ branchId });
+  const { tasks: realTasks } = useTasks({ branchId });
+  const { alerts } = useAlerts({ branchId });
+  const overdueTasks = realTasks.filter(t => t.status === 'OVERDUE');
+  const openAlerts = alerts.filter(a => a.status === 'OPEN' || a.status === 'ACKNOWLEDGED');
 
   const tasks: TaskRow[] = [
     { id: "T-1041", resident: "Chan Tai Man · 陳大文", task: "Blood pressure check", due: "10:00", assignee: "RN Lee", status: "overdue" },
@@ -55,10 +67,10 @@ function DashboardPage() {
 
         {/* Stats — full width 4 columns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full mb-5">
-          <StatCard label={t("dashboard.residentsToday")} value="127" trend={{ direction: "up", value: "+2" }} icon={<Users size={18} />} />
-          <StatCard label={t("dashboard.openAlerts")} value="3" tone="warning" icon={<BellRing size={18} />} />
-          <StatCard label={t("dashboard.overdueTasks")} value="7" tone="error" icon={<ListTodo size={18} />} />
-          <StatCard label={t("dashboard.dcuAttendance")} value="24/28" tone="success" icon={<ClipboardCheck size={18} />} />
+          <StatCard label={t("dashboard.residentsToday")} value={String(residents.length)} trend={{ direction: "up", value: "+2" }} icon={<Users size={18} />} />
+          <StatCard label={t("dashboard.openAlerts")} value={String(openAlerts.length)} tone="warning" icon={<BellRing size={18} />} />
+          <StatCard label={t("dashboard.overdueTasks")} value={String(overdueTasks.length)} tone="error" icon={<ListTodo size={18} />} />
+          <StatCard label={t("dashboard.dcuAttendance")} value={String(realTasks.length)} tone="success" icon={<ClipboardCheck size={18} />} />
         </div>
 
         {/* Critical alert */}
