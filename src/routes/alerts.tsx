@@ -302,7 +302,7 @@ function AlertsDashboardPage() {
                 const escalated = (a.escalation_level ?? 0) > 0;
 
                 return (
-                  <Card key={a.id} padding="md">
+                  <Card key={a.id} padding="md" style={{ borderLeft: severityBorder(a.severity) }}>
                     <Stack gap={3}>
                       <Inline justify="between" align="start" wrap>
                         <Inline gap={2} wrap align="center">
@@ -337,6 +337,11 @@ function AlertsDashboardPage() {
                         {escalated && a.last_escalated_at && (
                           <Text size="sm" color="tertiary">
                             {t("alerts.lastEscalatedAt")}: {timeAgo(a.last_escalated_at, t)}
+                          </Text>
+                        )}
+                        {a.status === "ASSIGNED" && (
+                          <Text size="sm" color="tertiary">
+                            {t("alerts.assignedTo")}: {t("alerts.assignToSelf")}
                           </Text>
                         )}
                       </Inline>
