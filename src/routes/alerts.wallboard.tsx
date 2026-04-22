@@ -25,5 +25,6 @@ function WallboardPage() {
         <WallboardTile label="Residents · 院友" value="127" />
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
