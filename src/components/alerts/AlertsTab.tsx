@@ -61,6 +61,10 @@ export function AlertsTab({ residentId, branchId, staffId, logAction }: AlertsTa
   const qc = useQueryClient();
 
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [escalateAlert, setEscalateAlert] = useState<AlertRow | null>(null);
+  const [resolveAlert, setResolveAlert] = useState<AlertRow | null>(null);
+  const [assignAlert, setAssignAlert] = useState<AlertRow | null>(null);
+  const [historyId, setHistoryId] = useState<string | null>(null);
   const { alerts, isLoading } = useAlerts({ branchId, status: "ALL", page: 1, pageSize: 200 });
 
   const scoped = useMemo(
