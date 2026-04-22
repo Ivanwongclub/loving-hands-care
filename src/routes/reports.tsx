@@ -585,15 +585,9 @@ function ReportsHubPage() {
               isLoading={emarQ.isLoading}
               hasFetched={hasFetched}
               rowCount={emarQ.data?.length ?? 0}
-              onExport={onExport}
-              summary={
-                <Inline gap={2} wrap>
-                  <StatPill label={t("reports.emarCompliance.complianceRate")} value={`${emarStats.rate}%`} tone={emarRateTone} />
-                  <StatPill label={t("reports.emarCompliance.administered")} value={emarStats.administered} tone="success" />
-                  <StatPill label={t("reports.emarCompliance.missed")} value={emarStats.missed} tone={emarStats.missed > 0 ? "error" : "neutral"} />
-                  <StatPill label={t("reports.emarCompliance.refused")} value={emarStats.refused} tone="warning" />
-                </Inline>
-              }
+              onExport={() => handleExport("emarCompliance")}
+              isExporting={exporting === "emarCompliance"}
+              errorMessage={emarQ.error ? (emarQ.error as Error).message : null}
               table={
                 <Table<EmarRow> columns={emarColumns} rows={(emarQ.data ?? []).slice(0, 15)} rowKey={(r) => r.id} density="compact" />
               }
