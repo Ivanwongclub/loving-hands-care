@@ -57,7 +57,18 @@ function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => vo
 
 export const getRouter = () => {
   // Fresh QueryClient per request — prevents data leaking between SSR requests
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        // Cache aggressively across page navigations so branches/staff/residents
+        // don't refetch on every route change. Most HMS data is not real-time.
+        staleTime: 60_000, // 1 minute
+        gcTime: 5 * 60_000, // 5 minutes
+        refetchOnWindowFocus: false,
+        retry: 1,
+      },
+    },
+  });
   const router = createRouter({
     routeTree,
     context: { queryClient },
