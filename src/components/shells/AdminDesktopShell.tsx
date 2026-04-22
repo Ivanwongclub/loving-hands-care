@@ -4,11 +4,13 @@ import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard, Users, ClipboardCheck, ListTodo, Activity, Pill,
   AlertTriangle, BellRing, ClipboardList, UserCog, FileBarChart2, ScrollText,
-  Upload, Settings, LogOut, Bell, Languages, ChevronDown, UserPlus, ExternalLink,
+  Upload, Settings, LogOut, Languages, ChevronDown, UserPlus, ExternalLink,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Avatar, ContextSwitcher, Inline, Stack, Text } from "@/components/hms";
 import { useAuth } from "@/lib/AuthContext";
+import { useCurrentStaff } from "@/hooks/useCurrentStaff";
+import { NotificationBell } from "@/components/alerts/NotificationBell";
 import logoUrl from "@/assets/helping-hand-logo.webp";
 
 interface NavItem { to: string; labelKey: string; icon: ReactNode; external?: boolean }
