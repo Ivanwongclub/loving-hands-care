@@ -538,6 +538,9 @@ function ReportsHubPage() {
               onExport={() => handleExport("dcuAttendance")}
               isExporting={exporting === "dcuAttendance"}
               errorMessage={dcuQ.error ? (dcuQ.error as Error).message : null}
+              summary={
+                <Inline gap={2} wrap>
+                  <StatPill label={t("reports.dcuAttendance.totalCheckins")} value={dcuStats.total} tone="info" />
                   <StatPill label={t("reports.dcuAttendance.uniqueResidents")} value={dcuStats.unique} tone="success" />
                   <StatPill label={t("reports.dcuAttendance.qrSource")} value={dcuStats.qrCount} />
                   <StatPill label={t("reports.dcuAttendance.manualSource")} value={dcuStats.manualCount} tone="warning" />
@@ -557,10 +560,9 @@ function ReportsHubPage() {
               isLoading={censusQ.isLoading}
               hasFetched={hasFetched}
               rowCount={censusQ.data?.length ?? 0}
-              onExport={onExport}
-              summary={
-                <Inline gap={2} wrap>
-                  <StatPill label={t("reports.residentCensus.totalResidents")} value={censusStats.total} tone="info" />
+              onExport={() => handleExport("residentCensus")}
+              isExporting={exporting === "residentCensus"}
+              errorMessage={censusQ.error ? (censusQ.error as Error).message : null}
                   <StatPill label={t("reports.residentCensus.activeCount")} value={censusStats.active} tone="success" />
                   <StatPill label={t("reports.residentCensus.dischargedCount")} value={censusStats.discharged} />
                   <StatPill label={t("reports.residentCensus.activeICP")} value={censusStats.activeICP} tone="info" />
