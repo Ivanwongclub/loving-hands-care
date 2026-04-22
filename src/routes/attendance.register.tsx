@@ -35,8 +35,7 @@ const STATUS_TONE: Record<string, "success" | "error" | "warning" | "neutral"> =
 function AttendanceRegisterPage() {
   const { t } = useTranslation();
   const { branches } = useBranches();
-  const DEMO_BRANCH_ID = '10000000-0000-0000-0000-000000000001'; // DEMO ONLY — remove before production
-  const branchId = branches.find(b => b.id === DEMO_BRANCH_ID)?.id ?? branches[0]?.id ?? null;
+  const branchId = branches[0]?.id ?? null;
 
   const [dateFrom, setDateFrom] = useState(todayStr());
   const [dateTo, setDateTo] = useState(todayStr());

@@ -66,8 +66,7 @@ function NewAdmissionPage() {
   const navigate = useNavigate();
   const { staff } = useCurrentStaff();
   const { branches } = useBranches();
-  const DEMO_BRANCH_ID = '10000000-0000-0000-0000-000000000001'; // DEMO ONLY — remove before production
-  const branchId = branches.find(b => b.id === DEMO_BRANCH_ID)?.id ?? branches[0]?.id ?? null;
+  const branchId = branches[0]?.id ?? null;
   const { logAction } = useAuditLog();
 
   const isAdmin = staff?.role === "SYSTEM_ADMIN" || staff?.role === "BRANCH_ADMIN";
