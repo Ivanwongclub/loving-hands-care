@@ -87,6 +87,52 @@ function AlertsDashboardPage() {
   const [assignAlert, setAssignAlert] = useState<AlertRow | null>(null);
   const [historyId, setHistoryId] = useState<string | null>(null);
 
+  // Live-updating "now" so timeAgo refreshes without page reload
+  const [, setNowTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setNowTick((n) => n + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Today (local midnight) ISO for audit_log counts
+  const startOfTodayIso = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d.toISOString();
+  }, []);
+
+  const autoEscalatedToday = useQuery({
+    queryKey: ["audit-counts", "ALERT_AUTO_ESCALATED", branchId, "today", startOfTodayIso],
+    enabled: !!branchId,
+    queryFn: async () => {
+      if (!branchId) return 0;
+      const { count, error } = await supabase
+        .from("audit_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("branch_id", branchId)
+        .eq("action", "ALERT_AUTO_ESCALATED")
+        .gte("created_at", startOfTodayIso);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  const manualEscalatedToday = useQuery({
+    queryKey: ["audit-counts", "ALERT_ESCALATED", branchId, "today", startOfTodayIso],
+    enabled: !!branchId,
+    queryFn: async () => {
+      if (!branchId) return 0;
+      const { count, error } = await supabase
+        .from("audit_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("branch_id", branchId)
+        .eq("action", "ALERT_ESCALATED")
+        .gte("created_at", startOfTodayIso);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return alerts.filter((a) => {
