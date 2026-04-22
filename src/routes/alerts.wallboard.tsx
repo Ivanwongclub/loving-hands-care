@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { WallboardTile } from "@/components/hms";
+import { ProtectedRoute } from "@/lib/ProtectedRoute";
 
 export const Route = createFileRoute("/alerts/wallboard")({
   component: WallboardPage,
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/alerts/wallboard")({
 function WallboardPage() {
   const { t } = useTranslation();
   return (
+    <ProtectedRoute>
     <div className="fixed inset-0 p-6" style={{ backgroundColor: "var(--color-onyx-900)", color: "#fff" }}>
       <div className="flex items-center justify-between mb-6">
         <div className="font-extrabold tracking-tight" style={{ fontSize: 32 }}>HMS Wallboard · 警報顯示</div>
@@ -23,5 +25,6 @@ function WallboardPage() {
         <WallboardTile label="Residents · 院友" value="127" />
       </div>
     </div>
+    </ProtectedRoute>
   );
 }

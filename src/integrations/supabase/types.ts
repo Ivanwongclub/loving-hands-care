@@ -2064,12 +2064,12 @@ export type Database = {
           status: Database["public"]["Enums"]["staff_status"]
           supabase_auth_id: string | null
           updated_at: string
-        }
+        }[]
         SetofOptions: {
           from: "*"
           to: "staff"
-          isOneToOne: true
-          isSetofReturn: false
+          isOneToOne: false
+          isSetofReturn: true
         }
       }
       can_access_resident_document: {
