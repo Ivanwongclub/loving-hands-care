@@ -107,9 +107,9 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
           className="absolute grid place-items-center"
           style={{
             bottom: 96,
-            right: -24,
-            width: 48,
-            height: 48,
+            right: -18,
+            width: 36,
+            height: 36,
             borderRadius: "50%",
             backgroundColor: "var(--bg-surface)",
             border: "1px solid var(--border-subtle)",
@@ -128,7 +128,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
             e.currentTarget.style.borderColor = "var(--border-subtle)";
           }}
         >
-          {collapsed ? <ChevronRight size={28} /> : <ChevronLeft size={28} />}
+          {collapsed ? <ChevronRight size={21} /> : <ChevronLeft size={21} />}
         </button>
 
         {/* Branch context */}
