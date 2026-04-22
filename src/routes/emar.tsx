@@ -239,15 +239,19 @@ function DashboardBody({ branchId }: { branchId: string }) {
           />
         </div>
         <div style={{ minWidth: 180 }}>
-          <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="ALL">{t("emar.allResidents")}</option>
-            <option value="DUE">{t("emar.emarStatus.DUE")}</option>
-            <option value="LATE">{t("emar.emarStatus.LATE")}</option>
-            <option value="ADMINISTERED">{t("emar.emarStatus.ADMINISTERED")}</option>
-            <option value="MISSED">{t("emar.emarStatus.MISSED")}</option>
-            <option value="REFUSED">{t("emar.emarStatus.REFUSED")}</option>
-            <option value="HELD">{t("emar.emarStatus.HELD")}</option>
-          </Select>
+          <Select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            options={[
+              { value: "ALL", label: t("emar.allResidents") },
+              { value: "DUE", label: t("emar.emarStatus.DUE") },
+              { value: "LATE", label: t("emar.emarStatus.LATE") },
+              { value: "ADMINISTERED", label: t("emar.emarStatus.ADMINISTERED") },
+              { value: "MISSED", label: t("emar.emarStatus.MISSED") },
+              { value: "REFUSED", label: t("emar.emarStatus.REFUSED") },
+              { value: "HELD", label: t("emar.emarStatus.HELD") },
+            ]}
+          />
         </div>
       </FilterBar>
 
