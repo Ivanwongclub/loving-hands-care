@@ -83,8 +83,13 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
           width: sidebarWidth,
           backgroundColor: "var(--color-neutral-25)",
           boxShadow: "1px 0 0 var(--border-subtle)",
+<<<<<<< Updated upstream
           zIndex: 10,
           transition: "width var(--duration-normal) ease",
+=======
+          zIndex: 50,
+          pointerEvents: "auto",
+>>>>>>> Stashed changes
         }}
       >
         {/* Header: HMS wordmark centered */}
@@ -228,13 +233,22 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
       <header
         className="fixed top-0 right-0 flex items-center justify-between"
         style={{
+<<<<<<< Updated upstream
           left: sidebarWidth,
+=======
+          left: "var(--sidebar-width)",
+          right: 0,
+>>>>>>> Stashed changes
           height: "var(--topbar-height)",
           paddingInline: "var(--page-gutter-desktop)",
           backgroundColor: "var(--bg-surface)",
           borderBottom: "1px solid var(--border-subtle)",
+<<<<<<< Updated upstream
           zIndex: 10,
           transition: "left var(--duration-normal) ease",
+=======
+          zIndex: 30,
+>>>>>>> Stashed changes
         }}
       >
         <div className="type-h3" style={{ color: "var(--text-primary)" }}>{pageTitle}</div>
