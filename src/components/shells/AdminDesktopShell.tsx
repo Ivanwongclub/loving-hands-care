@@ -5,11 +5,11 @@ import {
   LayoutDashboard, Users, ClipboardCheck, ListTodo, Activity, Pill,
   AlertTriangle, BellRing, ClipboardList, UserCog, FileBarChart2, ScrollText,
   Upload, Settings, LogOut, Bell, Languages, ChevronDown, UserPlus, ExternalLink,
-  PanelLeftClose, PanelLeftOpen,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Avatar, ContextSwitcher, Inline, Stack, Text } from "@/components/hms";
 import { useAuth } from "@/lib/AuthContext";
-import logoUrl from "@/assets/logo.png";
+import logoUrl from "@/assets/helping-hand-logo.webp";
 
 interface NavItem { to: string; labelKey: string; icon: ReactNode; external?: boolean }
 interface NavSection { titleKey: string; items: NavItem[] }
@@ -88,26 +88,15 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
           overflow: "hidden",
         }}
       >
-        {/* Header: logo + HMS centered + collapse toggle */}
+        {/* Header: logo + HMS centered */}
         <div style={{ padding: collapsed ? "16px 8px 12px" : "20px 18px 16px", position: "relative" }}>
-          <button
-            type="button"
-            onClick={() => setCollapsed((c) => !c)}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="absolute p-1 rounded hover:bg-[var(--bg-hover-subtle)]"
-            style={{ top: 8, right: 8, color: "var(--text-secondary)" }}
-          >
-            {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
-          </button>
-          <div className="flex flex-col items-center justify-center" style={{ gap: 6 }}>
+          <div className="flex flex-col items-center justify-center" style={{ gap: 8 }}>
             {!collapsed && (
               <img
                 src={logoUrl}
                 alt="Helping Hand"
-                width={40}
-                height={40}
                 loading="lazy"
-                style={{ width: 40, height: 40, objectFit: "contain" }}
+                style={{ height: 48, width: "auto", objectFit: "contain" }}
               />
             )}
             <div
@@ -118,6 +107,38 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
             </div>
           </div>
         </div>
+
+        {/* Floating collapse toggle — half-overlapping right edge */}
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="absolute grid place-items-center"
+          style={{
+            bottom: 96,
+            right: -12,
+            width: 24,
+            height: 24,
+            borderRadius: "50%",
+            backgroundColor: "var(--bg-surface)",
+            border: "1px solid var(--border-subtle)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+            color: "var(--text-secondary)",
+            zIndex: 20,
+            transition: "background-color var(--duration-normal) ease, border-color var(--duration-normal) ease",
+            cursor: "pointer",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--bg-hover-subtle)";
+            e.currentTarget.style.borderColor = "var(--border-default)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--bg-surface)";
+            e.currentTarget.style.borderColor = "var(--border-subtle)";
+          }}
+        >
+          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </button>
 
         {/* Branch context */}
         {!collapsed && (
