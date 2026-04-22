@@ -901,6 +901,21 @@
     "adminConfirmTime": "Administration time",
     "prnOutcomeLabel": "PRN outcome notes (optional)",
     "supervisorOverrideLabel": "Supervisor override (when PIN locked)",
-    "adminFinalise": "Finalise Administration"
+    "adminFinalise": "Finalise Administration",
+    "dashboardTitle": "eMAR Overview",
+    "todaySchedule": "Today's Administration Schedule",
+    "administered": "Administered",
+    "missed": "Missed",
+    "late": "Late",
+    "dueCount": "Due",
+    "administeredCount": "Administered",
+    "missedCount": "Missed",
+    "lateCount": "Late",
+    "refusedCount": "Refused",
+    "allResidents": "All residents",
+    "filterByDrug": "Filter by drug",
+    "complianceRate": "Compliance rate",
+    "noEMARToday": "No medication records today",
+    "missedAlert": "{{count}} missed administration record(s) require follow-up"
   }
 }
