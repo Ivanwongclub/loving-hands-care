@@ -192,7 +192,7 @@ function ReportsHubPage() {
     queryFn: async (): Promise<AttRow[]> => {
       const { data, error } = await supabase
         .from("attendance_events")
-        .select("id, event_type, event_time, operator_type, is_manual, swd_flagged, dcu_enrollments:enrollment_id(residents:resident_id(id, name_zh, name, hkid_hash))")
+        .select("id, event_type, event_time, operator_type, is_manual, dcu_enrollments:enrollment_id(residents:resident_id(id, name_zh, name, hkid_hash))")
         .eq("branch_id", branchId!)
         .gte("event_time", `${fromDate}T00:00:00`)
         .lte("event_time", `${toDate}T23:59:59`)
@@ -208,7 +208,7 @@ function ReportsHubPage() {
           event_time: r.event_time,
           operator_type: r.operator_type,
           is_manual: !!r.is_manual,
-          swd_flagged: !!r.swd_flagged,
+          swd_flagged: false,
           resident: res,
         };
       });
