@@ -62,6 +62,9 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
   const loc = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { staff } = useCurrentStaff();
+  const displayName = staff?.name_zh ?? staff?.name ?? "—";
+  const displayRole = staff?.role ? t(`staff.roles.${staff.role}`) : "—";
   const [collapsed, setCollapsed] = useState(false);
 
   const sidebarWidth = collapsed ? COLLAPSED_WIDTH : "var(--sidebar-width)";
