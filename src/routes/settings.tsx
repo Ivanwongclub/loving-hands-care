@@ -11,6 +11,7 @@ import { useBranches, type Branch } from "@/hooks/useBranches";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { AddBranchModal } from "@/components/settings/AddBranchModal";
 import { BranchEditDrawer } from "@/components/settings/BranchEditDrawer";
+import { AlertSLASection } from "@/components/alerts/AlertSLASection";
 import type { Enums } from "@/integrations/supabase/types";
 
 type BranchType = Enums<"branch_type">;
@@ -49,12 +50,22 @@ function SettingsPage() {
           />
           <div className="flex-1 min-w-0">
             {section === "branches" && isSysAdmin && <BranchesSection />}
-            {section !== "branches" && <ComingSoonSection labelKey={`settings.sections.${section}`} />}
+            {section === "alerts" && <AlertsSettingsSection />}
+            {section !== "branches" && section !== "alerts" && <ComingSoonSection labelKey={`settings.sections.${section}`} />}
           </div>
         </div>
       </AdminDesktopShell>
     </ProtectedRoute>
   );
+}
+
+function AlertsSettingsSection() {
+  const { staff } = useCurrentStaff();
+  const { branches } = useBranches();
+  const branch = branches[0] ?? null;
+  const allowed = staff?.role === "BRANCH_ADMIN" || staff?.role === "SYSTEM_ADMIN";
+  if (!allowed) return <ComingSoonSection labelKey="settings.sections.alerts" />;
+  return <AlertSLASection branch={branch} />;
 }
 
 interface SideSectionNavProps {
