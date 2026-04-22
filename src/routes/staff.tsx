@@ -1,9 +1,9 @@
-import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, MoreHorizontal, Inbox, Edit, KeyRound, Unlock, UserX, UserCheck } from "lucide-react";
+import { Plus, MoreHorizontal, Inbox, Edit, KeyRound, Unlock, UserX, UserCheck, Eye } from "lucide-react";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
@@ -47,17 +47,26 @@ const STATUS_TONE: Record<StaffStatusEnum, "success" | "neutral" | "error"> = {
 function StaffManagementPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { logAction } = useAuditLog();
   const { branches } = useBranches();
-  const branchId = branches[0]?.id ?? null;
+  const defaultBranchId = branches[0]?.id ?? null;
   const { staff: currentStaff } = useCurrentStaff();
 
   const canCreate = currentStaff?.role === "SYSTEM_ADMIN" || currentStaff?.role === "BRANCH_ADMIN";
   const canManage = canCreate;
+  const isSystemAdmin = currentStaff?.role === "SYSTEM_ADMIN";
 
   const [roleFilter, setRoleFilter] = useState<StaffRoleEnum | "ALL">("ALL");
   const [statusFilter, setStatusFilter] = useState<StaffStatusEnum | "ALL">("ALL");
   const [search, setSearch] = useState("");
+  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(defaultBranchId);
+
+  useEffect(() => {
+    if (selectedBranchId === null && defaultBranchId && !isSystemAdmin) {
+      setSelectedBranchId(defaultBranchId);
+    }
+  }, [defaultBranchId, isSystemAdmin, selectedBranchId]);
 
   const [newOpen, setNewOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<StaffRow | null>(null);
@@ -65,7 +74,7 @@ function StaffManagementPage() {
   const [unlockStaff, setUnlockStaff] = useState<StaffRow | null>(null);
 
   const { staff, isLoading } = useStaff({
-    branchId,
+    branchId: selectedBranchId,
     role: roleFilter,
     status: statusFilter,
   });
@@ -191,6 +200,7 @@ function StaffManagementPage() {
               </button>
             }
             items={[
+              { label: <Inline gap={2}><Eye size={14} />{t("staff.viewDetail")}</Inline>, onSelect: () => navigate({ to: "/staff/$id", params: { id: row.id } }) },
               { label: <Inline gap={2}><Edit size={14} />{t("actions.edit")}</Inline>, onSelect: () => setEditingStaff(row) },
               ...(canManage ? [{
                 label: <Inline gap={2}><KeyRound size={14} />{row.pin_hash ? t("staff.resetPin") : t("staff.setPin")}</Inline>,
@@ -242,6 +252,21 @@ function StaffManagementPage() {
               onClear={() => setSearch("")}
             />
           </div>
+          {isSystemAdmin && branches.length > 1 && (
+            <div style={{ width: 240 }}>
+              <Select
+                value={selectedBranchId ?? ""}
+                onChange={(e) => {
+                  const v = (e.target as HTMLSelectElement).value;
+                  setSelectedBranchId(v || null);
+                }}
+                options={[
+                  { value: "", label: t("staff.branchesAll") },
+                  ...branches.map((b) => ({ value: b.id, label: b.name_zh || b.name })),
+                ]}
+              />
+            </div>
+          )}
           <div style={{ width: 200 }}>
             <Select
               value={roleFilter}
@@ -267,7 +292,7 @@ function StaffManagementPage() {
             columns={columns}
             rows={filtered}
             rowKey={(r) => r.id}
-            onRowClick={(r) => setEditingStaff(r)}
+            onRowClick={(r) => navigate({ to: "/staff/$id", params: { id: r.id } })}
             empty={
               <EmptyState
                 icon={<Inbox size={40} />}

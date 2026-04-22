@@ -1064,9 +1064,28 @@
     "tabs": {
       "basic": "Basic Info",
       "branches": "Branch Access",
-      "pin": "PIN"
+      "pin": "Shift PIN",
+      "workload": "Workload"
     },
     "pinFunctionMissing": "PIN setup requires staff-set-pin Edge Function deployment",
-    "systemAdminAllBranches": "System admins can access all branches"
+    "systemAdminAllBranches": "System admins can access all branches",
+    "workloadTitle": "Workload (Last 7 Days)",
+    "tasksCompleted": "Tasks Completed",
+    "tasksPending": "Tasks Pending",
+    "incidentsReported": "Incidents Reported",
+    "auditActivity": "System Activity",
+    "noWorkload": "No workload activity in the last 7 days",
+    "viewDetail": "View Detail",
+    "workloadDrawerHint": "View full workload on the staff detail page",
+    "columns": {
+      "resident": "Resident",
+      "task": "Task",
+      "due": "Due",
+      "drug": "Drug",
+      "time": "Time",
+      "incidentRef": "Incident Ref",
+      "type": "Type",
+      "severity": "Severity"
+    }
   }
 }

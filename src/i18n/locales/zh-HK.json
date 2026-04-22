@@ -1064,9 +1064,28 @@
     "tabs": {
       "basic": "基本資料",
       "branches": "分院權限",
-      "pin": "PIN 管理"
+      "pin": "換班 PIN",
+      "workload": "工作量"
     },
     "pinFunctionMissing": "PIN 設定功能需要部署 staff-set-pin Edge Function",
-    "systemAdminAllBranches": "系統管理員可存取所有分院"
+    "systemAdminAllBranches": "系統管理員可存取所有分院",
+    "workloadTitle": "工作量（最近 7 天）",
+    "tasksCompleted": "已完成任務",
+    "tasksPending": "待處理任務",
+    "incidentsReported": "事故報告",
+    "auditActivity": "系統活動",
+    "noWorkload": "最近 7 天沒有工作記錄",
+    "viewDetail": "查看詳情",
+    "workloadDrawerHint": "此功能完整版請在員工詳情頁查看",
+    "columns": {
+      "resident": "院友",
+      "task": "任務",
+      "due": "到期",
+      "drug": "藥物",
+      "time": "時間",
+      "incidentRef": "事故編號",
+      "type": "類別",
+      "severity": "嚴重程度"
+    }
   }
 }

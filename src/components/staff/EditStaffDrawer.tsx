@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -35,13 +36,14 @@ export function EditStaffDrawer({
 }: EditStaffDrawerProps) {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { logAction } = useAuditLog();
   const { branches } = useBranches();
   const { staff: currentStaff } = useCurrentStaff();
 
   const canManage = currentStaff?.role === "SYSTEM_ADMIN" || currentStaff?.role === "BRANCH_ADMIN";
 
-  const [tab, setTab] = useState<"basic" | "branches" | "pin">("basic");
+  const [tab, setTab] = useState<"basic" | "branches" | "pin" | "workload">("basic");
   const [nameZh, setNameZh] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -203,6 +205,7 @@ export function EditStaffDrawer({
               { value: "basic", label: t("staff.tabs.basic") },
               { value: "branches", label: t("staff.tabs.branches") },
               { value: "pin", label: t("staff.tabs.pin") },
+              { value: "workload", label: t("staff.tabs.workload") },
             ]}
           />
 
@@ -279,6 +282,23 @@ export function EditStaffDrawer({
                   </Button>
                 )}
               </Inline>
+            </Stack>
+          )}
+
+          {tab === "workload" && (
+            <Stack gap={3}>
+              <Alert severity="info" description={t("staff.workloadDrawerHint")} />
+              <div>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    onClose();
+                    navigate({ to: "/staff/$id", params: { id: staffMember.id } });
+                  }}
+                >
+                  {t("staff.viewDetail")}
+                </Button>
+              </div>
             </Stack>
           )}
         </Stack>
