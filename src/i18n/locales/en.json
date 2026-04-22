@@ -887,6 +887,20 @@
     "active": "Active",
     "history": "History",
     "overviewTitle": "eMAR Overview",
-    "overviewSoon": "Branch-wide eMAR dashboard coming in S6-L3"
+    "overviewSoon": "Branch-wide eMAR dashboard coming in S6-L3",
+    "step1Barcode": "Step 1: Scan drug barcode",
+    "step2PIN": "Step 2: Enter shift PIN",
+    "step3Confirm": "Step 3: Confirm administration",
+    "barcodeScanning": "Scanning...",
+    "barcodeSkip": "Skip barcode (no package barcode)",
+    "pinClear": "Clear",
+    "adminConfirmTitle": "Confirm Administration",
+    "adminConfirmDrug": "Drug",
+    "adminConfirmDose": "Dose",
+    "adminConfirmResident": "Resident",
+    "adminConfirmTime": "Administration time",
+    "prnOutcomeLabel": "PRN outcome notes (optional)",
+    "supervisorOverrideLabel": "Supervisor override (when PIN locked)",
+    "adminFinalise": "Finalise Administration"
   }
 }
