@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@/i18n";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/AuthContext";
+import { NotificationBell } from "@/components/alerts/NotificationBell";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +75,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Outlet />
+        <NotificationBell />
       </AuthProvider>
     </QueryClientProvider>
   );
