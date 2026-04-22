@@ -8,7 +8,7 @@ import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
   Stack, Inline, Card, PageHeader, FormField, Select, DateField,
-  Table, Badge, Button, EmptyState, Skeleton, Text, type Column,
+  Table, Badge, Button, EmptyState, Skeleton, Text, Alert, type Column,
 } from "@/components/hms";
 import { useBranches } from "@/hooks/useBranches";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
@@ -88,6 +88,7 @@ interface IncRow {
 /* Section wrapper */
 function ReportSection({
   icon, title, desc, swdNote, summary, table, isLoading, hasFetched, rowCount, onExport,
+  isExporting, errorMessage,
 }: {
   icon: React.ReactNode;
   title: string;
@@ -99,6 +100,8 @@ function ReportSection({
   hasFetched: boolean;
   rowCount: number;
   onExport: () => void;
+  isExporting: boolean;
+  errorMessage?: string | null;
 }) {
   const { t } = useTranslation();
   return (
@@ -120,10 +123,20 @@ function ReportSection({
               <Text size="sm" color="secondary">{desc}</Text>
             </Stack>
           </Inline>
-          <Button variant="soft" size="compact" onClick={onExport}>{t("reports.export")}</Button>
+          <Button
+            variant="soft"
+            size="compact"
+            loading={isExporting}
+            disabled={isExporting}
+            onClick={onExport}
+          >
+            {isExporting ? t("reports.exporting") : t("reports.export")}
+          </Button>
         </Inline>
 
-        {!hasFetched ? (
+        {errorMessage ? (
+          <Alert severity="error" title={errorMessage} />
+        ) : !hasFetched ? (
           <EmptyState icon={<Inbox size={36} />} title={t("reports.generate")} />
         ) : isLoading ? (
           <Stack gap={2}>
