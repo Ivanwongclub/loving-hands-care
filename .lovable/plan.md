@@ -1,42 +1,34 @@
 
 
-## Sidebar Updates — Logo, Centered Title, Collapse
+## Sidebar Refinements — Login Logo + Floating Collapse Toggle
 
-Update `src/components/shells/AdminDesktopShell.tsx` to refine the sidebar header and add collapse functionality.
+Update `src/components/shells/AdminDesktopShell.tsx` only.
 
-### Changes
+### 1. Use the existing login-page logo
+- Replace the import `@/assets/logo.png` with `@/assets/helping-hand-logo.webp` (same asset used on `/login`).
+- Render at ~48px tall, centered, above the "HMS" wordmark.
+- Do NOT generate or create a new logo asset.
 
-**1. Header (top of sidebar)**
-- Add logo image above the "HMS" wordmark
-- Center-align both logo and "HMS" text
-- Remove the "HMS 伸手助人協會" subtitle line
-- When collapsed: show only the centered "HMS" text logo (no image, no subtitle)
+### 2. Replace the collapse toggle with a floating, enterprise-grade control
+- Remove the current `PanelLeftClose` / `PanelLeftOpen` button from inside the sidebar header.
+- Add a new circular floating toggle button positioned near the **bottom** of the sidebar's right edge, half-overlapping outside the sidebar (classic enterprise pattern, e.g. Notion / Linear / Vercel).
+- Placement (absolute positioning on the `<aside>`):
+  - `position: absolute; bottom: 96px; right: -12px;` (half of the 24px button sits outside the sidebar)
+  - `width: 24px; height: 24px;` perfectly circular
+  - Background: `var(--bg-surface)`, border: `1px solid var(--border-subtle)`, subtle shadow `0 2px 6px rgba(0,0,0,0.08)`
+  - Hover: background `var(--bg-hover-subtle)`, border `var(--border-default)`
+  - Icon: `ChevronLeft` (expanded) / `ChevronRight` (collapsed) from lucide at size 14, color `var(--text-secondary)`
+  - `z-index` above sidebar content; `border-radius: 50%`
+  - Smooth icon rotation/swap on toggle
 
-**2. Collapse functionality**
-- Add local `collapsed` state (`useState<boolean>`)
-- Add a toggle button (chevron icon, lucide `PanelLeftClose` / `PanelLeftOpen`) pinned at the top-right corner of the sidebar header
-- When collapsed:
-  - Sidebar width shrinks from `var(--sidebar-width)` to `64px` (icon-only mode)
-  - Nav items hide their text labels — show icons only, centered
-  - Section title labels (`OPERATIONS`, `MANAGEMENT`, `SYSTEM`) hide
-  - Branch ContextSwitcher hides
-  - User chip at the bottom shows only the avatar (centered), name/role/sign-out hidden — sign-out becomes a small icon button below avatar
-  - Top bar `left` offset switches to `64px`
-  - Main content `margin-left` switches to `64px`
-- Smooth width transition using CSS `transition: width var(--duration-normal)`
-
-**3. Layout adjustments**
-- Replace inline `width: var(--sidebar-width)` with a dynamic value driven by `collapsed` state on the `<aside>`, top `<header>`, and `<main>`
-- Keep all existing nav items, sections, and behavior intact (including the external `/attendance/kiosk` button)
-- Logo image: use a placeholder path `/logo.png` (existing public asset convention) — if no asset exists, render a simple SVG circle/monogram placeholder so build doesn't break
+### 3. Keep everything else from the previous turn
+- Collapsed width `64px`, expanded `var(--sidebar-width)`, transition preserved
+- All collapse behaviors (hidden labels, hidden section titles, hidden ContextSwitcher, avatar-only user chip) unchanged
+- Top bar `left` and main `marginLeft` continue to track sidebar width
 
 ### Files Touched
-
-- `src/components/shells/AdminDesktopShell.tsx` (only file changed)
+- `src/components/shells/AdminDesktopShell.tsx` (only)
 
 ### Out of Scope
-
-- No changes to tokens, i18n keys, hooks, shells/ structure beyond this single shell file
-- No new routes or backend changes
-- Collapsed state is local (not persisted) — can persist to localStorage in a follow-up if desired
+- No new assets, no i18n changes, no other files modified
 
