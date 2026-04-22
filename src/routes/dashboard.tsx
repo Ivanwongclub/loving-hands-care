@@ -27,9 +27,8 @@ interface TaskRow {
 
 function DashboardPage() {
   const { t } = useTranslation();
-  const DEMO_BRANCH_ID = '10000000-0000-0000-0000-000000000001'; // DEMO ONLY — remove before production
   const { branches } = useBranches();
-  const branchId = branches.find(b => b.id === DEMO_BRANCH_ID)?.id ?? branches[0]?.id ?? null;
+  const branchId = branches[0]?.id ?? null;
   const { residents } = useResidents({ branchId });
   const { tasks: realTasks } = useTasks({ branchId });
   const { alerts } = useAlerts({ branchId });
