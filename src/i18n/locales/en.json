@@ -572,6 +572,9 @@
   },
   "vitals": {
     "title": "Vitals",
+    "dashboardTitle": "Vitals Overview",
+    "recentAbnormal": "Recent Abnormal Readings",
+    "noRecentAbnormal": "No recent abnormal readings",
     "record": "Record Vitals",
     "history": "History",
     "thresholds": "Normal Ranges",
@@ -675,6 +678,24 @@
     "title": "Incidents",
     "overviewTitle": "Incidents Overview",
     "overviewSoon": "Branch-wide incidents dashboard coming in S5-L3",
+    "dashboardTitle": "Incidents Overview",
+    "openCount": "Open",
+    "criticalCount": "Critical",
+    "thisMonth": "This Month",
+    "underReviewCount": "Under Review",
+    "searchPlaceholder": "Search description or resident…",
+    "allTypes": "All Types",
+    "allStatuses": "All Statuses",
+    "columns": {
+      "ref": "Ref",
+      "type": "Type",
+      "severity": "Severity",
+      "resident": "Resident",
+      "occurredAt": "Occurred At",
+      "status": "Status",
+      "reporter": "Reporter",
+      "actions": "Actions"
+    },
     "new": "New Incident",
     "list": "Incidents",
     "detail": "Incident Detail",
@@ -729,5 +750,47 @@
       "details": "Details",
       "followUps": "Follow-ups"
     }
+  },
+  "alerts": {
+    "title": "Alerts",
+    "open": "Open Alerts",
+    "acknowledge": "Acknowledge",
+    "acknowledged": "Acknowledged",
+    "resolve": "Mark Resolved",
+    "resolved": "Resolved",
+    "dismiss": "Dismiss",
+    "view": "View",
+    "filterStatus": "Status",
+    "allStatuses": "All",
+    "residentBanner_one": "This resident has {{count}} open alert",
+    "residentBanner_other": "This resident has {{count}} open alerts",
+    "type": {
+      "VITALS_BREACH": "Vitals out of range"
+    },
+    "source": {
+      "MANUAL": "Manual",
+      "VITALS": "Vitals",
+      "INCIDENT": "Incident",
+      "SYSTEM": "System",
+      "IOT": "IoT Device"
+    },
+    "severity": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CRITICAL": "Critical"
+    },
+    "status": {
+      "OPEN": "Open",
+      "ACKNOWLEDGED": "Acknowledged",
+      "ASSIGNED": "Assigned",
+      "RESOLVED": "Resolved",
+      "DISMISSED": "Dismissed"
+    },
+    "noAlerts": "No open alerts",
+    "vitalsBreachAlert": "Vitals abnormal alert created",
+    "acknowledgeSuccess": "Alert acknowledged",
+    "resolveSuccess": "Alert resolved",
+    "dismissSuccess": "Alert dismissed"
   }
 }

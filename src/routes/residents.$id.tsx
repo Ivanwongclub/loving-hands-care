@@ -18,6 +18,7 @@ import { TasksTab } from "@/components/tasks/TasksTab";
 import { VitalsTab } from "@/components/vitals/VitalsTab";
 import { WoundsTab } from "@/components/wounds/WoundsTab";
 import { IncidentsTab } from "@/components/incidents/IncidentsTab";
+import { AlertsTab } from "@/components/alerts/AlertsTab";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
@@ -100,8 +101,9 @@ function ResidentDetailPage() {
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [bedHistory, setBedHistory] = useState<BedAssignment[]>([]);
   const [activityLog, setActivityLog] = useState<AuditLogRow[]>([]);
+  const [openAlertCount, setOpenAlertCount] = useState(0);
 
-  const [tab, setTab] = useState<"profile" | "contacts" | "documents" | "bed" | "activity" | "vitals" | "wounds" | "incidents" | "icp" | "tasks">("profile");
+  const [tab, setTab] = useState<"profile" | "alerts" | "contacts" | "documents" | "bed" | "activity" | "vitals" | "wounds" | "incidents" | "icp" | "tasks">("profile");
   const [editMode, setEditMode] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [dischargeOpen, setDischargeOpen] = useState(false);
@@ -165,12 +167,23 @@ function ResidentDetailPage() {
     if (!error) setActivityLog((data ?? []) as unknown as AuditLogRow[]);
   };
 
+  const fetchOpenAlertCount = async () => {
+    const { data, error } = await supabase
+      .from("alerts")
+      .select("id")
+      .eq("resident_id", id)
+      .eq("status", "OPEN")
+      .limit(50);
+    if (!error) setOpenAlertCount((data ?? []).length);
+  };
+
   useEffect(() => {
     void fetchResident();
     void fetchContacts();
     void fetchDocuments();
     void fetchBedHistory();
     void fetchActivity();
+    void fetchOpenAlertCount();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -229,6 +242,20 @@ function ResidentDetailPage() {
             onDischarge={() => setDischargeOpen(true)}
           />
 
+          {openAlertCount > 0 && (
+            <div>
+              <Alert
+                severity="warning"
+                description={t("alerts.residentBanner", { count: openAlertCount })}
+              />
+              <div style={{ marginTop: 8 }}>
+                <Button variant="ghost" size="compact" onClick={() => setTab("alerts")}>
+                  {t("alerts.view")}
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div>
             <Tabs
               style="line"
@@ -236,6 +263,7 @@ function ResidentDetailPage() {
               onChange={(v) => setTab(v as typeof tab)}
               items={[
                 { value: "profile", label: t("residents.profile") },
+                { value: "alerts", label: t("alerts.title") },
                 { value: "contacts", label: t("residents.contacts") },
                 { value: "documents", label: t("residents.documents") },
                 { value: "bed", label: t("residents.bedHistory") },
@@ -256,6 +284,14 @@ function ResidentDetailPage() {
               editMode={editMode}
               setEditMode={setEditMode}
               onSaved={fetchResident}
+              logAction={logAction}
+            />
+          )}
+          {tab === "alerts" && (
+            <AlertsTab
+              residentId={id}
+              branchId={resident.branch_id}
+              staffId={staff?.id ?? null}
               logAction={logAction}
             />
           )}

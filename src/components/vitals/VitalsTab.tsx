@@ -155,6 +155,53 @@ export function VitalsTab({ residentId, branchId, staffId, logAction }: VitalsTa
         branch_id: branchId,
         after_state: { readings: form, is_abnormal: isAbnormal } as Record<string, unknown>,
       });
+
+      if (isAbnormal) {
+        const abnormalReadings = VITAL_FIELDS
+          .filter((f) => isOutOfRange(form[f.key], thresholds[f.key]))
+          .map((f) => f.key);
+
+        const alertInsert: TablesInsert<"alerts"> = {
+          branch_id: branchId,
+          resident_id: residentId,
+          source: "VITALS",
+          source_ref_id: data.id,
+          source_ref_table: "vitals",
+          type: "VITALS_BREACH",
+          severity: "HIGH",
+          status: "OPEN",
+          triggered_at: new Date().toISOString(),
+        };
+        const { data: alertData, error: alertErr } = await supabase
+          .from("alerts")
+          .insert(alertInsert)
+          .select()
+          .single();
+        if (alertErr) {
+          // eslint-disable-next-line no-console
+          console.error("[alerts] insert failed:", alertErr.message);
+        } else {
+          await supabase
+            .from("vitals")
+            .update({ alert_triggered: true })
+            .eq("id", data.id);
+          await logAction({
+            action: "ALERT_CREATED",
+            entity_type: "alerts",
+            entity_id: alertData.id,
+            branch_id: branchId,
+            metadata: {
+              source: "VITALS",
+              abnormal_readings: abnormalReadings,
+              resident_id: residentId,
+            },
+          });
+          void qc.invalidateQueries({ queryKey: ["alerts", branchId] });
+          void qc.invalidateQueries({ queryKey: ["alerts"] });
+          toast.success(t("alerts.vitalsBreachAlert"));
+        }
+      }
+
       toast.success(t("vitals.recordSuccess"));
       if (isAbnormal) setShowAbnormalWarning(true);
       void qc.invalidateQueries({ queryKey: ["vitals", residentId] });
