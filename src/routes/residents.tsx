@@ -77,9 +77,12 @@ function ResidentsListPage() {
 function ResidentsHeader() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { branches } = useBranches();
+  const branchName = branches[0]?.name_zh ?? "";
   return (
     <PageHeader
       title={t("residents.title")}
+      description={branchName}
       actions={
         <Button
           variant="primary"

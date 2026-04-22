@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
+import { useBranches } from "@/hooks/useBranches";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/emar")({
@@ -67,6 +68,8 @@ function EMARDashboardPage() {
 
 function DashboardBody({ branchId }: { branchId: string }) {
   const { t } = useTranslation();
+  const { branches } = useBranches();
+  const branchName = branches[0]?.name_zh ?? "";
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [date, setDate] = useState<string>(todayISO());
@@ -178,6 +181,7 @@ function DashboardBody({ branchId }: { branchId: string }) {
     <Stack gap={4}>
       <PageHeader
         title={t("emar.dashboardTitle")}
+        description={branchName}
         actions={
           <div style={{ width: 180 }}>
             <FormField label={t("emar.selectDate")}>

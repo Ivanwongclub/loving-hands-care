@@ -204,7 +204,7 @@ function AlertsDashboardPage() {
     <ProtectedRoute>
       <AdminDesktopShell pageTitle={t("alerts.dashboard")}>
         <Stack gap={4}>
-          <PageHeader title={t("alerts.dashboard")} />
+          <PageHeader title={t("alerts.dashboard")} description={branch?.name_zh ?? ""} />
 
           {criticalOpen > 0 && (
             <HmsAlert
