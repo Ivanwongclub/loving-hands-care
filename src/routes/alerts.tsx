@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { BellRing, History } from "lucide-react";
@@ -48,6 +48,20 @@ const STATUS_TONE: Record<AlertStatus, "warning" | "info" | "success" | "neutral
   RESOLVED: "success",
   DISMISSED: "neutral",
 };
+
+function severityBorder(sev: AlertSeverity): string {
+  switch (sev) {
+    case "CRITICAL":
+      return "4px solid var(--status-error-accent)";
+    case "HIGH":
+      return "4px solid var(--status-warning-accent)";
+    case "MEDIUM":
+      return "4px solid color-mix(in oklab, var(--status-warning-accent) 60%, transparent)";
+    case "LOW":
+    default:
+      return "4px solid var(--border-subtle)";
+  }
+}
 
 function AlertsDashboardPage() {
   const { t } = useTranslation();
