@@ -284,6 +284,23 @@ export function EditStaffDrawer({
               </Inline>
             </Stack>
           )}
+
+          {tab === "workload" && (
+            <Stack gap={3}>
+              <Alert severity="info" description={t("staff.workloadDrawerHint")} />
+              <div>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    onClose();
+                    navigate({ to: "/staff/$id", params: { id: staffMember.id } });
+                  }}
+                >
+                  {t("staff.viewDetail")}
+                </Button>
+              </div>
+            </Stack>
+          )}
         </Stack>
       </Drawer>
 
