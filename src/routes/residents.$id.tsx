@@ -349,6 +349,8 @@ function ResidentDetailPage() {
               branchId={resident.branch_id}
               staffId={staff?.id ?? null}
               staffRole={staff?.role ?? null}
+              residentNameZh={resident.name_zh}
+              residentName={resident.name}
               logAction={logAction}
             />
           )}

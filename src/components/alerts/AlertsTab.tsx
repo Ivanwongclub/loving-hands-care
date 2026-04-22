@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
+import { History } from "lucide-react";
 import { toast } from "sonner";
 import {
   Card, Stack, Inline, Text, Heading, Button, Badge, EmptyState, Skeleton, Select, FormField,
@@ -9,6 +10,10 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Enums } from "@/integrations/supabase/types";
 import { useAlerts, type AlertRow } from "@/hooks/useAlerts";
 import type { useAuditLog } from "@/hooks/useAuditLog";
+import { EscalateModal } from "./EscalateModal";
+import { ResolveModal } from "./ResolveModal";
+import { AssignModal } from "./AssignModal";
+import { EscalationHistoryDrawer } from "./EscalationHistoryDrawer";
 
 type AlertSource = Enums<"alert_source">;
 type AlertSeverity = Enums<"alert_severity">;
@@ -56,6 +61,10 @@ export function AlertsTab({ residentId, branchId, staffId, logAction }: AlertsTa
   const qc = useQueryClient();
 
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [escalateAlert, setEscalateAlert] = useState<AlertRow | null>(null);
+  const [resolveAlert, setResolveAlert] = useState<AlertRow | null>(null);
+  const [assignAlert, setAssignAlert] = useState<AlertRow | null>(null);
+  const [historyId, setHistoryId] = useState<string | null>(null);
   const { alerts, isLoading } = useAlerts({ branchId, status: "ALL", page: 1, pageSize: 200 });
 
   const scoped = useMemo(
@@ -188,9 +197,17 @@ export function AlertsTab({ residentId, branchId, staffId, logAction }: AlertsTa
                 <Text size="sm" color="secondary">{formatDateTime(a.triggered_at)}</Text>
 
                 {a.status === "OPEN" && staffId && (
-                  <Inline gap={2} justify="end">
+                  <Inline gap={2} justify="end" wrap>
+                    {(a.escalation_level ?? 0) > 0 && (
+                      <Button variant="ghost" size="compact" leadingIcon={<History size={14} />} onClick={() => setHistoryId(a.id)}>
+                        {t("alerts.viewHistory")}
+                      </Button>
+                    )}
                     <Button variant="ghost" size="compact" onClick={() => handleDismiss(a)}>
                       {t("alerts.dismiss")}
+                    </Button>
+                    <Button variant="soft" size="compact" onClick={() => setEscalateAlert(a)}>
+                      {t("alerts.escalate")}
                     </Button>
                     <Button variant="primary" size="compact" onClick={() => handleAcknowledge(a)}>
                       {t("alerts.acknowledge")}
@@ -198,8 +215,28 @@ export function AlertsTab({ residentId, branchId, staffId, logAction }: AlertsTa
                   </Inline>
                 )}
                 {a.status === "ACKNOWLEDGED" && staffId && (
-                  <Inline gap={2} justify="end">
-                    <Button variant="primary" size="compact" onClick={() => handleResolve(a)}>
+                  <Inline gap={2} justify="end" wrap>
+                    {(a.escalation_level ?? 0) > 0 && (
+                      <Button variant="ghost" size="compact" leadingIcon={<History size={14} />} onClick={() => setHistoryId(a.id)}>
+                        {t("alerts.viewHistory")}
+                      </Button>
+                    )}
+                    <Button variant="soft" size="compact" onClick={() => setEscalateAlert(a)}>
+                      {t("alerts.escalate")}
+                    </Button>
+                    <Button variant="soft" size="compact" onClick={() => setResolveAlert(a)}>
+                      {t("alerts.resolve")}
+                    </Button>
+                  </Inline>
+                )}
+                {a.status === "ASSIGNED" && staffId && (
+                  <Inline gap={2} justify="end" wrap>
+                    {(a.escalation_level ?? 0) > 0 && (
+                      <Button variant="ghost" size="compact" leadingIcon={<History size={14} />} onClick={() => setHistoryId(a.id)}>
+                        {t("alerts.viewHistory")}
+                      </Button>
+                    )}
+                    <Button variant="soft" size="compact" onClick={() => setResolveAlert(a)}>
                       {t("alerts.resolve")}
                     </Button>
                   </Inline>
@@ -218,6 +255,36 @@ export function AlertsTab({ residentId, branchId, staffId, logAction }: AlertsTa
           ))}
         </Stack>
       )}
+
+      <EscalateModal
+        open={!!escalateAlert}
+        onClose={() => setEscalateAlert(null)}
+        alert={escalateAlert}
+        branchId={branchId}
+        staffId={staffId}
+        logAction={logAction}
+      />
+      <ResolveModal
+        open={!!resolveAlert}
+        onClose={() => setResolveAlert(null)}
+        alert={resolveAlert}
+        branchId={branchId}
+        staffId={staffId}
+        logAction={logAction}
+      />
+      <AssignModal
+        open={!!assignAlert}
+        onClose={() => setAssignAlert(null)}
+        alert={assignAlert}
+        branchId={branchId}
+        staffId={staffId}
+        logAction={logAction}
+      />
+      <EscalationHistoryDrawer
+        open={!!historyId}
+        onClose={() => setHistoryId(null)}
+        alertId={historyId}
+      />
     </Stack>
   );
 }

@@ -669,6 +669,7 @@ export type Database = {
         Row: {
           administered_at: string | null
           administered_by: string | null
+          alert_triggered: boolean
           barcode_scanned: string | null
           barcode_verified: boolean
           branch_id: string
@@ -690,6 +691,7 @@ export type Database = {
         Insert: {
           administered_at?: string | null
           administered_by?: string | null
+          alert_triggered?: boolean
           barcode_scanned?: string | null
           barcode_verified?: boolean
           branch_id: string
@@ -711,6 +713,7 @@ export type Database = {
         Update: {
           administered_at?: string | null
           administered_by?: string | null
+          alert_triggered?: boolean
           barcode_scanned?: string | null
           barcode_verified?: boolean
           branch_id?: string

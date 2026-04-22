@@ -1,8 +1,12 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import "@/i18n";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/AuthContext";
+import { NotificationBell } from "@/components/alerts/NotificationBell";
+
+const queryClient = new QueryClient();
 
 function NotFoundComponent() {
   return (
@@ -68,8 +72,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   return (
-    <AuthProvider>
-      <Outlet />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Outlet />
+        <NotificationBell />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

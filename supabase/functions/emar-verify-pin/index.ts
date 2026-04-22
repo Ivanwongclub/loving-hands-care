@@ -8,6 +8,7 @@ interface VerifyPINRequest {
   emar_record_id: string
 }
 
+<<<<<<< HEAD
 interface VerifyPINResponse {
   success: boolean
   locked: boolean
@@ -25,11 +26,15 @@ interface StaffPINRecord {
 
 const MAX_ATTEMPTS = 3
 const UPDATE_RETRY_LIMIT = 5
+=======
+const MAX_ATTEMPTS = 3
+>>>>>>> eff54bf6e363d43972e35b7f3e236ce87f60eeb0
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+<<<<<<< HEAD
 function jsonResponse(body: VerifyPINResponse, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -102,6 +107,8 @@ async function incrementFailureCount(
   throw new Error('Unable to update PIN failure count safely')
 }
 
+=======
+>>>>>>> eff54bf6e363d43972e35b7f3e236ce87f60eeb0
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: CORS_HEADERS })
@@ -117,6 +124,7 @@ serve(async (req: Request) => {
     const { staff_id, pin, emar_record_id } = body
 
     if (!staff_id || !pin || !emar_record_id) {
+<<<<<<< HEAD
       return jsonResponse({ success: false, locked: false, message: 'Missing required fields' }, 400)
     }
 
@@ -131,10 +139,46 @@ serve(async (req: Request) => {
 
     if (staff.pin_locked_at) {
       return jsonResponse({ success: false, locked: true, message: 'PIN locked - contact supervisor' })
+=======
+      return new Response(
+        JSON.stringify({ success: false, locked: false, message: 'Missing required fields' }),
+        { status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!/^\d{4}$/.test(pin)) {
+      return new Response(
+        JSON.stringify({ success: false, locked: false, message: 'Invalid PIN format' }),
+        { status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const { data: staff, error: staffErr } = await supabase
+      .from('staff')
+      .select('id, pin_hash, pin_failed_attempts, pin_locked_at, status, role')
+      .eq('id', staff_id)
+      .eq('status', 'ACTIVE')
+      .is('deleted_at', null)
+      .single()
+
+    if (staffErr || !staff) {
+      return new Response(
+        JSON.stringify({ success: false, locked: false, message: 'Staff not found' }),
+        { status: 404, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (staff.pin_locked_at) {
+      return new Response(
+        JSON.stringify({ success: false, locked: true, message: 'PIN locked — contact supervisor' }),
+        { status: 200, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+      )
+>>>>>>> eff54bf6e363d43972e35b7f3e236ce87f60eeb0
     }
 
     const clinicalRoles = ['SENIOR_NURSE', 'NURSE', 'BRANCH_ADMIN', 'SYSTEM_ADMIN']
     if (!clinicalRoles.includes(staff.role)) {
+<<<<<<< HEAD
       return jsonResponse({
         success: false,
         locked: false,
@@ -148,6 +192,19 @@ serve(async (req: Request) => {
         locked: false,
         message: 'PIN not configured - contact administrator',
       })
+=======
+      return new Response(
+        JSON.stringify({ success: false, locked: false, message: 'Insufficient role' }),
+        { status: 403, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!staff.pin_hash) {
+      return new Response(
+        JSON.stringify({ success: false, locked: false, message: 'PIN not configured' }),
+        { status: 200, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+      )
+>>>>>>> eff54bf6e363d43972e35b7f3e236ce87f60eeb0
     }
 
     const pinValid = await bcrypt.compare(pin, staff.pin_hash)
@@ -163,6 +220,7 @@ serve(async (req: Request) => {
         .update({ shift_pin_verified: true })
         .eq('id', emar_record_id)
 
+<<<<<<< HEAD
       console.log(`[emar-verify-pin] PIN verified for staff ${staff_id}, emar_record ${emar_record_id}`)
       return jsonResponse({ success: true, locked: false })
     }
@@ -180,5 +238,40 @@ serve(async (req: Request) => {
   } catch (err) {
     console.error('[emar-verify-pin] Unexpected error:', (err as Error).message)
     return jsonResponse({ success: false, locked: false, message: 'Internal server error' }, 500)
+=======
+      return new Response(
+        JSON.stringify({ success: true, locked: false }),
+        { status: 200, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+      )
+    } else {
+      const newAttempts = (staff.pin_failed_attempts ?? 0) + 1
+      const shouldLock = newAttempts >= MAX_ATTEMPTS
+
+      await supabase
+        .from('staff')
+        .update({
+          pin_failed_attempts: newAttempts,
+          pin_locked_at: shouldLock ? new Date().toISOString() : null,
+        })
+        .eq('id', staff_id)
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          locked: shouldLock,
+          message: shouldLock
+            ? 'PIN locked after 3 failed attempts — contact supervisor'
+            : `Incorrect PIN (${newAttempts}/${MAX_ATTEMPTS} attempts)`,
+        }),
+        { status: 200, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+      )
+    }
+  } catch (err) {
+    console.error('[emar-verify-pin] Error:', (err as Error).message)
+    return new Response(
+      JSON.stringify({ success: false, locked: false, message: 'Internal server error' }),
+      { status: 500, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+    )
+>>>>>>> eff54bf6e363d43972e35b7f3e236ce87f60eeb0
   }
 })
