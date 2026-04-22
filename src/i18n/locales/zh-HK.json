@@ -885,8 +885,22 @@
     "administeredAt": "給藥時間",
     "selectDate": "選擇日期",
     "active": "生效中",
-    "history": "歷史",
+    "history": "歷史醫囑",
     "overviewTitle": "eMAR 總覽",
-    "overviewSoon": "分支層面的 eMAR 總覽將於 S6-L3 推出"
+    "overviewSoon": "院舍 eMAR 總覽將於 S6-L3 推出",
+    "step1Barcode": "第一步：掃描藥物條碼",
+    "step2PIN": "第二步：輸入換班 PIN",
+    "step3Confirm": "第三步：確認給藥",
+    "barcodeScanning": "正在掃描...",
+    "barcodeSkip": "跳過條碼（無包裝條碼）",
+    "pinClear": "清除",
+    "adminConfirmTitle": "確認給藥",
+    "adminConfirmDrug": "藥物",
+    "adminConfirmDose": "劑量",
+    "adminConfirmResident": "院友",
+    "adminConfirmTime": "給藥時間",
+    "prnOutcomeLabel": "PRN 效果備註（選填）",
+    "supervisorOverrideLabel": "督導員覆蓋（PIN 鎖定時）",
+    "adminFinalise": "確認給藥"
   }
 }
