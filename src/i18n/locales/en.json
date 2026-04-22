@@ -280,7 +280,9 @@
     "page": "Page {{current}} of {{total}}",
     "totalRecords": "{{count}} records",
     "summary": "Summary",
-    "insufficientPermissions": "Insufficient permissions"
+    "insufficientPermissions": "Insufficient permissions",
+    "exportAuditLog": "Export Audit Log",
+    "exportSuccess": "Audit log exported"
   },
   "reports": {
     "title": "Reports Center",
@@ -300,6 +302,8 @@
     "previewTitle": "Report Preview",
     "rowCount": "{{count}} records",
     "generating": "Loading data...",
+    "refreshPreview": "Refresh Preview",
+    "lastPreviewed": "Last previewed: {{time}}",
     "reportType": {
       "dcuAttendance": "DCU Attendance Records",
       "residentCensus": "Resident Census Report",

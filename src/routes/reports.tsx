@@ -8,7 +8,7 @@ import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
   Stack, Inline, Card, PageHeader, FormField, Select, DateField,
-  Table, Badge, Button, EmptyState, Skeleton, Text, type Column,
+  Table, Badge, Button, EmptyState, Skeleton, Text, Alert, type Column,
 } from "@/components/hms";
 import { useBranches } from "@/hooks/useBranches";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
@@ -88,6 +88,7 @@ interface IncRow {
 /* Section wrapper */
 function ReportSection({
   icon, title, desc, swdNote, summary, table, isLoading, hasFetched, rowCount, onExport,
+  isExporting, errorMessage,
 }: {
   icon: React.ReactNode;
   title: string;
@@ -99,6 +100,8 @@ function ReportSection({
   hasFetched: boolean;
   rowCount: number;
   onExport: () => void;
+  isExporting: boolean;
+  errorMessage?: string | null;
 }) {
   const { t } = useTranslation();
   return (
@@ -120,10 +123,20 @@ function ReportSection({
               <Text size="sm" color="secondary">{desc}</Text>
             </Stack>
           </Inline>
-          <Button variant="soft" size="compact" onClick={onExport}>{t("reports.export")}</Button>
+          <Button
+            variant="soft"
+            size="compact"
+            loading={isExporting}
+            disabled={isExporting}
+            onClick={onExport}
+          >
+            {isExporting ? t("reports.exporting") : t("reports.export")}
+          </Button>
         </Inline>
 
-        {!hasFetched ? (
+        {errorMessage ? (
+          <Alert severity="error" title={errorMessage} />
+        ) : !hasFetched ? (
           <EmptyState icon={<Inbox size={36} />} title={t("reports.generate")} />
         ) : isLoading ? (
           <Stack gap={2}>
@@ -176,6 +189,8 @@ function ReportsHubPage() {
   const [selectedBranch, setSelectedBranch] = useState<string>(branches[0]?.id ?? "");
   const [hasFetched, setHasFetched] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);
+  const [exporting, setExporting] = useState<string | null>(null);
+  const [lastPreviewTime, setLastPreviewTime] = useState<Date | null>(null);
 
   // When branches load, default-select first
   useMemo(() => {
@@ -389,8 +404,64 @@ function ReportsHubPage() {
   const onPreview = () => {
     setHasFetched(true);
     setFetchKey((k) => k + 1);
+    setLastPreviewTime(new Date());
   };
-  const onExport = () => toast.info(t("reports.exportComingSoon"));
+
+  type ReportType = "dcuAttendance" | "residentCensus" | "emarCompliance" | "incidentSummary";
+  const TITLES: Record<ReportType, string> = {
+    dcuAttendance: "日間護理出席記錄",
+    residentCensus: "院友人口統計報表",
+    emarCompliance: "電子用藥記錄合規報表",
+    incidentSummary: "事故報告摘要",
+  };
+
+  const handleExport = async (reportType: ReportType) => {
+    if (!branchId || !fromDate || !toDate) {
+      toast.error(t("reports.exportError"));
+      return;
+    }
+    setExporting(reportType);
+    try {
+      const { data, error } = await supabase.functions.invoke("report-generate", {
+        body: {
+          report_type: reportType,
+          branch_id: branchId,
+          from_date: fromDate,
+          to_date: toDate,
+        },
+      });
+      if (error) throw error;
+
+      // supabase-js returns the raw body for unknown content types — coerce to ArrayBuffer
+      let buf: ArrayBuffer;
+      if (data instanceof ArrayBuffer) {
+        buf = data;
+      } else if (data instanceof Blob) {
+        buf = await data.arrayBuffer();
+      } else if (data instanceof Uint8Array) {
+        buf = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
+      } else {
+        throw new Error("Unexpected response payload");
+      }
+
+      const blob = new Blob([buf], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${TITLES[reportType]}_${fromDate}_${toDate}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(t("reports.exportSuccess"));
+    } catch (err) {
+      toast.error(`${t("reports.exportError")}: ${(err as Error).message}`);
+    } finally {
+      setExporting(null);
+    }
+  };
 
   if (!allowed) {
     return (
@@ -442,7 +513,15 @@ function ReportsHubPage() {
                   </div>
                 )}
                 <Button variant="primary" onClick={onPreview}>{t("reports.generate")}</Button>
+                <Button variant="ghost" onClick={onPreview} disabled={!hasFetched}>{t("reports.refreshPreview")}</Button>
               </Inline>
+              {lastPreviewTime && (
+                <Text size="sm" color="tertiary">
+                  {t("reports.lastPreviewed", {
+                    time: `${pad(lastPreviewTime.getHours())}:${pad(lastPreviewTime.getMinutes())}:${pad(lastPreviewTime.getSeconds())}`,
+                  })}
+                </Text>
+              )}
             </Stack>
           </Card>
 
@@ -456,7 +535,9 @@ function ReportsHubPage() {
               isLoading={dcuQ.isLoading}
               hasFetched={hasFetched}
               rowCount={dcuQ.data?.length ?? 0}
-              onExport={onExport}
+              onExport={() => handleExport("dcuAttendance")}
+              isExporting={exporting === "dcuAttendance"}
+              errorMessage={dcuQ.error ? (dcuQ.error as Error).message : null}
               summary={
                 <Inline gap={2} wrap>
                   <StatPill label={t("reports.dcuAttendance.totalCheckins")} value={dcuStats.total} tone="info" />
@@ -479,7 +560,9 @@ function ReportsHubPage() {
               isLoading={censusQ.isLoading}
               hasFetched={hasFetched}
               rowCount={censusQ.data?.length ?? 0}
-              onExport={onExport}
+              onExport={() => handleExport("residentCensus")}
+              isExporting={exporting === "residentCensus"}
+              errorMessage={censusQ.error ? (censusQ.error as Error).message : null}
               summary={
                 <Inline gap={2} wrap>
                   <StatPill label={t("reports.residentCensus.totalResidents")} value={censusStats.total} tone="info" />
@@ -502,7 +585,9 @@ function ReportsHubPage() {
               isLoading={emarQ.isLoading}
               hasFetched={hasFetched}
               rowCount={emarQ.data?.length ?? 0}
-              onExport={onExport}
+              onExport={() => handleExport("emarCompliance")}
+              isExporting={exporting === "emarCompliance"}
+              errorMessage={emarQ.error ? (emarQ.error as Error).message : null}
               summary={
                 <Inline gap={2} wrap>
                   <StatPill label={t("reports.emarCompliance.complianceRate")} value={`${emarStats.rate}%`} tone={emarRateTone} />
@@ -525,7 +610,9 @@ function ReportsHubPage() {
               isLoading={incQ.isLoading}
               hasFetched={hasFetched}
               rowCount={incQ.data?.length ?? 0}
-              onExport={onExport}
+              onExport={() => handleExport("incidentSummary")}
+              isExporting={exporting === "incidentSummary"}
+              errorMessage={incQ.error ? (incQ.error as Error).message : null}
               summary={
                 <Inline gap={2} wrap>
                   <StatPill label={t("reports.incidentSummary.totalIncidents")} value={incStats.total} tone="info" />

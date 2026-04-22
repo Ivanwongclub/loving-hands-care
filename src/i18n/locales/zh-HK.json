@@ -280,7 +280,9 @@
     "page": "第 {{current}} 頁，共 {{total}} 頁",
     "totalRecords": "共 {{count}} 條記錄",
     "summary": "摘要",
-    "insufficientPermissions": "權限不足"
+    "insufficientPermissions": "權限不足",
+    "exportAuditLog": "匯出審計記錄",
+    "exportSuccess": "審計記錄已匯出"
   },
   "reports": {
     "title": "報表中心",
@@ -300,6 +302,8 @@
     "previewTitle": "報表預覽",
     "rowCount": "共 {{count}} 條記錄",
     "generating": "正在載入資料...",
+    "refreshPreview": "重新預覽",
+    "lastPreviewed": "最後預覽：{{time}}",
     "reportType": {
       "dcuAttendance": "日間護理出席記錄",
       "residentCensus": "院友人口統計報表",
