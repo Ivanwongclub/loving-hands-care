@@ -302,6 +302,8 @@
     "previewTitle": "Report Preview",
     "rowCount": "{{count}} records",
     "generating": "Loading data...",
+    "refreshPreview": "Refresh Preview",
+    "lastPreviewed": "Last previewed: {{time}}",
     "reportType": {
       "dcuAttendance": "DCU Attendance Records",
       "residentCensus": "Resident Census Report",
