@@ -18,6 +18,7 @@ import { TasksTab } from "@/components/tasks/TasksTab";
 import { VitalsTab } from "@/components/vitals/VitalsTab";
 import { WoundsTab } from "@/components/wounds/WoundsTab";
 import { IncidentsTab } from "@/components/incidents/IncidentsTab";
+import { AlertsTab } from "@/components/alerts/AlertsTab";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
@@ -100,8 +101,9 @@ function ResidentDetailPage() {
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [bedHistory, setBedHistory] = useState<BedAssignment[]>([]);
   const [activityLog, setActivityLog] = useState<AuditLogRow[]>([]);
+  const [openAlertCount, setOpenAlertCount] = useState(0);
 
-  const [tab, setTab] = useState<"profile" | "contacts" | "documents" | "bed" | "activity" | "vitals" | "wounds" | "incidents" | "icp" | "tasks">("profile");
+  const [tab, setTab] = useState<"profile" | "alerts" | "contacts" | "documents" | "bed" | "activity" | "vitals" | "wounds" | "incidents" | "icp" | "tasks">("profile");
   const [editMode, setEditMode] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [dischargeOpen, setDischargeOpen] = useState(false);
