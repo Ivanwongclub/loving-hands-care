@@ -189,6 +189,8 @@ function ReportsHubPage() {
   const [selectedBranch, setSelectedBranch] = useState<string>(branches[0]?.id ?? "");
   const [hasFetched, setHasFetched] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);
+  const [exporting, setExporting] = useState<string | null>(null);
+  const [lastPreviewTime, setLastPreviewTime] = useState<Date | null>(null);
 
   // When branches load, default-select first
   useMemo(() => {
@@ -402,8 +404,64 @@ function ReportsHubPage() {
   const onPreview = () => {
     setHasFetched(true);
     setFetchKey((k) => k + 1);
+    setLastPreviewTime(new Date());
   };
-  const onExport = () => toast.info(t("reports.exportComingSoon"));
+
+  type ReportType = "dcuAttendance" | "residentCensus" | "emarCompliance" | "incidentSummary";
+  const TITLES: Record<ReportType, string> = {
+    dcuAttendance: "日間護理出席記錄",
+    residentCensus: "院友人口統計報表",
+    emarCompliance: "電子用藥記錄合規報表",
+    incidentSummary: "事故報告摘要",
+  };
+
+  const handleExport = async (reportType: ReportType) => {
+    if (!branchId || !fromDate || !toDate) {
+      toast.error(t("reports.exportError"));
+      return;
+    }
+    setExporting(reportType);
+    try {
+      const { data, error } = await supabase.functions.invoke("report-generate", {
+        body: {
+          report_type: reportType,
+          branch_id: branchId,
+          from_date: fromDate,
+          to_date: toDate,
+        },
+      });
+      if (error) throw error;
+
+      // supabase-js returns the raw body for unknown content types — coerce to ArrayBuffer
+      let buf: ArrayBuffer;
+      if (data instanceof ArrayBuffer) {
+        buf = data;
+      } else if (data instanceof Blob) {
+        buf = await data.arrayBuffer();
+      } else if (data instanceof Uint8Array) {
+        buf = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
+      } else {
+        throw new Error("Unexpected response payload");
+      }
+
+      const blob = new Blob([buf], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${TITLES[reportType]}_${fromDate}_${toDate}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(t("reports.exportSuccess"));
+    } catch (err) {
+      toast.error(`${t("reports.exportError")}: ${(err as Error).message}`);
+    } finally {
+      setExporting(null);
+    }
+  };
 
   if (!allowed) {
     return (
