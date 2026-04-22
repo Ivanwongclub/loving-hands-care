@@ -37,8 +37,12 @@ function jsonResponse(body: VerifyPINResponse, status = 200): Response {
   })
 }
 
+// Use a loose type for the supabase client — the generated typings cause
+// strict generic mismatches with helper functions in Deno's type-checker.
+type SupabaseLike = ReturnType<typeof createClient<any, any, any>>
+
 async function fetchStaffRecord(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseLike,
   staffId: string,
 ): Promise<StaffPINRecord | null> {
   const { data, error } = await supabase
@@ -54,7 +58,7 @@ async function fetchStaffRecord(
 }
 
 async function incrementFailureCount(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseLike,
   staff: StaffPINRecord,
 ): Promise<{ locked: boolean; attempts: number }> {
   let currentStaff = staff
