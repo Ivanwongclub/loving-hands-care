@@ -513,7 +513,15 @@ function ReportsHubPage() {
                   </div>
                 )}
                 <Button variant="primary" onClick={onPreview}>{t("reports.generate")}</Button>
+                <Button variant="ghost" onClick={onPreview} disabled={!hasFetched}>{t("reports.refreshPreview")}</Button>
               </Inline>
+              {lastPreviewTime && (
+                <Text size="sm" color="tertiary">
+                  {t("reports.lastPreviewed", {
+                    time: `${pad(lastPreviewTime.getHours())}:${pad(lastPreviewTime.getMinutes())}:${pad(lastPreviewTime.getSeconds())}`,
+                  })}
+                </Text>
+              )}
             </Stack>
           </Card>
 
@@ -527,10 +535,9 @@ function ReportsHubPage() {
               isLoading={dcuQ.isLoading}
               hasFetched={hasFetched}
               rowCount={dcuQ.data?.length ?? 0}
-              onExport={onExport}
-              summary={
-                <Inline gap={2} wrap>
-                  <StatPill label={t("reports.dcuAttendance.totalCheckins")} value={dcuStats.total} tone="info" />
+              onExport={() => handleExport("dcuAttendance")}
+              isExporting={exporting === "dcuAttendance"}
+              errorMessage={dcuQ.error ? (dcuQ.error as Error).message : null}
                   <StatPill label={t("reports.dcuAttendance.uniqueResidents")} value={dcuStats.unique} tone="success" />
                   <StatPill label={t("reports.dcuAttendance.qrSource")} value={dcuStats.qrCount} />
                   <StatPill label={t("reports.dcuAttendance.manualSource")} value={dcuStats.manualCount} tone="warning" />
