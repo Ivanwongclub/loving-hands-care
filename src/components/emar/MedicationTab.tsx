@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Shield } from "lucide-react";
 import {
   Card, Surface, Stack, Inline, Text, Heading, Button, Spinner, EmptyState, Badge, Tabs, FormField, TextField,
 } from "@/components/hms";
 import type { Enums } from "@/integrations/supabase/types";
+import { supabase } from "@/integrations/supabase/client";
 import { useMedicationOrders, type MedOrderRow } from "@/hooks/useMedicationOrders";
 import { useEMARRecords, type EMARRow } from "@/hooks/useEMARRecords";
 import type { useAuditLog } from "@/hooks/useAuditLog";
@@ -13,12 +14,15 @@ import { NewOrderModal } from "./NewOrderModal";
 import { StopOrderModal } from "./StopOrderModal";
 import { RefusalModal } from "./RefusalModal";
 import { HoldModal } from "./HoldModal";
+import { AdministerModal } from "./AdministerModal";
 
 interface MedicationTabProps {
   residentId: string;
   branchId: string;
   staffId: string | null;
   staffRole: Enums<"staff_role"> | null;
+  residentNameZh: string;
+  residentName: string;
   logAction: ReturnType<typeof useAuditLog>["logAction"];
 }
 
@@ -72,9 +76,10 @@ function scheduleTimes(o: MedOrderRow): string[] {
 }
 
 export function MedicationTab({
-  residentId, branchId, staffId, staffRole, logAction,
+  residentId, branchId, staffId, staffRole, residentNameZh, residentName, logAction,
 }: MedicationTabProps) {
   const { t } = useTranslation();
+  const qc = useQueryClient();
   const [tab, setTab] = useState<"orders" | "schedule">("orders");
   const [date, setDate] = useState(todayISO());
 
@@ -85,11 +90,67 @@ export function MedicationTab({
   const [stopping, setStopping] = useState<string | null>(null);
   const [refusing, setRefusing] = useState<string | null>(null);
   const [holding, setHolding] = useState<string | null>(null);
+  const [adminRecord, setAdminRecord] = useState<EMARRow | null>(null);
 
   const canCreateOrder =
     staffRole === "SENIOR_NURSE" ||
     staffRole === "BRANCH_ADMIN" ||
     staffRole === "SYSTEM_ADMIN";
+
+  // Flag stale DUE records (older than 1 day) as MISSED — silent
+  useEffect(() => {
+    if (!residentId) return;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 1);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    void supabase
+      .from("emar_records")
+      .update({ status: "MISSED" })
+      .eq("resident_id", residentId)
+      .eq("status", "DUE")
+      .lt("due_at", `${cutoffStr}T00:00:00`)
+      .then(({ error }) => {
+        if (!error) void qc.invalidateQueries({ queryKey: ["emarRecords", residentId] });
+      });
+  }, [residentId, qc]);
+
+  // Flag today's overdue DUE records as LATE — silent
+  useEffect(() => {
+    if (!residentId) return;
+    const now = new Date().toISOString();
+    const todayStart = `${now.slice(0, 10)}T00:00:00`;
+    void supabase
+      .from("emar_records")
+      .update({ status: "LATE" })
+      .eq("resident_id", residentId)
+      .eq("status", "DUE")
+      .lt("due_at", now)
+      .gte("due_at", todayStart)
+      .then(({ error }) => {
+        if (!error) void qc.invalidateQueries({ queryKey: ["emarRecords", residentId, date] });
+      });
+  }, [residentId, date, qc]);
+
+  const handlePRNAdmin = async (order: MedOrderRow) => {
+    const { data, error } = await supabase
+      .from("emar_records")
+      .insert({
+        order_id: order.id,
+        resident_id: residentId,
+        branch_id: branchId,
+        due_at: new Date().toISOString(),
+        status: "DUE",
+        prn_indication: order.prn_indication,
+      })
+      .select(
+        "*, order:order_id(drug_name, drug_name_zh, dose, route, is_prn, barcode), administrator:administered_by(name, name_zh)",
+      )
+      .single();
+    if (!error && data) {
+      void qc.invalidateQueries({ queryKey: ["emarRecords", residentId, date] });
+      setAdminRecord(data as unknown as EMARRow);
+    }
+  };
 
   return (
     <Stack gap={4}>
@@ -119,7 +180,8 @@ export function MedicationTab({
           isLoading={recordsLoading}
           date={date}
           onDateChange={setDate}
-          onAdminister={() => toast.message(t("emar.useAdminFlow"))}
+          onAdminister={(r) => setAdminRecord(r)}
+          onPRNAdmin={handlePRNAdmin}
           onRefuse={(id) => setRefusing(id)}
           onHold={(id) => setHolding(id)}
           orders={orders}
@@ -163,6 +225,18 @@ export function MedicationTab({
         residentId={residentId}
         branchId={branchId}
         date={date}
+        logAction={logAction}
+      />
+      <AdministerModal
+        open={!!adminRecord}
+        onClose={() => setAdminRecord(null)}
+        record={adminRecord}
+        residentNameZh={residentNameZh}
+        residentName={residentName}
+        branchId={branchId}
+        staffId={staffId ?? ""}
+        date={date}
+        residentId={residentId}
         logAction={logAction}
       />
     </Stack>
@@ -296,13 +370,14 @@ export function MedicationTab({
   }
 
   function SchedulePanel({
-    records, isLoading, date, onDateChange, onAdminister, onRefuse, onHold, orders,
+    records, isLoading, date, onDateChange, onAdminister, onPRNAdmin, onRefuse, onHold, orders,
   }: {
     records: EMARRow[];
     isLoading: boolean;
     date: string;
     onDateChange: (d: string) => void;
-    onAdminister: () => void;
+    onAdminister: (r: EMARRow) => void;
+    onPRNAdmin: (o: MedOrderRow) => void;
     onRefuse: (id: string) => void;
     onHold: (id: string) => void;
     orders: MedOrderRow[];
@@ -383,7 +458,7 @@ export function MedicationTab({
                             </Inline>
                             {(s.status === "DUE" || s.status === "LATE") && (
                               <Inline gap={2}>
-                                <Button variant="primary" size="compact" onClick={onAdminister}>
+                                <Button variant="primary" size="compact" onClick={() => onAdminister(s)}>
                                   {t("emar.administer")}
                                 </Button>
                                 <Button variant="ghost" size="compact" onClick={() => onRefuse(s.id)}>
@@ -440,7 +515,7 @@ export function MedicationTab({
                       <Text size="sm" color="secondary">{o.prn_indication}</Text>
                     )}
                   </Stack>
-                  <Button variant="primary" size="compact" onClick={onAdminister}>
+                  <Button variant="primary" size="compact" onClick={() => onPRNAdmin(o)}>
                     {t("emar.prnAdmin")}
                   </Button>
                 </Inline>
