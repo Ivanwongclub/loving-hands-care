@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { BellRing, History } from "lucide-react";
@@ -49,6 +49,20 @@ const STATUS_TONE: Record<AlertStatus, "warning" | "info" | "success" | "neutral
   DISMISSED: "neutral",
 };
 
+function severityBorder(sev: AlertSeverity): string {
+  switch (sev) {
+    case "CRITICAL":
+      return "4px solid var(--status-error-accent)";
+    case "HIGH":
+      return "4px solid var(--status-warning-accent)";
+    case "MEDIUM":
+      return "4px solid color-mix(in oklab, var(--status-warning-accent) 60%, transparent)";
+    case "LOW":
+    default:
+      return "4px solid var(--border-subtle)";
+  }
+}
+
 function AlertsDashboardPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -72,6 +86,52 @@ function AlertsDashboardPage() {
   const [resolveAlert, setResolveAlert] = useState<AlertRow | null>(null);
   const [assignAlert, setAssignAlert] = useState<AlertRow | null>(null);
   const [historyId, setHistoryId] = useState<string | null>(null);
+
+  // Live-updating "now" so timeAgo refreshes without page reload
+  const [, setNowTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setNowTick((n) => n + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Today (local midnight) ISO for audit_log counts
+  const startOfTodayIso = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d.toISOString();
+  }, []);
+
+  const autoEscalatedToday = useQuery({
+    queryKey: ["audit-counts", "ALERT_AUTO_ESCALATED", branchId, "today", startOfTodayIso],
+    enabled: !!branchId,
+    queryFn: async () => {
+      if (!branchId) return 0;
+      const { count, error } = await supabase
+        .from("audit_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("branch_id", branchId)
+        .eq("action", "ALERT_AUTO_ESCALATED")
+        .gte("created_at", startOfTodayIso);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  const manualEscalatedToday = useQuery({
+    queryKey: ["audit-counts", "ALERT_ESCALATED", branchId, "today", startOfTodayIso],
+    enabled: !!branchId,
+    queryFn: async () => {
+      if (!branchId) return 0;
+      const { count, error } = await supabase
+        .from("audit_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("branch_id", branchId)
+        .eq("action", "ALERT_ESCALATED")
+        .gte("created_at", startOfTodayIso);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -164,6 +224,15 @@ function AlertsDashboardPage() {
             <StatCard label={t("alerts.stats.escalated")} value={stats.escalated} tone="error" />
           </div>
 
+          <Inline gap={2} wrap align="center">
+            <Badge tone="neutral">
+              {t("alerts.autoEscalatedToday")}: {autoEscalatedToday.data ?? "—"} {t("alerts.timesUnit")}
+            </Badge>
+            <Badge tone="neutral">
+              {t("alerts.manualEscalatedToday")}: {manualEscalatedToday.data ?? "—"} {t("alerts.timesUnit")}
+            </Badge>
+          </Inline>
+
           <FilterBar>
             <div style={{ width: 240 }}>
               <SearchField
@@ -233,7 +302,7 @@ function AlertsDashboardPage() {
                 const escalated = (a.escalation_level ?? 0) > 0;
 
                 return (
-                  <Card key={a.id} padding="md">
+                  <Card key={a.id} padding="md" style={{ borderLeft: severityBorder(a.severity) }}>
                     <Stack gap={3}>
                       <Inline justify="between" align="start" wrap>
                         <Inline gap={2} wrap align="center">
@@ -268,6 +337,11 @@ function AlertsDashboardPage() {
                         {escalated && a.last_escalated_at && (
                           <Text size="sm" color="tertiary">
                             {t("alerts.lastEscalatedAt")}: {timeAgo(a.last_escalated_at, t)}
+                          </Text>
+                        )}
+                        {a.status === "ASSIGNED" && (
+                          <Text size="sm" color="tertiary">
+                            {t("alerts.assignedTo")}: {t("alerts.assignToSelf")}
                           </Text>
                         )}
                       </Inline>

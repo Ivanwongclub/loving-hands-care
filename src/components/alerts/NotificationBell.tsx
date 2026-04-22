@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -34,7 +34,14 @@ export function NotificationBell() {
 
   const branchId = branches[0]?.id ?? null;
 
-  const { alerts } = useAlerts({ branchId, status: "OPEN", page: 1, pageSize: 50 });
+  const { alerts, refetch } = useAlerts({ branchId, status: "OPEN", page: 1, pageSize: 50 });
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      void refetch();
+    }, 60_000);
+    return () => clearInterval(id);
+  }, [refetch]);
 
   if (!user) return null;
 
@@ -77,7 +84,7 @@ export function NotificationBell() {
         type="button"
         aria-label={t("alerts.notificationBell")}
         onClick={() => setOpen(true)}
-        className="relative grid place-items-center"
+        className={`relative grid place-items-center ${unread > 0 ? "animate-pulse" : ""}`}
         style={{
           position: "fixed",
           top: 12,

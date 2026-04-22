@@ -12,6 +12,7 @@ import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { AddBranchModal } from "@/components/settings/AddBranchModal";
 import { BranchEditDrawer } from "@/components/settings/BranchEditDrawer";
 import { AlertSLASection } from "@/components/alerts/AlertSLASection";
+import { EscalationEngineCard } from "@/components/alerts/EscalationEngineCard";
 import type { Enums } from "@/integrations/supabase/types";
 
 type BranchType = Enums<"branch_type">;
@@ -65,7 +66,12 @@ function AlertsSettingsSection() {
   const branch = branches[0] ?? null;
   const allowed = staff?.role === "BRANCH_ADMIN" || staff?.role === "SYSTEM_ADMIN";
   if (!allowed) return <ComingSoonSection labelKey="settings.sections.alerts" />;
-  return <AlertSLASection branch={branch} />;
+  return (
+    <Stack gap={4}>
+      <AlertSLASection branch={branch} />
+      <EscalationEngineCard branchId={branch?.id ?? null} />
+    </Stack>
+  );
 }
 
 interface SideSectionNavProps {
