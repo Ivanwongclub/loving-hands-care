@@ -87,17 +87,9 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
           transition: "width var(--duration-normal) ease",
         }}
       >
-        {/* Header: logo + HMS centered */}
+        {/* Header: HMS wordmark centered */}
         <div style={{ padding: collapsed ? "16px 8px 12px" : "20px 18px 16px", position: "relative" }}>
-          <div className="flex flex-col items-center justify-center" style={{ gap: 8 }}>
-            {!collapsed && (
-              <img
-                src={logoUrl}
-                alt="Helping Hand"
-                loading="lazy"
-                style={{ height: 48, width: "auto", objectFit: "contain" }}
-              />
-            )}
+          <div className="flex flex-col items-center justify-center">
             <div
               className="font-extrabold tracking-tight"
               style={{ fontSize: collapsed ? 18 : 22, color: "var(--color-onyx-900)", lineHeight: 1 }}
@@ -115,9 +107,9 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
           className="absolute grid place-items-center"
           style={{
             bottom: 96,
-            right: -12,
-            width: 24,
-            height: 24,
+            right: -24,
+            width: 48,
+            height: 48,
             borderRadius: "50%",
             backgroundColor: "var(--bg-surface)",
             border: "1px solid var(--border-subtle)",
@@ -136,7 +128,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
             e.currentTarget.style.borderColor = "var(--border-subtle)";
           }}
         >
-          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+          {collapsed ? <ChevronRight size={28} /> : <ChevronLeft size={28} />}
         </button>
 
         {/* Branch context */}
