@@ -588,6 +588,14 @@ function ReportsHubPage() {
               onExport={() => handleExport("emarCompliance")}
               isExporting={exporting === "emarCompliance"}
               errorMessage={emarQ.error ? (emarQ.error as Error).message : null}
+              summary={
+                <Inline gap={2} wrap>
+                  <StatPill label={t("reports.emarCompliance.complianceRate")} value={`${emarStats.rate}%`} tone={emarRateTone} />
+                  <StatPill label={t("reports.emarCompliance.administered")} value={emarStats.administered} tone="success" />
+                  <StatPill label={t("reports.emarCompliance.missed")} value={emarStats.missed} tone={emarStats.missed > 0 ? "error" : "neutral"} />
+                  <StatPill label={t("reports.emarCompliance.refused")} value={emarStats.refused} tone="warning" />
+                </Inline>
+              }
               table={
                 <Table<EmarRow> columns={emarColumns} rows={(emarQ.data ?? []).slice(0, 15)} rowKey={(r) => r.id} density="compact" />
               }
@@ -602,7 +610,9 @@ function ReportsHubPage() {
               isLoading={incQ.isLoading}
               hasFetched={hasFetched}
               rowCount={incQ.data?.length ?? 0}
-              onExport={onExport}
+              onExport={() => handleExport("incidentSummary")}
+              isExporting={exporting === "incidentSummary"}
+              errorMessage={incQ.error ? (incQ.error as Error).message : null}
               summary={
                 <Inline gap={2} wrap>
                   <StatPill label={t("reports.incidentSummary.totalIncidents")} value={incStats.total} tone="info" />
