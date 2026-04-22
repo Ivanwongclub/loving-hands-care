@@ -85,7 +85,6 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
           boxShadow: "1px 0 0 var(--border-subtle)",
           zIndex: 10,
           transition: "width var(--duration-normal) ease",
-          overflow: "hidden",
         }}
       >
         {/* Header: logo + HMS centered */}
