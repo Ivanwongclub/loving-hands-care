@@ -1,13 +1,15 @@
-import { type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard, Users, ClipboardCheck, ListTodo, Activity, Pill,
   AlertTriangle, BellRing, ClipboardList, UserCog, FileBarChart2, ScrollText,
   Upload, Settings, LogOut, Bell, Languages, ChevronDown, UserPlus, ExternalLink,
+  PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import { Avatar, ContextSwitcher, Inline, Stack, Text } from "@/components/hms";
 import { useAuth } from "@/lib/AuthContext";
+import logoUrl from "@/assets/logo.png";
 
 interface NavItem { to: string; labelKey: string; icon: ReactNode; external?: boolean }
 interface NavSection { titleKey: string; items: NavItem[] }
@@ -51,11 +53,16 @@ interface AdminDesktopShellProps {
   children: ReactNode;
 }
 
+const COLLAPSED_WIDTH = "64px";
+
 export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProps) {
   const { t, i18n } = useTranslation();
   const loc = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
+
+  const sidebarWidth = collapsed ? COLLAPSED_WIDTH : "var(--sidebar-width)";
 
   const toggleLang = () => {
     const next = i18n.language === "en" ? "zh-HK" : "en";
@@ -73,32 +80,63 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
       <aside
         className="fixed left-0 top-0 h-full flex flex-col"
         style={{
-          width: "var(--sidebar-width)",
+          width: sidebarWidth,
           backgroundColor: "var(--color-neutral-25)",
           boxShadow: "1px 0 0 var(--border-subtle)",
           zIndex: 10,
+          transition: "width var(--duration-normal) ease",
+          overflow: "hidden",
         }}
       >
-        {/* Logo */}
-        <div style={{ padding: "20px 18px 16px" }}>
-          <div className="font-extrabold tracking-tight" style={{ fontSize: 22, color: "var(--color-onyx-900)" }}>HMS</div>
-          <div className="type-caption" style={{ color: "var(--text-secondary)" }}>{t("app.name")}</div>
+        {/* Header: logo + HMS centered + collapse toggle */}
+        <div style={{ padding: collapsed ? "16px 8px 12px" : "20px 18px 16px", position: "relative" }}>
+          <button
+            type="button"
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="absolute p-1 rounded hover:bg-[var(--bg-hover-subtle)]"
+            style={{ top: 8, right: 8, color: "var(--text-secondary)" }}
+          >
+            {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+          </button>
+          <div className="flex flex-col items-center justify-center" style={{ gap: 6 }}>
+            {!collapsed && (
+              <img
+                src={logoUrl}
+                alt="Helping Hand"
+                width={40}
+                height={40}
+                loading="lazy"
+                style={{ width: 40, height: 40, objectFit: "contain" }}
+              />
+            )}
+            <div
+              className="font-extrabold tracking-tight"
+              style={{ fontSize: collapsed ? 18 : 22, color: "var(--color-onyx-900)", lineHeight: 1 }}
+            >
+              HMS
+            </div>
+          </div>
         </div>
 
         {/* Branch context */}
-        <div style={{ padding: "0 14px 12px" }}>
-          <ContextSwitcher label={t("common.branch")} current="Central Branch · 中央院舍" />
-        </div>
+        {!collapsed && (
+          <div style={{ padding: "0 14px 12px" }}>
+            <ContextSwitcher label={t("common.branch")} current="Central Branch · 中央院舍" />
+          </div>
+        )}
 
         {/* Nav */}
-        <nav className="flex-1 overflow-auto" style={{ padding: "4px 10px 16px" }}>
+        <nav className="flex-1 overflow-auto" style={{ padding: collapsed ? "4px 6px 16px" : "4px 10px 16px" }}>
           {sections.map((sec) => (
             <div key={sec.titleKey} className="mb-4">
-              <div className="type-label px-3 py-2" style={{ color: "var(--text-tertiary)" }}>{t(sec.titleKey)}</div>
+              {!collapsed && (
+                <div className="type-label px-3 py-2" style={{ color: "var(--text-tertiary)" }}>{t(sec.titleKey)}</div>
+              )}
               <ul className="flex flex-col gap-0.5">
                 {sec.items.map((it) => {
                   const active = !it.external && (loc.pathname === it.to || loc.pathname.startsWith(it.to + "/"));
-                  const sharedClass = "flex items-center gap-2.5 px-3 transition-colors w-full text-left";
+                  const sharedClass = `flex items-center transition-colors w-full ${collapsed ? "justify-center" : "gap-2.5 px-3 text-left"}`;
                   const sharedStyle = {
                     height: 40,
                     borderRadius: "var(--radius-sm)",
@@ -111,7 +149,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
                   const inner = (
                     <>
                       <span style={{ color: active ? "var(--color-iris-500)" : "var(--text-secondary)" }}>{it.icon}</span>
-                      <span className="type-body-md font-medium">{t(it.labelKey)}</span>
+                      {!collapsed && <span className="type-body-md font-medium">{t(it.labelKey)}</span>}
                     </>
                   );
                   return (
@@ -124,6 +162,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
                           style={sharedStyle}
                           onMouseEnter={onEnter}
                           onMouseLeave={onLeave}
+                          title={collapsed ? t(it.labelKey) : undefined}
                         >
                           {inner}
                         </button>
@@ -134,6 +173,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
                           style={sharedStyle}
                           onMouseEnter={onEnter}
                           onMouseLeave={onLeave}
+                          title={collapsed ? t(it.labelKey) : undefined}
                         >
                           {inner}
                         </Link>
@@ -147,19 +187,28 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
         </nav>
 
         {/* User chip */}
-        <div style={{ padding: "12px 14px", borderTop: "1px solid var(--border-subtle)" }}>
-          <Inline justify="between">
-            <Inline gap={2}>
+        <div style={{ padding: collapsed ? "12px 8px" : "12px 14px", borderTop: "1px solid var(--border-subtle)" }}>
+          {collapsed ? (
+            <div className="flex flex-col items-center gap-2">
               <Avatar name="Wong KM" size="sm" />
-              <Stack gap={1}>
-                <Text size="sm" className="font-semibold">Wong K.M.</Text>
-                <Text size="caption" color="tertiary">Registered Nurse</Text>
-              </Stack>
+              <button onClick={handleSignOut} aria-label="Sign out" title="Sign out" className="p-1.5 rounded hover:bg-[var(--bg-hover-subtle)]">
+                <LogOut size={16} style={{ color: "var(--text-secondary)" }} />
+              </button>
+            </div>
+          ) : (
+            <Inline justify="between">
+              <Inline gap={2}>
+                <Avatar name="Wong KM" size="sm" />
+                <Stack gap={1}>
+                  <Text size="sm" className="font-semibold">Wong K.M.</Text>
+                  <Text size="caption" color="tertiary">Registered Nurse</Text>
+                </Stack>
+              </Inline>
+              <button onClick={handleSignOut} aria-label="Sign out" className="p-1.5 rounded hover:bg-[var(--bg-hover-subtle)]">
+                <LogOut size={16} style={{ color: "var(--text-secondary)" }} />
+              </button>
             </Inline>
-            <button onClick={handleSignOut} aria-label="Sign out" className="p-1.5 rounded hover:bg-[var(--bg-hover-subtle)]">
-              <LogOut size={16} style={{ color: "var(--text-secondary)" }} />
-            </button>
-          </Inline>
+          )}
         </div>
       </aside>
 
@@ -167,12 +216,13 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
       <header
         className="fixed top-0 right-0 flex items-center justify-between"
         style={{
-          left: "var(--sidebar-width)",
+          left: sidebarWidth,
           height: "var(--topbar-height)",
           paddingInline: "var(--page-gutter-desktop)",
           backgroundColor: "var(--bg-surface)",
           borderBottom: "1px solid var(--border-subtle)",
           zIndex: 10,
+          transition: "left var(--duration-normal) ease",
         }}
       >
         <div className="type-h3" style={{ color: "var(--text-primary)" }}>{pageTitle}</div>
@@ -196,8 +246,9 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
       {/* Content — full width, no centering */}
       <main
         style={{
-          marginLeft: "var(--sidebar-width)",
+          marginLeft: sidebarWidth,
           paddingTop: "var(--topbar-height)",
+          transition: "margin-left var(--duration-normal) ease",
         }}
       >
         <div style={{ padding: `var(--space-6) var(--page-gutter-desktop)` }}>
