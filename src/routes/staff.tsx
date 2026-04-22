@@ -200,6 +200,7 @@ function StaffManagementPage() {
               </button>
             }
             items={[
+              { label: <Inline gap={2}><Eye size={14} />{t("staff.viewDetail")}</Inline>, onSelect: () => navigate({ to: "/staff/$id", params: { id: row.id } }) },
               { label: <Inline gap={2}><Edit size={14} />{t("actions.edit")}</Inline>, onSelect: () => setEditingStaff(row) },
               ...(canManage ? [{
                 label: <Inline gap={2}><KeyRound size={14} />{row.pin_hash ? t("staff.resetPin") : t("staff.setPin")}</Inline>,
@@ -251,6 +252,21 @@ function StaffManagementPage() {
               onClear={() => setSearch("")}
             />
           </div>
+          {isSystemAdmin && branches.length > 1 && (
+            <div style={{ width: 240 }}>
+              <Select
+                value={selectedBranchId ?? ""}
+                onChange={(e) => {
+                  const v = (e.target as HTMLSelectElement).value;
+                  setSelectedBranchId(v || null);
+                }}
+                options={[
+                  { value: "", label: t("staff.branchesAll") },
+                  ...branches.map((b) => ({ value: b.id, label: b.name_zh || b.name })),
+                ]}
+              />
+            </div>
+          )}
           <div style={{ width: 200 }}>
             <Select
               value={roleFilter}
@@ -276,7 +292,7 @@ function StaffManagementPage() {
             columns={columns}
             rows={filtered}
             rowKey={(r) => r.id}
-            onRowClick={(r) => setEditingStaff(r)}
+            onRowClick={(r) => navigate({ to: "/staff/$id", params: { id: r.id } })}
             empty={
               <EmptyState
                 icon={<Inbox size={40} />}
