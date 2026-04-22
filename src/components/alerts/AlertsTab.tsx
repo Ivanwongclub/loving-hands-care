@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
+import { History } from "lucide-react";
 import { toast } from "sonner";
 import {
   Card, Stack, Inline, Text, Heading, Button, Badge, EmptyState, Skeleton, Select, FormField,
@@ -9,6 +10,10 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Enums } from "@/integrations/supabase/types";
 import { useAlerts, type AlertRow } from "@/hooks/useAlerts";
 import type { useAuditLog } from "@/hooks/useAuditLog";
+import { EscalateModal } from "./EscalateModal";
+import { ResolveModal } from "./ResolveModal";
+import { AssignModal } from "./AssignModal";
+import { EscalationHistoryDrawer } from "./EscalationHistoryDrawer";
 
 type AlertSource = Enums<"alert_source">;
 type AlertSeverity = Enums<"alert_severity">;
