@@ -293,7 +293,7 @@ function DashboardBody({ branchId }: { branchId: string }) {
                     className="cursor-pointer"
                   >
                     <TableCell>
-                      <Stack gap={0}>
+                      <Stack gap={1}>
                         <Text size="sm" className="font-semibold">
                           {r.residents?.name_zh ?? "—"}
                         </Text>
