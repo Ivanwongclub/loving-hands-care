@@ -243,17 +243,17 @@ function ResidentDetailPage() {
           />
 
           {openAlertCount > 0 && (
-            <Alert
-              severity="warning"
-              description={t("alerts.residentBanner", { count: openAlertCount })}
-              onDismiss={undefined}
-            >
+            <div>
+              <Alert
+                severity="warning"
+                description={t("alerts.residentBanner", { count: openAlertCount })}
+              />
               <div style={{ marginTop: 8 }}>
                 <Button variant="ghost" size="compact" onClick={() => setTab("alerts")}>
                   {t("alerts.view")}
                 </Button>
               </div>
-            </Alert>
+            </div>
           )}
 
           <div>
