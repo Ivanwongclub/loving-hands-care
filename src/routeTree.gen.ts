@@ -27,6 +27,7 @@ import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VitalsAssessmentsRouteImport } from './routes/vitals.assessments'
 import { Route as TasksHandoverRouteImport } from './routes/tasks.handover'
+import { Route as StaffIdRouteImport } from './routes/staff.$id'
 import { Route as ResidentsNewRouteImport } from './routes/residents.new'
 import { Route as ResidentsIdRouteImport } from './routes/residents.$id'
 import { Route as FamilyLoginRouteImport } from './routes/family.login'
@@ -128,6 +129,11 @@ const TasksHandoverRoute = TasksHandoverRouteImport.update({
   path: '/handover',
   getParentRoute: () => TasksRoute,
 } as any)
+const StaffIdRoute = StaffIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => StaffRoute,
+} as any)
 const ResidentsNewRoute = ResidentsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -193,7 +199,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/residents': typeof ResidentsRouteWithChildren
   '/settings': typeof SettingsRoute
-  '/staff': typeof StaffRoute
+  '/staff': typeof StaffRouteWithChildren
   '/tasks': typeof TasksRouteWithChildren
   '/vitals': typeof VitalsRouteWithChildren
   '/alerts/wallboard': typeof AlertsWallboardRoute
@@ -206,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/family/login': typeof FamilyLoginRoute
   '/residents/$id': typeof ResidentsIdRoute
   '/residents/new': typeof ResidentsNewRoute
+  '/staff/$id': typeof StaffIdRoute
   '/tasks/handover': typeof TasksHandoverRoute
   '/vitals/assessments': typeof VitalsAssessmentsRoute
 }
@@ -223,7 +230,7 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/residents': typeof ResidentsRouteWithChildren
   '/settings': typeof SettingsRoute
-  '/staff': typeof StaffRoute
+  '/staff': typeof StaffRouteWithChildren
   '/tasks': typeof TasksRouteWithChildren
   '/vitals': typeof VitalsRouteWithChildren
   '/alerts/wallboard': typeof AlertsWallboardRoute
@@ -236,6 +243,7 @@ export interface FileRoutesByTo {
   '/family/login': typeof FamilyLoginRoute
   '/residents/$id': typeof ResidentsIdRoute
   '/residents/new': typeof ResidentsNewRoute
+  '/staff/$id': typeof StaffIdRoute
   '/tasks/handover': typeof TasksHandoverRoute
   '/vitals/assessments': typeof VitalsAssessmentsRoute
 }
@@ -254,7 +262,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/residents': typeof ResidentsRouteWithChildren
   '/settings': typeof SettingsRoute
-  '/staff': typeof StaffRoute
+  '/staff': typeof StaffRouteWithChildren
   '/tasks': typeof TasksRouteWithChildren
   '/vitals': typeof VitalsRouteWithChildren
   '/alerts/wallboard': typeof AlertsWallboardRoute
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/family/login': typeof FamilyLoginRoute
   '/residents/$id': typeof ResidentsIdRoute
   '/residents/new': typeof ResidentsNewRoute
+  '/staff/$id': typeof StaffIdRoute
   '/tasks/handover': typeof TasksHandoverRoute
   '/vitals/assessments': typeof VitalsAssessmentsRoute
 }
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/family/login'
     | '/residents/$id'
     | '/residents/new'
+    | '/staff/$id'
     | '/tasks/handover'
     | '/vitals/assessments'
   fileRoutesByTo: FileRoutesByTo
@@ -329,6 +339,7 @@ export interface FileRouteTypes {
     | '/family/login'
     | '/residents/$id'
     | '/residents/new'
+    | '/staff/$id'
     | '/tasks/handover'
     | '/vitals/assessments'
   id:
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/family/login'
     | '/residents/$id'
     | '/residents/new'
+    | '/staff/$id'
     | '/tasks/handover'
     | '/vitals/assessments'
   fileRoutesById: FileRoutesById
@@ -377,7 +389,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   ResidentsRoute: typeof ResidentsRouteWithChildren
   SettingsRoute: typeof SettingsRoute
-  StaffRoute: typeof StaffRoute
+  StaffRoute: typeof StaffRouteWithChildren
   TasksRoute: typeof TasksRouteWithChildren
   VitalsRoute: typeof VitalsRouteWithChildren
   AttendanceEnrollmentsRoute: typeof AttendanceEnrollmentsRoute
@@ -515,6 +527,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksHandoverRouteImport
       parentRoute: typeof TasksRoute
     }
+    '/staff/$id': {
+      id: '/staff/$id'
+      path: '/$id'
+      fullPath: '/staff/$id'
+      preLoaderRoute: typeof StaffIdRouteImport
+      parentRoute: typeof StaffRoute
+    }
     '/residents/new': {
       id: '/residents/new'
       path: '/new'
@@ -635,6 +654,16 @@ const ResidentsRouteWithChildren = ResidentsRoute._addFileChildren(
   ResidentsRouteChildren,
 )
 
+interface StaffRouteChildren {
+  StaffIdRoute: typeof StaffIdRoute
+}
+
+const StaffRouteChildren: StaffRouteChildren = {
+  StaffIdRoute: StaffIdRoute,
+}
+
+const StaffRouteWithChildren = StaffRoute._addFileChildren(StaffRouteChildren)
+
 interface TasksRouteChildren {
   TasksHandoverRoute: typeof TasksHandoverRoute
 }
@@ -670,7 +699,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   ResidentsRoute: ResidentsRouteWithChildren,
   SettingsRoute: SettingsRoute,
-  StaffRoute: StaffRoute,
+  StaffRoute: StaffRouteWithChildren,
   TasksRoute: TasksRouteWithChildren,
   VitalsRoute: VitalsRouteWithChildren,
   AttendanceEnrollmentsRoute: AttendanceEnrollmentsRoute,
