@@ -437,7 +437,6 @@ export type Database = {
           after_state: Json | null
           before_state: Json | null
           branch_id: string | null
-          category: string
           created_at: string
           entity_id: string
           entity_type: string
@@ -453,7 +452,6 @@ export type Database = {
           after_state?: Json | null
           before_state?: Json | null
           branch_id?: string | null
-          category?: string
           created_at?: string
           entity_id: string
           entity_type: string
@@ -469,7 +467,6 @@ export type Database = {
           after_state?: Json | null
           before_state?: Json | null
           branch_id?: string | null
-          category?: string
           created_at?: string
           entity_id?: string
           entity_type?: string
@@ -571,7 +568,6 @@ export type Database = {
           operating_hours: Json | null
           phone: string | null
           sla_config: Json
-          system_config: Json
           swd_code: string
           type: Database["public"]["Enums"]["branch_type"]
           updated_at: string
@@ -589,7 +585,6 @@ export type Database = {
           operating_hours?: Json | null
           phone?: string | null
           sla_config?: Json
-          system_config?: Json
           swd_code: string
           type: Database["public"]["Enums"]["branch_type"]
           updated_at?: string
@@ -607,7 +602,6 @@ export type Database = {
           operating_hours?: Json | null
           phone?: string | null
           sla_config?: Json
-          system_config?: Json
           swd_code?: string
           type?: Database["public"]["Enums"]["branch_type"]
           updated_at?: string
@@ -1610,7 +1604,6 @@ export type Database = {
           deleted_at: string | null
           email: string
           id: string
-          is_shared_device: boolean
           name: string
           name_zh: string | null
           phone: string | null
@@ -1628,7 +1621,6 @@ export type Database = {
           deleted_at?: string | null
           email: string
           id?: string
-          is_shared_device?: boolean
           name: string
           name_zh?: string | null
           phone?: string | null
@@ -1646,7 +1638,6 @@ export type Database = {
           deleted_at?: string | null
           email?: string
           id?: string
-          is_shared_device?: boolean
           name?: string
           name_zh?: string | null
           phone?: string | null
@@ -2051,395 +2042,6 @@ export type Database = {
         ]
       }
     }
-      backup_log: {
-        Row: {
-          backup_type: string
-          checksum: string | null
-          completed_at: string | null
-          created_at: string
-          error_message: string | null
-          file_path: string | null
-          file_size_bytes: number | null
-          id: string
-          provider: string | null
-          started_at: string
-          status: string
-          triggered_by: string
-        }
-        Insert: {
-          backup_type: string
-          checksum?: string | null
-          completed_at?: string | null
-          created_at?: string
-          error_message?: string | null
-          file_path?: string | null
-          file_size_bytes?: number | null
-          id?: string
-          provider?: string | null
-          started_at?: string
-          status: string
-          triggered_by?: string
-        }
-        Update: {
-          backup_type?: string
-          checksum?: string | null
-          completed_at?: string | null
-          created_at?: string
-          error_message?: string | null
-          file_path?: string | null
-          file_size_bytes?: number | null
-          id?: string
-          provider?: string | null
-          started_at?: string
-          status?: string
-          triggered_by?: string
-        }
-        Relationships: []
-      }
-      escalation_rules: {
-        Row: {
-          alert_severity: Database["public"]["Enums"]["alert_severity"]
-          branch_id: string
-          channels: string[]
-          created_at: string
-          delay_minutes: number
-          id: string
-          is_active: boolean
-          level: number
-          notify_roles: string[]
-          updated_at: string
-        }
-        Insert: {
-          alert_severity: Database["public"]["Enums"]["alert_severity"]
-          branch_id: string
-          channels: string[]
-          created_at?: string
-          delay_minutes?: number
-          id?: string
-          is_active?: boolean
-          level: number
-          notify_roles: string[]
-          updated_at?: string
-        }
-        Update: {
-          alert_severity?: Database["public"]["Enums"]["alert_severity"]
-          branch_id?: string
-          channels?: string[]
-          created_at?: string
-          delay_minutes?: number
-          id?: string
-          is_active?: boolean
-          level?: number
-          notify_roles?: string[]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "escalation_rules_branch_id_fkey"
-            columns: ["branch_id"]
-            isOneToOne: false
-            referencedRelation: "branches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notification_log: {
-        Row: {
-          attempt_count: number
-          branch_id: string
-          channel: string
-          created_at: string
-          delivered_at: string | null
-          event_type: string
-          failure_reason: string | null
-          id: string
-          message_preview: string | null
-          provider_ref: string | null
-          recipient_masked: string
-          resident_id: string | null
-          sent_at: string | null
-          status: string
-        }
-        Insert: {
-          attempt_count?: number
-          branch_id: string
-          channel: string
-          created_at?: string
-          delivered_at?: string | null
-          event_type: string
-          failure_reason?: string | null
-          id?: string
-          message_preview?: string | null
-          provider_ref?: string | null
-          recipient_masked: string
-          resident_id?: string | null
-          sent_at?: string | null
-          status: string
-        }
-        Update: {
-          attempt_count?: number
-          branch_id?: string
-          channel?: string
-          created_at?: string
-          delivered_at?: string | null
-          event_type?: string
-          failure_reason?: string | null
-          id?: string
-          message_preview?: string | null
-          provider_ref?: string | null
-          recipient_masked?: string
-          resident_id?: string | null
-          sent_at?: string | null
-          status?: string
-        }
-        Relationships: []
-      }
-      notification_queue: {
-        Row: {
-          attempt_count: number
-          branch_id: string
-          channel: string
-          created_at: string
-          event_type: string
-          expires_at: string
-          id: string
-          last_error: string | null
-          max_attempts: number
-          message: string
-          next_attempt_at: string
-          recipient_email: string | null
-          recipient_phone: string | null
-          resident_id: string | null
-          status: string
-          template_id: string | null
-        }
-        Insert: {
-          attempt_count?: number
-          branch_id: string
-          channel?: string
-          created_at?: string
-          event_type: string
-          expires_at?: string
-          id?: string
-          last_error?: string | null
-          max_attempts?: number
-          message: string
-          next_attempt_at?: string
-          recipient_email?: string | null
-          recipient_phone?: string | null
-          resident_id?: string | null
-          status?: string
-          template_id?: string | null
-        }
-        Update: {
-          attempt_count?: number
-          branch_id?: string
-          channel?: string
-          created_at?: string
-          event_type?: string
-          expires_at?: string
-          id?: string
-          last_error?: string | null
-          max_attempts?: number
-          message?: string
-          next_attempt_at?: string
-          recipient_email?: string | null
-          recipient_phone?: string | null
-          resident_id?: string | null
-          status?: string
-          template_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_queue_branch_id_fkey"
-            columns: ["branch_id"]
-            isOneToOne: false
-            referencedRelation: "branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notification_queue_resident_id_fkey"
-            columns: ["resident_id"]
-            isOneToOne: false
-            referencedRelation: "residents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notification_queue_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "notification_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notification_templates: {
-        Row: {
-          body: string
-          branch_id: string | null
-          channel: string
-          created_at: string
-          event_type: string
-          id: string
-          is_active: boolean
-          is_system_default: boolean
-          language: string
-          subject: string | null
-          updated_at: string
-          variables: string[]
-        }
-        Insert: {
-          body: string
-          branch_id?: string | null
-          channel: string
-          created_at?: string
-          event_type: string
-          id?: string
-          is_active?: boolean
-          is_system_default?: boolean
-          language?: string
-          subject?: string | null
-          updated_at?: string
-          variables?: string[]
-        }
-        Update: {
-          body?: string
-          branch_id?: string | null
-          channel?: string
-          created_at?: string
-          event_type?: string
-          id?: string
-          is_active?: boolean
-          is_system_default?: boolean
-          language?: string
-          subject?: string | null
-          updated_at?: string
-          variables?: string[]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_templates_branch_id_fkey"
-            columns: ["branch_id"]
-            isOneToOne: false
-            referencedRelation: "branches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      system_job_runs: {
-        Row: {
-          created_at: string
-          duration_ms: number | null
-          ended_at: string | null
-          id: string
-          job_name: string
-          message: string | null
-          started_at: string
-          status: string
-          triggered_by: string
-        }
-        Insert: {
-          created_at?: string
-          duration_ms?: number | null
-          ended_at?: string | null
-          id?: string
-          job_name: string
-          message?: string | null
-          started_at?: string
-          status?: string
-          triggered_by?: string
-        }
-        Update: {
-          created_at?: string
-          duration_ms?: number | null
-          ended_at?: string | null
-          id?: string
-          job_name?: string
-          message?: string | null
-          started_at?: string
-          status?: string
-          triggered_by?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "system_job_runs_job_name_fkey"
-            columns: ["job_name"]
-            isOneToOne: false
-            referencedRelation: "system_jobs"
-            referencedColumns: ["job_name"]
-          },
-        ]
-      }
-      system_jobs: {
-        Row: {
-          created_at: string
-          cron_command: string
-          description: string | null
-          display_name: string
-          display_name_zh: string
-          fail_count: number
-          id: string
-          is_enabled: boolean
-          is_schedule_editable: boolean
-          job_name: string
-          last_run_at: string | null
-          last_run_message: string | null
-          last_run_ms: number | null
-          last_run_status: string | null
-          min_interval_minutes: number | null
-          run_count: number
-          schedule_hkt_label: string
-          schedule_hkt_label_zh: string
-          schedule_utc: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          cron_command?: string
-          description?: string | null
-          display_name: string
-          display_name_zh: string
-          fail_count?: number
-          id?: string
-          is_enabled?: boolean
-          is_schedule_editable?: boolean
-          job_name: string
-          last_run_at?: string | null
-          last_run_message?: string | null
-          last_run_ms?: number | null
-          last_run_status?: string | null
-          min_interval_minutes?: number | null
-          run_count?: number
-          schedule_hkt_label: string
-          schedule_hkt_label_zh: string
-          schedule_utc: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          cron_command?: string
-          description?: string | null
-          display_name?: string
-          display_name_zh?: string
-          fail_count?: number
-          id?: string
-          is_enabled?: boolean
-          is_schedule_editable?: boolean
-          job_name?: string
-          last_run_at?: string | null
-          last_run_message?: string | null
-          last_run_ms?: number | null
-          last_run_status?: string | null
-          min_interval_minutes?: number | null
-          run_count?: number
-          schedule_hkt_label?: string
-          schedule_hkt_label_zh?: string
-          schedule_utc?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-    }
     Views: {
       [_ in never]: never
     }
@@ -2452,7 +2054,6 @@ export type Database = {
           deleted_at: string | null
           email: string
           id: string
-          is_shared_device: boolean
           name: string
           name_zh: string | null
           phone: string | null
@@ -2476,14 +2077,6 @@ export type Database = {
         Returns: boolean
       }
       has_branch_access: { Args: { p_branch_id: string }; Returns: boolean }
-      increment_system_job_counter: {
-        Args: { p_job_name: string; p_success: boolean }
-        Returns: undefined
-      }
-      reschedule_job: {
-        Args: { p_job_name: string; p_schedule: string; p_command: string }
-        Returns: undefined
-      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
