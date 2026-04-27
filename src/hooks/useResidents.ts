@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
 export type ResidentStatus = Enums<"resident_status">;
+type RiskLevel = Enums<"risk_level">;
 
 export type ResidentRow = Tables<"residents"> & {
   locations: { code: string; name: string } | null;
@@ -12,6 +13,7 @@ interface UseResidentsParams {
   branchId: string | null;
   search?: string;
   status?: ResidentStatus | "ALL" | null;
+  riskLevel?: RiskLevel | null;
   page?: number;
   pageSize?: number;
 }
@@ -23,6 +25,7 @@ export function useResidents({
   branchId,
   search,
   status,
+  riskLevel,
   page = 1,
   pageSize = 20,
 }: UseResidentsParams) {
@@ -30,7 +33,7 @@ export function useResidents({
   const statusKey = status && status !== "ALL" ? status : null;
 
   const query = useQuery({
-    queryKey: ["residents", branchId, trimmed, statusKey, page, pageSize],
+    queryKey: ["residents", branchId, trimmed, statusKey, riskLevel ?? null, page, pageSize],
     enabled: !!branchId,
     queryFn: async () => {
       if (!branchId) return { rows: [] as ResidentRow[], count: 0 };
@@ -45,6 +48,7 @@ export function useResidents({
         .is("deleted_at", null);
 
       if (statusKey) q = q.eq("status", statusKey);
+      if (riskLevel) q = q.eq("risk_level", riskLevel);
 
       if (trimmed.length > 0) {
         // Escape commas/parens in search input for the .or() expression

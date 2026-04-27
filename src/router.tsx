@@ -1,6 +1,15 @@
 import { createRouter, useRouter } from "@tanstack/react-router";
 import { QueryClient } from "@tanstack/react-query";
 import { routeTree } from "./routeTree.gen";
+import { Spinner } from "@/components/hms";
+
+function PendingComponent() {
+  return (
+    <div className="flex items-center justify-center h-64 w-full">
+      <Spinner size="lg" />
+    </div>
+  );
+}
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -75,6 +84,8 @@ export const getRouter = () => {
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
+    defaultPendingComponent: PendingComponent,
+    defaultPendingMs: 300,
   });
 
   return router;

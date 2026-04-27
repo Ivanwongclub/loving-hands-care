@@ -120,15 +120,10 @@ function ResidentsListTab({ branchId }: { branchId: string | null }) {
     branchId,
     search: debounced,
     status: statusFilter,
+    riskLevel: riskFilter !== "ALL" ? riskFilter : null,
     page,
     pageSize: 20,
   });
-
-  // Client-side risk filter (server hook does not filter risk)
-  const filtered = useMemo(() => {
-    if (riskFilter === "ALL") return residents;
-    return residents.filter((r) => r.risk_level === riskFilter);
-  }, [residents, riskFilter]);
 
   const totalPages = Math.max(1, Math.ceil(total / 20));
 
@@ -283,7 +278,7 @@ function ResidentsListTab({ branchId }: { branchId: string | null }) {
       ) : (
         <Table<ResidentRow>
           columns={columns}
-          rows={filtered}
+          rows={residents}
           rowKey={(r) => r.id}
           onRowClick={(r) => navigate({ to: "/residents/$id", params: { id: r.id } })}
           empty={

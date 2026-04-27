@@ -7,7 +7,7 @@ import {
   Upload, Settings, LogOut, Languages, ChevronDown, UserPlus, ExternalLink,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
-import { Avatar, ContextSwitcher, Inline, Stack, Text } from "@/components/hms";
+import { Alert, Avatar, Button, ContextSwitcher, Inline, Stack, Text } from "@/components/hms";
 import { useAuth } from "@/lib/AuthContext";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
@@ -63,7 +63,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
   const loc = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const { staff } = useCurrentStaff();
+  const { staff, isLoading: staffLoading } = useCurrentStaff();
   const { branches } = useBranches();
   const currentBranch = branches[0];
   const branchLabel = currentBranch ? `${currentBranch.name_zh}` : t("common.loading");
@@ -82,6 +82,19 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
     await signOut();
     void navigate({ to: "/login" });
   };
+
+  if (!staffLoading && !staff) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-8">
+        <Alert
+          severity="error"
+          title="帳戶設定錯誤"
+          description="你的帳戶未連結至任何員工記錄。請聯絡系統管理員。"
+        />
+        <Button variant="ghost" onClick={handleSignOut}>登出</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full" style={{ backgroundColor: "var(--bg-page)" }}>

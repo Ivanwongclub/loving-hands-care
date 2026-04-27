@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Stack, Heading, Text, PINField, Button, Alert } from "@/components/hms";
+import { Stack, Heading, Text, PINField, Button, Alert, Spinner } from "@/components/hms";
+import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 
 export const Route = createFileRoute("/pin-setup")({
   component: PINSetupPage,
@@ -9,7 +10,23 @@ export const Route = createFileRoute("/pin-setup")({
 
 function PINSetupPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { staff, isLoading } = useCurrentStaff();
   const [pin, setPin] = useState("");
+
+  useEffect(() => {
+    if (!isLoading && staff?.pin_hash) {
+      void navigate({ to: "/dashboard", replace: true });
+    }
+  }, [staff, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full grid place-items-center" style={{ backgroundColor: "var(--bg-page)" }}>
+        <Spinner size="lg" />
+      </div>
+    );
+  }
   const [confirm, setConfirm] = useState("");
   const [done, setDone] = useState(false);
   const mismatch = pin.length === 4 && confirm.length === 4 && pin !== confirm;

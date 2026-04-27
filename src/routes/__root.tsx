@@ -1,9 +1,11 @@
 import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import "@/i18n";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/AuthContext";
+import { Spinner } from "@/components/hms";
 
 interface RouterContext {
   queryClient: QueryClient;
@@ -80,7 +82,13 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Outlet />
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-64 w-full">
+            <Spinner size="lg" />
+          </div>
+        }>
+          <Outlet />
+        </Suspense>
       </AuthProvider>
     </QueryClientProvider>
   );
