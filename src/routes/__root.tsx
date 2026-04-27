@@ -1,11 +1,13 @@
 import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
-import { Suspense } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Suspense, useEffect } from "react";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 
 import "@/i18n";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/AuthContext";
 import { Spinner } from "@/components/hms";
+import { useCurrentStaff } from "@/hooks/useCurrentStaff";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RouterContext {
   queryClient: QueryClient;
@@ -63,6 +65,90 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   notFoundComponent: NotFoundComponent,
 });
 
+// Fires once after login to warm the React Query cache for the most-visited pages.
+// queryKeys must exactly match the keys used in useResidents / useTasks / useAlerts / useBranches.
+function PrefetchWarmup() {
+  const queryClient = useQueryClient();
+  const { staff } = useCurrentStaff();
+
+  useEffect(() => {
+    if (!staff) return;
+    const branchId = (staff.branch_ids ?? [])[0] ?? null;
+    if (!branchId) return;
+
+    // ["branches", staff.id] — matches useBranches queryKey
+    void queryClient.prefetchQuery({
+      queryKey: ["branches", staff.id],
+      staleTime: 5 * 60_000,
+      queryFn: async () => {
+        let q = supabase.from("branches").select("*").eq("is_active", true);
+        if (staff.role !== "SYSTEM_ADMIN") {
+          if (!staff.branch_ids?.length) return [];
+          q = q.in("id", staff.branch_ids);
+        }
+        const { data } = await q.order("name_zh", { ascending: true });
+        return data ?? [];
+      },
+    });
+
+    // ["residents", branchId, "", null, null, 1, 20] — matches useResidents default call
+    void queryClient.prefetchQuery({
+      queryKey: ["residents", branchId, "", null, null, 1, 20],
+      staleTime: 5 * 60_000,
+      queryFn: async () => {
+        const { data, count } = await supabase
+          .from("residents")
+          .select("*, locations:bed_id(code, name)", { count: "exact" })
+          .eq("branch_id", branchId)
+          .is("deleted_at", null)
+          .order("name_zh", { ascending: true })
+          .range(0, 19);
+        return { rows: data ?? [], count: count ?? 0 };
+      },
+    });
+
+    // ["tasks", null, branchId, null, 1, 50] — matches useTasks default call in dashboard
+    void queryClient.prefetchQuery({
+      queryKey: ["tasks", null, branchId, null, 1, 50],
+      staleTime: 5 * 60_000,
+      queryFn: async () => {
+        const { data, count } = await supabase
+          .from("tasks")
+          .select(
+            "*, assignee:assigned_to(name, name_zh), completer:completed_by(name, name_zh), resident:resident_id(id, name, name_zh)",
+            { count: "exact" },
+          )
+          .eq("branch_id", branchId)
+          .order("due_at", { ascending: true })
+          .range(0, 49);
+        return { rows: data ?? [], count: count ?? 0 };
+      },
+    });
+
+    // ["alerts", branchId, null, 1, 100] — matches useAlerts default call
+    void queryClient.prefetchQuery({
+      queryKey: ["alerts", branchId, null, 1, 100],
+      staleTime: 5 * 60_000,
+      queryFn: async () => {
+        const { data, count } = await supabase
+          .from("alerts")
+          .select(
+            "*, acknowledger:acknowledged_by(name, name_zh), resolver:resolved_by(name, name_zh), residents:resident_id(name, name_zh)",
+            { count: "exact" },
+          )
+          .eq("branch_id", branchId)
+          .order("triggered_at", { ascending: false })
+          .range(0, 99);
+        return { rows: data ?? [], total: count ?? 0 };
+      },
+    });
+  // staff.id is the only meaningful dependency — we only re-prefetch when the logged-in user changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staff?.id]);
+
+  return null;
+}
+
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -82,6 +168,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <PrefetchWarmup />
         <Suspense fallback={
           <div className="flex items-center justify-center h-64 w-full">
             <Spinner size="lg" />

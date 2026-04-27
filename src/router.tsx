@@ -71,9 +71,10 @@ export const getRouter = () => {
       queries: {
         // Cache aggressively across page navigations so branches/staff/residents
         // don't refetch on every route change. Most HMS data is not real-time.
-        staleTime: 60_000, // 1 minute
-        gcTime: 5 * 60_000, // 5 minutes
+        staleTime: 5 * 60_000,  // 5 minutes — staff/branches/residents don't change mid-session
+        gcTime: 10 * 60_000,    // 10 minutes
         refetchOnWindowFocus: false,
+        refetchOnMount: false,   // prevents refetch when navigating back to a visited page
         retry: 1,
       },
     },
@@ -82,10 +83,11 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
+    defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
     defaultPendingComponent: PendingComponent,
-    defaultPendingMs: 300,
+    defaultPendingMs: 100,
   });
 
   return router;

@@ -252,12 +252,7 @@ function KioskPage() {
         metadata: { source: "KIOSK", replayed: !!originalEventTime },
       });
 
-      // Stub family notification — wired in S3-C1
-      // eslint-disable-next-line no-console
-      console.log("[NOTIFY STUB] Would send WhatsApp to family", {
-        enrollment_id: enrollment.id,
-        event_type: nextEventType,
-      });
+      // TODO: wire attendance-notify Edge Function (WhatsApp Phase 2)
 
       const resident = enrollment.residents;
       const photoUrl = await getPhotoUrl(resident?.photo_storage_path ?? null);
