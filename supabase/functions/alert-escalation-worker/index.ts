@@ -32,8 +32,18 @@ serve(async (_req: Request) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   )
 
+  const runId = crypto.randomUUID()
+  const startMs = Date.now()
+
+  await supabase.from('system_job_runs').insert({
+    id: runId,
+    job_name: 'alert-escalation-worker',
+    started_at: new Date().toISOString(),
+    status: 'RUNNING',
+    triggered_by: 'CRON',
+  }).catch(console.error)
+
   try {
-    // Fetch all branches with their SLA config
     const { data: branches, error: branchErr } = await supabase
       .from('branches')
       .select('id, sla_config')
@@ -46,8 +56,6 @@ serve(async (_req: Request) => {
     for (const branch of branches ?? []) {
       const sla = readSLA(branch.sla_config)
 
-      // Fetch OPEN and ACKNOWLEDGED alerts for this branch
-      // that have not been resolved or dismissed
       const { data: alerts, error: alertErr } = await supabase
         .from('alerts')
         .select('id, status, escalation_level, triggered_at, last_escalated_at')
@@ -64,8 +72,6 @@ serve(async (_req: Request) => {
         const currentLevel = alert.escalation_level ?? 0
         const elapsed = minutesSince(alert.triggered_at)
 
-        // Determine if this alert should escalate based on its current level
-        // and how long it has been open
         let shouldEscalate = false
         let newLevel = currentLevel
 
@@ -79,13 +85,11 @@ serve(async (_req: Request) => {
           shouldEscalate = true
           newLevel = 3
         }
-        // Level 3 is max — no further auto-escalation
 
         if (!shouldEscalate) continue
 
         const nowIso = new Date().toISOString()
 
-        // Update the alert
         const { error: updateErr } = await supabase
           .from('alerts')
           .update({
@@ -100,7 +104,6 @@ serve(async (_req: Request) => {
           continue
         }
 
-        // Insert escalation history record
         const { error: escalErr } = await supabase
           .from('alert_escalations')
           .insert({
@@ -117,7 +120,6 @@ serve(async (_req: Request) => {
           console.error(`[escalation-worker] Failed to insert escalation for alert ${alert.id}:`, escalErr.message)
         }
 
-        // Insert audit log entry
         await supabase.from('audit_logs').insert({
           branch_id: branch.id,
           actor_id: null,
@@ -125,6 +127,7 @@ serve(async (_req: Request) => {
           action: 'ALERT_AUTO_ESCALATED',
           entity_type: 'alerts',
           entity_id: alert.id,
+          category: 'SYSTEM_JOB',
           before_state: { escalation_level: currentLevel, status: alert.status },
           after_state: { escalation_level: newLevel, last_escalated_at: nowIso },
           metadata: {
@@ -142,15 +145,59 @@ serve(async (_req: Request) => {
       }
     }
 
+    const durationMs = Date.now() - startMs
+    const msg = `Escalated ${totalEscalated} alerts`
+
+    await Promise.all([
+      supabase.from('system_job_runs').update({
+        ended_at: new Date().toISOString(),
+        status: 'SUCCESS',
+        message: msg,
+        duration_ms: durationMs,
+      }).eq('id', runId),
+      supabase.from('system_jobs').update({
+        last_run_at: new Date().toISOString(),
+        last_run_status: 'SUCCESS',
+        last_run_message: msg,
+        last_run_ms: durationMs,
+      }).eq('job_name', 'alert-escalation-worker'),
+      supabase.rpc('increment_system_job_counter', {
+        p_job_name: 'alert-escalation-worker',
+        p_success: true,
+      }),
+    ]).catch(console.error)
+
     return new Response(
       JSON.stringify({ success: true, escalated: totalEscalated }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
 
   } catch (err) {
-    console.error('[escalation-worker] Fatal error:', (err as Error).message)
+    const errMsg = (err as Error).message
+    const durationMs = Date.now() - startMs
+
+    await Promise.all([
+      supabase.from('system_job_runs').update({
+        ended_at: new Date().toISOString(),
+        status: 'FAILED',
+        message: errMsg,
+        duration_ms: durationMs,
+      }).eq('id', runId),
+      supabase.from('system_jobs').update({
+        last_run_at: new Date().toISOString(),
+        last_run_status: 'FAILED',
+        last_run_message: errMsg,
+        last_run_ms: durationMs,
+      }).eq('job_name', 'alert-escalation-worker'),
+      supabase.rpc('increment_system_job_counter', {
+        p_job_name: 'alert-escalation-worker',
+        p_success: false,
+      }),
+    ]).catch(console.error)
+
+    console.error('[escalation-worker] Fatal error:', errMsg)
     return new Response(
-      JSON.stringify({ error: (err as Error).message }),
+      JSON.stringify({ error: errMsg }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }

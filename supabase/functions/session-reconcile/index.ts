@@ -8,10 +8,18 @@ serve(async (_req: Request) => {
   )
 
   const today = new Date().toISOString().slice(0, 10)
+  const runId = crypto.randomUUID()
+  const startMs = Date.now()
+
+  await supabase.from('system_job_runs').insert({
+    id: runId,
+    job_name: 'session-reconcile',
+    started_at: new Date().toISOString(),
+    status: 'RUNNING',
+    triggered_by: 'CRON',
+  }).catch(console.error)
 
   try {
-    // Find sessions for today that have check_in_at but no check_out_at
-    // and are still in PRESENT or EXPECTED status
     const { data: incompleteSessions, error: fetchErr } = await supabase
       .from('attendance_sessions')
       .select('id, enrollment_id, branch_id, check_in_at')
@@ -23,13 +31,31 @@ serve(async (_req: Request) => {
     if (fetchErr) throw fetchErr
 
     if (!incompleteSessions || incompleteSessions.length === 0) {
+      const durationMs = Date.now() - startMs
+      const msg = 'No partial sessions found'
+
+      await Promise.all([
+        supabase.from('system_job_runs').update({
+          ended_at: new Date().toISOString(),
+          status: 'SUCCESS',
+          message: msg,
+          duration_ms: durationMs,
+        }).eq('id', runId),
+        supabase.from('system_jobs').update({
+          last_run_at: new Date().toISOString(),
+          last_run_status: 'SUCCESS',
+          last_run_message: msg,
+          last_run_ms: durationMs,
+        }).eq('job_name', 'session-reconcile'),
+        supabase.rpc('increment_system_job_counter', { p_job_name: 'session-reconcile', p_success: true }),
+      ]).catch(console.error)
+
       return new Response(
         JSON.stringify({ success: true, flagged: 0 }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
       )
     }
 
-    // Mark each as PARTIAL
     const ids = incompleteSessions.map((s) => s.id)
     const { error: updateErr } = await supabase
       .from('attendance_sessions')
@@ -38,7 +64,6 @@ serve(async (_req: Request) => {
 
     if (updateErr) throw updateErr
 
-    // Log each partial session to system_errors for DCU worker follow-up
     const errorRows = incompleteSessions.map((s) => ({
       branch_id: s.branch_id,
       source: 'session-reconcile',
@@ -52,15 +77,53 @@ serve(async (_req: Request) => {
 
     console.log(`[session-reconcile] Flagged ${incompleteSessions.length} partial sessions for ${today}`)
 
+    const durationMs = Date.now() - startMs
+    const msg = `Flagged ${incompleteSessions.length} partial sessions`
+
+    await Promise.all([
+      supabase.from('system_job_runs').update({
+        ended_at: new Date().toISOString(),
+        status: 'SUCCESS',
+        message: msg,
+        duration_ms: durationMs,
+      }).eq('id', runId),
+      supabase.from('system_jobs').update({
+        last_run_at: new Date().toISOString(),
+        last_run_status: 'SUCCESS',
+        last_run_message: msg,
+        last_run_ms: durationMs,
+      }).eq('job_name', 'session-reconcile'),
+      supabase.rpc('increment_system_job_counter', { p_job_name: 'session-reconcile', p_success: true }),
+    ]).catch(console.error)
+
     return new Response(
       JSON.stringify({ success: true, flagged: incompleteSessions.length }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
 
   } catch (err) {
+    const errMsg = String(err)
+    const durationMs = Date.now() - startMs
+
+    await Promise.all([
+      supabase.from('system_job_runs').update({
+        ended_at: new Date().toISOString(),
+        status: 'FAILED',
+        message: errMsg,
+        duration_ms: durationMs,
+      }).eq('id', runId),
+      supabase.from('system_jobs').update({
+        last_run_at: new Date().toISOString(),
+        last_run_status: 'FAILED',
+        last_run_message: errMsg,
+        last_run_ms: durationMs,
+      }).eq('job_name', 'session-reconcile'),
+      supabase.rpc('increment_system_job_counter', { p_job_name: 'session-reconcile', p_success: false }),
+    ]).catch(console.error)
+
     console.error('[session-reconcile] Error:', err)
     return new Response(
-      JSON.stringify({ error: String(err) }),
+      JSON.stringify({ error: errMsg }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }
