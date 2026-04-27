@@ -83,7 +83,9 @@
     "dcuAttendance": "DCU Attendance Today",
     "criticalAlert": "CRITICAL: Room 305 resident call bell unanswered for over 5 minutes",
     "recentTasks": "Recent Tasks",
-    "recentActivity": "Recent Activity"
+    "recentActivity": "Recent Activity",
+    "openAlertsDesc": "open alerts require attention",
+    "noActivity": "No recent activity"
   },
   "common": {
     "comingSoon": "Coming in next sprint",

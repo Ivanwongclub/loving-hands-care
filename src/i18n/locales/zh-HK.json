@@ -83,7 +83,9 @@
     "dcuAttendance": "今日出席",
     "criticalAlert": "危急警報：305 室院友未回應呼叫鈴超過 5 分鐘",
     "recentTasks": "最近任務",
-    "recentActivity": "近期活動"
+    "recentActivity": "近期活動",
+    "openAlertsDesc": "個警報待處理",
+    "noActivity": "暫無活動記錄"
   },
   "common": {
     "comingSoon": "下一期開發中",

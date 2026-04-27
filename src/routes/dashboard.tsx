@@ -1,59 +1,60 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { Users, BellRing, ListTodo, ClipboardCheck } from "lucide-react";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import {
   PageHeader, StatCard, Banner, Card, Table, type Column,
-  TableToolbar, Badge, Timeline, ActivityItem, Inline, Stack, Text,
+  TableToolbar, Badge, Timeline, ActivityItem, Text,
+  Skeleton, EmptyState,
 } from "@/components/hms";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import { useResidents } from "@/hooks/useResidents";
-import { useTasks } from "@/hooks/useTasks";
+import { useTasks, type TaskRow } from "@/hooks/useTasks";
 import { useAlerts } from "@/hooks/useAlerts";
 import { useBranches } from "@/hooks/useBranches";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
-interface TaskRow {
-  id: string;
-  resident: string;
-  task: string;
-  due: string;
-  assignee: string;
-  status: "pending" | "inProgress" | "overdue" | "completed";
-}
-
 function DashboardPage() {
   const { t } = useTranslation();
   const { branches } = useBranches();
   const branchId = branches[0]?.id ?? null;
-  const { residents } = useResidents({ branchId });
-  const { tasks: realTasks } = useTasks({ branchId });
-  const { alerts } = useAlerts({ branchId });
-  const overdueTasks = realTasks.filter(t => t.status === 'OVERDUE');
-  const openAlerts = alerts.filter(a => a.status === 'OPEN' || a.status === 'ACKNOWLEDGED');
+  const { residents, isLoading: residentsLoading } = useResidents({ branchId });
+  const { tasks, isLoading: tasksLoading } = useTasks({ branchId });
+  const { alerts, isLoading: alertsLoading } = useAlerts({ branchId });
+  const overdueTasks = tasks.filter((task) => task.status === "OVERDUE");
+  const openAlerts = alerts.filter((a) => a.status === "OPEN" || a.status === "ACKNOWLEDGED");
 
-  const tasks: TaskRow[] = [
-    { id: "T-1041", resident: "Chan Tai Man · 陳大文", task: "Blood pressure check", due: "10:00", assignee: "RN Lee", status: "overdue" },
-    { id: "T-1042", resident: "Wong Mei Ling · 黃美玲", task: "Insulin administration", due: "10:30", assignee: "RN Wong", status: "inProgress" },
-    { id: "T-1043", resident: "Lam Chi Kit · 林志傑", task: "Wound dressing", due: "11:00", assignee: "RN Cheung", status: "pending" },
-    { id: "T-1044", resident: "Ho Sau Lin · 何秀蓮", task: "Mobility assistance", due: "11:15", assignee: "HCA Tam", status: "pending" },
-    { id: "T-1045", resident: "Yip Kwok Wing · 葉國榮", task: "Medication: Warfarin", due: "11:30", assignee: "RN Lee", status: "pending" },
-  ];
+  const { data: auditLogs = [], isLoading: auditLoading } = useQuery({
+    queryKey: ["audit_logs_dashboard", branchId],
+    enabled: !!branchId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("audit_logs")
+        .select("id, action, entity_type, created_at, staff:actor_id(name, name_zh)")
+        .eq("branch_id", branchId!)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
-  const statusTone: Record<TaskRow["status"], "neutral" | "warning" | "info" | "error" | "success"> = {
-    pending: "neutral", inProgress: "info", overdue: "error", completed: "success",
+  const statusTone: Record<string, "neutral" | "warning" | "info" | "error" | "success"> = {
+    PENDING: "neutral", IN_PROGRESS: "info", OVERDUE: "error", COMPLETED: "success", CANCELLED: "neutral",
   };
 
   const cols: Column<TaskRow>[] = [
-    { key: "id", header: "ID", cell: (r) => <span className="font-mono type-body-sm">{r.id}</span>, width: 80 },
-    { key: "resident", header: t("nav.residents"), cell: (r) => r.resident },
-    { key: "task", header: t("nav.tasks"), cell: (r) => r.task },
-    { key: "due", header: "Due", cell: (r) => r.due, width: 80 },
-    { key: "assignee", header: "Assignee", cell: (r) => r.assignee, width: 120 },
-    { key: "status", header: "Status", cell: (r) => <Badge tone={statusTone[r.status]} dot>{t(`taskStatus.${r.status}`)}</Badge>, width: 130 },
+    { key: "id", header: "ID", cell: (r) => <span className="font-mono type-body-sm">{r.id.slice(-6).toUpperCase()}</span>, width: 80 },
+    { key: "resident_id", header: t("nav.residents"), cell: (r) => r.resident?.name_zh ?? r.resident?.name ?? "—" },
+    { key: "title", header: t("nav.tasks"), cell: (r) => r.title },
+    { key: "due_at", header: "Due", cell: (r) => r.due_at ? new Date(r.due_at).toLocaleTimeString("zh-HK", { hour: "2-digit", minute: "2-digit" }) : "—", width: 80 },
+    { key: "assigned_to", header: "Assignee", cell: (r) => r.assignee?.name_zh ?? r.assignee?.name ?? t("tasks.unassigned"), width: 120 },
+    { key: "status", header: "Status", cell: (r) => <Badge tone={statusTone[r.status] ?? "neutral"} dot>{t(`tasks.status.${r.status}`)}</Badge>, width: 130 },
   ];
 
   return (
@@ -61,21 +62,43 @@ function DashboardPage() {
       <AdminDesktopShell pageTitle={t("dashboard.title")}>
         <PageHeader
           title={t("dashboard.title")}
-          actions={<Badge tone="info" dot>Central Branch · 中央院舍</Badge>}
+          actions={<Badge tone="info" dot>{branches[0]?.name_zh ?? t("common.loading")}</Badge>}
         />
 
         {/* Stats — full width 4 columns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full mb-5">
-          <StatCard label={t("dashboard.residentsToday")} value={String(residents.length)} trend={{ direction: "up", value: "+2" }} icon={<Users size={18} />} />
-          <StatCard label={t("dashboard.openAlerts")} value={String(openAlerts.length)} tone="warning" icon={<BellRing size={18} />} />
-          <StatCard label={t("dashboard.overdueTasks")} value={String(overdueTasks.length)} tone="error" icon={<ListTodo size={18} />} />
-          <StatCard label={t("dashboard.dcuAttendance")} value={String(realTasks.length)} tone="success" icon={<ClipboardCheck size={18} />} />
+          {residentsLoading ? (
+            <Skeleton variant="block" height={92} />
+          ) : (
+            <StatCard label={t("dashboard.residentsToday")} value={String(residents.length)} icon={<Users size={18} />} />
+          )}
+          {alertsLoading ? (
+            <Skeleton variant="block" height={92} />
+          ) : (
+            <StatCard label={t("dashboard.openAlerts")} value={String(openAlerts.length)} tone="warning" icon={<BellRing size={18} />} />
+          )}
+          {tasksLoading ? (
+            <Skeleton variant="block" height={92} />
+          ) : (
+            <StatCard label={t("dashboard.overdueTasks")} value={String(overdueTasks.length)} tone="error" icon={<ListTodo size={18} />} />
+          )}
+          {tasksLoading ? (
+            <Skeleton variant="block" height={92} />
+          ) : (
+            <StatCard label={t("dashboard.dcuAttendance")} value={String(tasks.length)} tone="success" icon={<ClipboardCheck size={18} />} />
+          )}
         </div>
 
-        {/* Critical alert */}
-        <div className="mb-5">
-          <Banner severity="critical" title={t("dashboard.criticalAlert")} description="Escalation L2 · 已升級至二級" />
-        </div>
+        {/* Critical alert — only shown when open alerts exist */}
+        {openAlerts.length > 0 && (
+          <div className="mb-5">
+            <Banner
+              severity="critical"
+              title={t("dashboard.criticalAlert")}
+              description={`${openAlerts.length} ${t("dashboard.openAlertsDesc")}`}
+            />
+          </div>
+        )}
 
         {/* Two-column 60/40 — full width */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 w-full">
@@ -86,19 +109,46 @@ function DashboardPage() {
                 right={<Badge tone="neutral">{tasks.length} items</Badge>}
               />
             }>
-              <Table columns={cols} rows={tasks} rowKey={(r) => r.id} density="default" />
+              {tasksLoading ? (
+                <div style={{ padding: "var(--space-4)" }}>
+                  <Skeleton variant="row" />
+                  <Skeleton variant="row" />
+                  <Skeleton variant="row" />
+                </div>
+              ) : (
+                <Table columns={cols} rows={tasks} rowKey={(r) => r.id} density="default" />
+              )}
             </Card>
           </div>
 
           <div className="lg:col-span-2">
             <Card header={<Text className="type-h3">{t("dashboard.recentActivity")}</Text>}>
-              <Timeline>
-                <ActivityItem timestamp="09:42" actor="RN Lee" action="Administered Metformin to Chan Tai Man" tone="success" />
-                <ActivityItem timestamp="09:38" actor="HCA Tam" action="Recorded vitals for Room 204" tone="info" />
-                <ActivityItem timestamp="09:30" actor="System" action="Alert escalated: Room 305 call bell" tone="error" />
-                <ActivityItem timestamp="09:15" actor="RN Wong" action="Completed handover for morning shift" />
-                <ActivityItem timestamp="09:02" actor="Dr. Cheung" action="Approved ICP for Lam Chi Kit" tone="success" />
-              </Timeline>
+              {auditLoading ? (
+                <Skeleton variant="block" height={128} />
+              ) : auditLogs.length === 0 ? (
+                <EmptyState title={t("dashboard.noActivity")} />
+              ) : (
+                <Timeline>
+                  {auditLogs.map((log) => {
+                    const actor = (log as any).staff;
+                    const actorName = actor?.name_zh ?? actor?.name ?? t("audit.systemActor");
+                    const action = String(log.action);
+                    const tone = action.includes("ALERT") ? "error"
+                      : action.includes("INCIDENT") ? "warning"
+                      : action.includes("LOGIN") ? "info"
+                      : "success";
+                    return (
+                      <ActivityItem
+                        key={log.id}
+                        timestamp={new Date(log.created_at).toLocaleTimeString("zh-HK", { hour: "2-digit", minute: "2-digit" })}
+                        actor={actorName}
+                        action={`${log.action} · ${log.entity_type}`}
+                        tone={tone}
+                      />
+                    );
+                  })}
+                </Timeline>
+              )}
             </Card>
           </div>
         </div>
