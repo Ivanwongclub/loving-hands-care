@@ -223,7 +223,7 @@ function TallCard({ resident, records, isDismissed, onAdminister }: TallCardProp
 
   const cardInner = (
     <Card padding="none" className="overflow-hidden">
-      <Stack gap={0}>
+      <Stack gap={1}>
         {/* Identity */}
         <div style={{ padding: 16, paddingBottom: 12 }}>
           <Stack gap={2}>
@@ -244,7 +244,7 @@ function TallCard({ resident, records, isDismissed, onAdminister }: TallCardProp
               ) : (
                 <Avatar name={nameZh || nameEn || "?"} size="md" />
               )}
-              <Stack gap={0}>
+              <Stack gap={1}>
                 <Text size="md" className="font-semibold">{displayName}</Text>
                 {nameZh && nameEn && nameZh !== nameEn && (
                   <Text size="sm" color="tertiary">{nameEn}</Text>
@@ -286,7 +286,7 @@ function TallCard({ resident, records, isDismissed, onAdminister }: TallCardProp
         <div style={{ padding: 16, paddingTop: 12, paddingBottom: 12 }}>
           <Stack gap={2}>
             <Text
-              size="xs"
+              size="caption"
               color="tertiary"
               style={{ textTransform: "uppercase", letterSpacing: "0.06em" }}
             >
@@ -322,7 +322,7 @@ function TallCard({ resident, records, isDismissed, onAdminister }: TallCardProp
                     {formatTime(rec.due_at)} {drugLabel} {dose}
                   </Text>
                   <Text
-                    size="xs"
+                    size="caption"
                     style={{
                       color: isLate
                         ? "var(--status-error-accent)"
@@ -338,11 +338,11 @@ function TallCard({ resident, records, isDismissed, onAdminister }: TallCardProp
                     <Inline gap={3} align="center">
                       <Inline gap={1} align="center">
                         <StatusDot tone={rec.barcode_verified ? "success" : "neutral"} />
-                        <Text size="xs" color="tertiary">Barcode</Text>
+                        <Text size="caption" color="tertiary">Barcode</Text>
                       </Inline>
                       <Inline gap={1} align="center">
                         <StatusDot tone={rec.shift_pin_verified ? "success" : "neutral"} />
-                        <Text size="xs" color="tertiary">PIN</Text>
+                        <Text size="caption" color="tertiary">PIN</Text>
                       </Inline>
                     </Inline>
                   )}
