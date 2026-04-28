@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Eye, Inbox, AlertCircle, Bell, Pill, SlidersHorizontal, Building } from "lucide-react";
+import { Plus, Eye, Inbox, AlertCircle, Bell, Pill, SlidersHorizontal, Building, Users } from "lucide-react";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
@@ -11,13 +11,14 @@ import { useBranches, type Branch } from "@/hooks/useBranches";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { AddBranchModal } from "@/components/settings/AddBranchModal";
 import { BranchEditDrawer } from "@/components/settings/BranchEditDrawer";
+import { StaffSection } from "@/components/settings/StaffSection";
 import { AlertSLASection } from "@/components/alerts/AlertSLASection";
 import { EscalationEngineCard } from "@/components/alerts/EscalationEngineCard";
 import type { Enums } from "@/integrations/supabase/types";
 
 type BranchType = Enums<"branch_type">;
 
-type SectionKey = "branches" | "alerts" | "notifications" | "emar" | "system";
+type SectionKey = "branches" | "staff" | "alerts" | "notifications" | "emar" | "system";
 
 const BRANCH_TYPE_TONE: Record<BranchType, "info" | "success" | "neutral" | "warning"> = {
   CARE_HOME: "info",
@@ -30,15 +31,18 @@ function SettingsPage() {
   const { t } = useTranslation();
   const { staff } = useCurrentStaff();
   const isSysAdmin = staff?.role === "SYSTEM_ADMIN";
-  const [section, setSection] = useState<SectionKey>(isSysAdmin ? "branches" : "alerts");
+  const isBranchAdmin = staff?.role === "BRANCH_ADMIN";
+  const canManageStaff = isSysAdmin || isBranchAdmin;
+  const [section, setSection] = useState<SectionKey>(isSysAdmin ? "branches" : canManageStaff ? "staff" : "alerts");
 
   const sections: { key: SectionKey; label: string; icon: React.ReactNode; gated?: boolean }[] = ([
-    { key: "branches" as SectionKey, label: t("settings.sections.branches"), icon: <Building size={16} />, gated: true },
+    { key: "branches" as SectionKey, label: t("settings.sections.branches"), icon: <Building size={16} />, gated: !isSysAdmin },
+    { key: "staff" as SectionKey, label: t("settings.sections.staff"), icon: <Users size={16} />, gated: !canManageStaff },
     { key: "alerts" as SectionKey, label: t("settings.sections.alerts"), icon: <AlertCircle size={16} /> },
     { key: "notifications" as SectionKey, label: t("settings.sections.notifications"), icon: <Bell size={16} /> },
     { key: "emar" as SectionKey, label: t("settings.sections.emar"), icon: <Pill size={16} /> },
     { key: "system" as SectionKey, label: t("settings.sections.system"), icon: <SlidersHorizontal size={16} /> },
-  ]).filter((s) => !s.gated || isSysAdmin);
+  ]).filter((s) => !s.gated);
 
   return (
     <ProtectedRoute>
@@ -51,8 +55,9 @@ function SettingsPage() {
           />
           <div className="flex-1 min-w-0">
             {section === "branches" && isSysAdmin && <BranchesSection />}
+            {section === "staff" && canManageStaff && <StaffSection />}
             {section === "alerts" && <AlertsSettingsSection />}
-            {section !== "branches" && section !== "alerts" && <ComingSoonSection labelKey={`settings.sections.${section}`} />}
+            {section !== "branches" && section !== "alerts" && section !== "staff" && <ComingSoonSection labelKey={`settings.sections.${section}`} />}
           </div>
         </div>
       </AdminDesktopShell>
