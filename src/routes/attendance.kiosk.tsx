@@ -689,9 +689,16 @@ interface ManualOverrideDrawerProps {
   onClose: () => void;
   branchId: string | null;
   onSubmitted: () => void;
+  onRequestHighRiskCheckOut: (payload: {
+    residentId: string;
+    residentName: string;
+    wanderingNotes: string | null;
+    enrollmentId: string;
+    reason: string;
+  }) => void;
 }
 
-function ManualOverrideDrawer({ open, onClose, branchId, onSubmitted }: ManualOverrideDrawerProps) {
+function ManualOverrideDrawer({ open, onClose, branchId, onSubmitted, onRequestHighRiskCheckOut }: ManualOverrideDrawerProps) {
   const { t } = useTranslation();
   const { logAction } = useAuditLog();
   const [search, setSearch] = useState("");
