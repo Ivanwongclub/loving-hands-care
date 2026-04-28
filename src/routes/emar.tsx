@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pill, Shield } from "lucide-react";
+import { List, Pill, Shield } from "lucide-react";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
@@ -95,7 +95,7 @@ function DashboardBody({ branchId, staffId }: { branchId: string; staffId: strin
   const [date, setDate] = useState<string>(todayISO());
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [passMode, setPassMode] = useState(false);
+  const [passMode, setPassMode] = useState(true);
   const [sessionCompleted, setSessionCompleted] = useState<Set<string>>(new Set());
   const [adminRecord, setAdminRecord] = useState<PassModeRecord | null>(null);
 
@@ -244,7 +244,7 @@ function DashboardBody({ branchId, staffId }: { branchId: string; staffId: strin
     <Stack gap={4}>
       <PageHeader
         title={t("emar.dashboardTitle")}
-        description={branchName}
+        description={passMode ? branchName : `${branchName} · ${t("emar.pass.viewHistory")}`}
         actions={
           <Inline gap={3} align="end">
             <div style={{ width: 180 }}>
@@ -252,18 +252,22 @@ function DashboardBody({ branchId, staffId }: { branchId: string; staffId: strin
                 <TextField type="date" value={date} onChange={(e) => setDate(e.target.value)} />
               </FormField>
             </div>
-            {!passMode ? (
+            {passMode ? (
+              <Button
+                variant="ghost"
+                leadingIcon={<List size={16} />}
+                onClick={() => setPassMode(false)}
+              >
+                {t("emar.pass.viewHistory")}
+              </Button>
+            ) : (
               <Button
                 variant="primary"
                 leadingIcon={<Pill size={16} />}
-                onClick={() => setPassMode(true)}
+                onClick={() => { setPassMode(true); setSessionCompleted(new Set()); }}
                 disabled={dueRecordCount === 0}
               >
-                {t("emar.pass.start")} ({dueRecordCount})
-              </Button>
-            ) : (
-              <Button variant="ghost" onClick={handleEndSession}>
-                {t("emar.pass.endSession")}
+                {t("emar.pass.backToPass")}
               </Button>
             )}
           </Inline>

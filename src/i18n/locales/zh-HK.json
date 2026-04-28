@@ -1538,7 +1538,9 @@
       "noPendingMeds": "目前無待給藥物",
       "allCaughtUp": "所有藥物已處理",
       "sessionComplete": "本次工作完成",
-      "allMedsAdministered": "本次已處理 {{count}} 項藥物"
+      "allMedsAdministered": "本次已處理 {{count}} 項藥物",
+      "viewHistory": "歷史記錄",
+      "backToPass": "返回給藥"
     }
   },
   "staff": {
