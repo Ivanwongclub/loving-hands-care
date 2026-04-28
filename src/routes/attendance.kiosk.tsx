@@ -8,6 +8,7 @@ import { KioskShell } from "@/components/shells/KioskShell";
 import {
   Stack, Inline, Heading, Text, Button, Badge, Banner,
   Drawer, SearchField, Radio, TextField, FormField, Avatar, Spinner,
+  ConfirmDialog,
 } from "@/components/hms";
 import { supabase } from "@/integrations/supabase/client";
 import { useBranches } from "@/hooks/useBranches";
@@ -65,6 +66,15 @@ function KioskPage() {
   );
   const [queueCount, setQueueCount] = useState<number>(0);
   const [syncing, setSyncing] = useState<boolean>(false);
+  const [pendingHighRiskCheckOut, setPendingHighRiskCheckOut] = useState<{
+    enrollmentId: string;
+    residentName: string;
+    wanderingNotes: string | null;
+    photoPath: string | null;
+    eventTime: string;
+    qrCodeUUID?: string;
+    manual?: { residentId: string; reason: string };
+  } | null>(null);
 
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const processingRef = useRef<boolean>(false);
@@ -115,8 +125,9 @@ function KioskPage() {
   }, []);
 
   // Core scan processor. originalEventTime is provided when replaying a queued scan.
+  // skipHighRiskGate: when true, bypass the wandering HIGH-risk confirmation (after user confirms).
   const processScan = useCallback(
-    async (qrCodeUUID: string, originalEventTime?: string): Promise<void> => {
+    async (qrCodeUUID: string, originalEventTime?: string, skipHighRiskGate = false): Promise<void> => {
       if (!branchId) {
         setErrorMsg(t("kiosk.invalidQR"));
         setState("ERROR");
@@ -126,7 +137,7 @@ function KioskPage() {
       const { data: enrollment, error: eErr } = await supabase
         .from("dcu_enrollments")
         .select(
-          "id, status, resident_id, residents:resident_id(name_zh, name, photo_storage_path)",
+          "id, status, resident_id, residents:resident_id(name_zh, name, photo_storage_path, wandering_risk_level, wandering_risk_notes)",
         )
         .eq("qr_code_uuid", qrCodeUUID)
         .maybeSingle();
@@ -163,6 +174,25 @@ function KioskPage() {
 
       const nextEventType: "CHECK_IN" | "CHECK_OUT" = hasCheckIn ? "CHECK_OUT" : "CHECK_IN";
       const eventTime = originalEventTime ?? new Date().toISOString();
+
+      // HIGH-risk wandering gate (skip for queued replays — already confirmed at scan time)
+      const resForGate = enrollment.residents;
+      if (
+        nextEventType === "CHECK_OUT" &&
+        !skipHighRiskGate &&
+        !originalEventTime &&
+        resForGate?.wandering_risk_level === "HIGH"
+      ) {
+        setPendingHighRiskCheckOut({
+          enrollmentId: enrollment.id,
+          residentName: resForGate.name_zh ?? resForGate.name ?? "—",
+          wanderingNotes: resForGate.wandering_risk_notes ?? null,
+          photoPath: resForGate.photo_storage_path ?? null,
+          eventTime,
+          qrCodeUUID,
+        });
+        return;
+      }
 
       const { data: insertedEvent, error: insErr } = await supabase
         .from("attendance_events")
@@ -268,6 +298,98 @@ function KioskPage() {
       void qc.invalidateQueries({ queryKey: ["attendanceSessions"] });
     },
     [branchId, t, logAction, qc, getPhotoUrl],
+  );
+
+  // Performs a manual CHECK_OUT after the HIGH-risk gate is confirmed.
+  const performManualCheckOut = useCallback(
+    async (residentId: string, reason: string): Promise<void> => {
+      if (!branchId) return;
+      try {
+        const { data: enrollment, error: enrErr } = await supabase
+          .from("dcu_enrollments")
+          .select("id")
+          .eq("resident_id", residentId)
+          .eq("branch_id", branchId)
+          .eq("status", "ACTIVE")
+          .maybeSingle();
+        if (enrErr || !enrollment) throw enrErr ?? new Error(t("kiosk.enrollmentInactive"));
+
+        const nowIso = new Date().toISOString();
+        const today = todayDateStr();
+        const { data: inserted, error: insErr } = await supabase
+          .from("attendance_events")
+          .insert({
+            enrollment_id: enrollment.id,
+            branch_id: branchId,
+            event_type: "CHECK_OUT",
+            event_time: nowIso,
+            operator_type: "STAFF_MANUAL",
+            is_manual: true,
+            manual_reason: reason,
+          })
+          .select()
+          .single();
+        if (insErr || !inserted) throw insErr ?? new Error("Insert failed");
+
+        const { data: session } = await supabase
+          .from("attendance_sessions")
+          .select("id, check_in_at")
+          .eq("enrollment_id", enrollment.id)
+          .eq("session_date", today)
+          .maybeSingle();
+        const dur = session?.check_in_at
+          ? Math.max(
+              0,
+              Math.round(
+                (new Date(inserted.event_time).getTime() -
+                  new Date(session.check_in_at).getTime()) / 60000,
+              ),
+            )
+          : null;
+        if (session) {
+          await supabase
+            .from("attendance_sessions")
+            .update({
+              check_out_event_id: inserted.id,
+              check_out_at: inserted.event_time,
+              duration_minutes: dur,
+              status: "PRESENT",
+              swd_flagged: true,
+            })
+            .eq("id", session.id);
+        } else {
+          await supabase.from("attendance_sessions").insert({
+            enrollment_id: enrollment.id,
+            branch_id: branchId,
+            session_date: today,
+            check_out_event_id: inserted.id,
+            check_out_at: inserted.event_time,
+            status: "PARTIAL",
+            swd_flagged: true,
+          });
+        }
+
+        await logAction({
+          action: "DCU_CHECKOUT",
+          entity_type: "attendance_events",
+          entity_id: inserted.id,
+          branch_id: branchId,
+          after_state: {
+            enrollment_id: enrollment.id,
+            event_type: "CHECK_OUT",
+            event_time: inserted.event_time,
+          },
+          metadata: { manual: true, reason, wandering_high_risk_confirmed: true },
+        });
+
+        void qc.invalidateQueries({ queryKey: ["attendanceEvents"] });
+        void qc.invalidateQueries({ queryKey: ["attendanceSessions"] });
+      } catch (err) {
+        setErrorMsg(err instanceof Error ? err.message : String(err));
+        setState("ERROR");
+      }
+    },
+    [branchId, t, logAction, qc],
   );
 
   const syncOfflineQueue = useCallback(async () => {
@@ -516,12 +638,44 @@ function KioskPage() {
         open={state === "MANUAL_OVERRIDE"}
         onClose={() => setState("STANDBY")}
         branchId={branchId}
+        onRequestHighRiskCheckOut={(payload) => {
+          setPendingHighRiskCheckOut({
+            enrollmentId: payload.enrollmentId,
+            residentName: payload.residentName,
+            wanderingNotes: payload.wanderingNotes,
+            photoPath: null,
+            eventTime: new Date().toISOString(),
+            manual: { residentId: payload.residentId, reason: payload.reason },
+          });
+          setState("STANDBY");
+        }}
         onSubmitted={() => {
           void qc.invalidateQueries({ queryKey: ["attendanceEvents"] });
           void qc.invalidateQueries({ queryKey: ["attendanceSessions"] });
           setState("STANDBY");
         }}
       />
+
+      {pendingHighRiskCheckOut && (
+        <ConfirmDialog
+          open={true}
+          onClose={() => setPendingHighRiskCheckOut(null)}
+          onConfirm={() => {
+            const p = pendingHighRiskCheckOut;
+            setPendingHighRiskCheckOut(null);
+            if (p.manual) {
+              void performManualCheckOut(p.manual.residentId, p.manual.reason);
+            } else if (p.qrCodeUUID) {
+              void processScan(p.qrCodeUUID, undefined, true);
+            }
+          }}
+          title={t("wandering.checkOutWarning")}
+          summary={`${t("wandering.checkOutConfirm")} ${pendingHighRiskCheckOut.residentName}`}
+          consequence={pendingHighRiskCheckOut.wanderingNotes ?? undefined}
+          confirmLabel={t("wandering.checkOutProceed")}
+          cancelLabel={t("wandering.checkOutCancel")}
+        />
+      )}
     </KioskShell>
   );
 }
@@ -535,9 +689,16 @@ interface ManualOverrideDrawerProps {
   onClose: () => void;
   branchId: string | null;
   onSubmitted: () => void;
+  onRequestHighRiskCheckOut: (payload: {
+    residentId: string;
+    residentName: string;
+    wanderingNotes: string | null;
+    enrollmentId: string;
+    reason: string;
+  }) => void;
 }
 
-function ManualOverrideDrawer({ open, onClose, branchId, onSubmitted }: ManualOverrideDrawerProps) {
+function ManualOverrideDrawer({ open, onClose, branchId, onSubmitted, onRequestHighRiskCheckOut }: ManualOverrideDrawerProps) {
   const { t } = useTranslation();
   const { logAction } = useAuditLog();
   const [search, setSearch] = useState("");
@@ -591,6 +752,22 @@ function ManualOverrideDrawer({ open, onClose, branchId, onSubmitted }: ManualOv
         .maybeSingle();
       if (enrErr) throw enrErr;
       if (!enrollment) throw new Error(t("kiosk.enrollmentInactive"));
+
+      // HIGH-risk wandering gate for manual CHECK_OUT
+      if (
+        eventType === "CHECK_OUT" &&
+        selectedResident.wandering_risk_level === "HIGH"
+      ) {
+        setSubmitting(false);
+        onRequestHighRiskCheckOut({
+          residentId: selectedResident.id,
+          residentName: selectedResident.name_zh ?? selectedResident.name,
+          wanderingNotes: selectedResident.wandering_risk_notes ?? null,
+          enrollmentId: enrollment.id,
+          reason: reason.trim(),
+        });
+        return;
+      }
 
       const nowIso = new Date().toISOString();
       const today = todayDateStr();

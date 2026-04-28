@@ -23,6 +23,8 @@ import { IncidentsTab } from "@/components/incidents/IncidentsTab";
 import { AlertsTab } from "@/components/alerts/AlertsTab";
 import { MedicationTab } from "@/components/emar/MedicationTab";
 import { RestraintsTab } from "@/components/restraints/RestraintsTab";
+import { VaccinationsTab } from "@/components/vaccinations/VaccinationsTab";
+import { WanderingAssessmentModal } from "@/components/wandering/WanderingAssessmentModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
@@ -94,7 +96,7 @@ interface ConsentFlags {
   religious_eol_preferences?: string;
 }
 
-const CLINICAL_TABS = ["profile", "vitals", "wounds", "emar", "icp", "tasks", "incidents", "restraints"] as const;
+const CLINICAL_TABS = ["profile", "vitals", "wounds", "emar", "icp", "tasks", "incidents", "vaccinations", "restraints"] as const;
 const ADMIN_TABS = ["alerts", "contacts", "documents", "bed", "activity"] as const;
 type TabKey = (typeof CLINICAL_TABS)[number] | (typeof ADMIN_TABS)[number];
 const ALL_TABS: readonly TabKey[] = [...CLINICAL_TABS, ...ADMIN_TABS];
@@ -353,6 +355,7 @@ function ResidentDetailPage() {
               { value: "icp", label: t("icp.title") },
               { value: "tasks", label: t("tasks.title") },
               { value: "incidents", label: t("incidents.title") },
+              { value: "vaccinations", label: t("vaccinations.title") },
               { value: "restraints", label: t("restraints.title") },
             ]}
           />
@@ -375,10 +378,12 @@ function ResidentDetailPage() {
               resident={resident}
               canEdit={canEditProfile}
               canEditAdmin={canEditAdmin}
+              canEditClinical={canEditClinical}
               editMode={editMode}
               setEditMode={setEditMode}
               onSaved={fetchResident}
               logAction={logAction}
+              staffId={staff?.id ?? null}
             />
           )}
           {tab === "alerts" && (
@@ -462,6 +467,15 @@ function ResidentDetailPage() {
               residentId={id}
               branchId={resident.branch_id}
               staffId={staff?.id ?? null}
+              logAction={logAction}
+            />
+          )}
+          {tab === "vaccinations" && (
+            <VaccinationsTab
+              residentId={id}
+              branchId={resident.branch_id}
+              staffId={staff?.id ?? null}
+              staffRole={staff?.role ?? null}
               logAction={logAction}
             />
           )}
@@ -1379,10 +1393,12 @@ interface ProfileTabProps {
   resident: Resident;
   canEdit: boolean;
   canEditAdmin: boolean;
+  canEditClinical: boolean;
   editMode: boolean;
   setEditMode: (v: boolean) => void;
   onSaved: () => Promise<void> | void;
   logAction: LogActionFn;
+  staffId: string | null;
 }
 
 interface EditForm {
@@ -1394,8 +1410,13 @@ interface EditForm {
   language_preference: string;
 }
 
-function ProfileTab({ resident, canEdit, canEditAdmin, editMode, setEditMode, onSaved, logAction }: ProfileTabProps) {
+function ProfileTab({ resident, canEdit, canEditAdmin, canEditClinical, editMode, setEditMode, onSaved, logAction, staffId }: ProfileTabProps) {
   const { t } = useTranslation();
+  const [wanderingModalOpen, setWanderingModalOpen] = useState(false);
+  const wanderingLevel = (resident.wandering_risk_level ?? "NONE") as "NONE" | "LOW" | "MEDIUM" | "HIGH";
+  const wanderingTone: "error" | "warning" | "neutral" =
+    wanderingLevel === "HIGH" ? "error" :
+    wanderingLevel === "MEDIUM" ? "warning" : "neutral";
   const [form, setForm] = useState<EditForm>({
     name_zh: resident.name_zh,
     name: resident.name,
@@ -1554,6 +1575,49 @@ function ProfileTab({ resident, canEdit, canEditAdmin, editMode, setEditMode, on
         onSaved={onSaved}
         logAction={logAction}
       />
+
+      {/* Card 4b — Wandering Risk */}
+      <Card padding="md">
+        <Stack gap={3}>
+          <Inline justify="between" align="center">
+            <Heading level={3}>{t("wandering.title")}</Heading>
+            {canEditClinical && (
+              <Button variant="ghost" size="compact" onClick={() => setWanderingModalOpen(true)}>
+                {wanderingLevel === "NONE" ? t("wandering.assess") : t("wandering.reassess")}
+              </Button>
+            )}
+          </Inline>
+          <Inline gap={2} align="center">
+            <Text size="sm" color="tertiary">{t("wandering.label")}:</Text>
+            {wanderingLevel === "NONE" ? (
+              <Text size="sm">{t("wandering.NONE")}</Text>
+            ) : (
+              <Badge tone={wanderingTone} emphasis={wanderingLevel === "HIGH" ? "strong" : "subtle"}>
+                {t(`wandering.${wanderingLevel}`)}
+              </Badge>
+            )}
+          </Inline>
+          {resident.wandering_risk_notes && (
+            <Text size="sm" color="secondary">{resident.wandering_risk_notes}</Text>
+          )}
+          {resident.wandering_risk_assessed_at && (
+            <Text size="caption" color="tertiary">
+              {t("wandering.lastAssessment")}: {new Date(resident.wandering_risk_assessed_at).toISOString().slice(0, 10)}
+            </Text>
+          )}
+        </Stack>
+      </Card>
+
+      {wanderingModalOpen && (
+        <WanderingAssessmentModal
+          open={wanderingModalOpen}
+          onClose={() => setWanderingModalOpen(false)}
+          resident={resident}
+          staffId={staffId}
+          logAction={logAction}
+          onSaved={async () => { await onSaved(); }}
+        />
+      )}
 
       {/* Card 5 — Dietary */}
       <Card padding="md">
