@@ -1156,6 +1156,25 @@
     "detail": "Staff Detail",
     "profile": "Profile",
     "role": "Role",
+    "allRoles": "All roles",
+    "allStatuses": "All statuses",
+    "emptyTitle": "No staff yet",
+    "emptyDescription": "Invite staff to get started.",
+    "columns": {
+      "name": "Name",
+      "role": "Role",
+      "type": "Type",
+      "branches": "Branches",
+      "status": "Status"
+    },
+    "fields": {
+      "nameZh": "Chinese name",
+      "name": "English name",
+      "email": "Email",
+      "role": "Role",
+      "phone": "Phone",
+      "branches": "Branches"
+    },
     "roles": {
       "SYSTEM_ADMIN": "System Admin",
       "BRANCH_ADMIN": "Branch Admin",
