@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { CheckCircle2, ChevronLeft, Shield, XCircle } from "lucide-react";
 import {
-  Modal, Stack, Inline, Text, Heading, Button, Surface, Alert, Spinner, Divider, FormField, TextArea,
+  Modal, Stack, Inline, Text, Heading, Button, Surface, Alert, Spinner, Divider, FormField, TextArea, Avatar,
 } from "@/components/hms";
 import { supabase } from "@/integrations/supabase/client";
 import type { EMARRow } from "@/hooks/useEMARRecords";
@@ -23,6 +23,8 @@ interface AdministerModalProps {
   staffId: string;
   date: string;
   residentId: string;
+  residentPhotoPath: string | null;
+  residentPhotoDeclined: boolean;
   logAction: ReturnType<typeof useAuditLog>["logAction"];
 }
 
@@ -35,7 +37,8 @@ function nowTime(): string {
 }
 
 export function AdministerModal({
-  open, onClose, record, residentNameZh, residentName, branchId, staffId, date, residentId, logAction,
+  open, onClose, record, residentNameZh, residentName, branchId, staffId, date, residentId,
+  residentPhotoPath, residentPhotoDeclined, logAction,
 }: AdministerModalProps) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -249,6 +252,14 @@ export function AdministerModal({
 
   return (
     <Modal open={open} onClose={handleClose} title={title} size="lg">
+      <ResidentPhotoIdBanner
+        residentNameZh={residentNameZh}
+        residentName={residentName}
+        residentId={residentId}
+        branchId={branchId}
+        photoPath={residentPhotoPath}
+        photoDeclined={residentPhotoDeclined}
+      />
       {step === "SUCCESS" ? (
         <div
           style={{
@@ -432,6 +443,76 @@ export function AdministerModal({
         </Stack>
       )}
     </Modal>
+  );
+}
+
+function ResidentPhotoIdBanner({
+  residentNameZh,
+  residentName,
+  residentId: _residentId,
+  branchId: _branchId,
+  photoPath,
+  photoDeclined,
+}: {
+  residentNameZh: string;
+  residentName: string;
+  residentId: string;
+  branchId: string;
+  photoPath: string | null;
+  photoDeclined: boolean;
+}) {
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!photoPath || photoDeclined) return;
+    supabase.storage
+      .from("resident-photos")
+      .createSignedUrl(photoPath, 3600)
+      .then(({ data }) => {
+        if (data?.signedUrl) setSignedUrl(data.signedUrl);
+      });
+  }, [photoPath, photoDeclined]);
+
+  const initials = (residentNameZh || residentName || "?").slice(0, 2);
+
+  return (
+    <Surface
+      padding="sm"
+      style={{
+        borderRadius: "var(--radius-md)",
+        marginBottom: "var(--spacing-4)",
+        borderLeft: "3px solid var(--color-warning)",
+        background: "var(--color-warning-subtle)",
+      }}
+    >
+      <Inline gap={3} align="center">
+        {signedUrl ? (
+          <img
+            src={signedUrl}
+            alt={residentNameZh}
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: "50%",
+              objectFit: "cover",
+              flexShrink: 0,
+              border: "2px solid var(--color-warning)",
+            }}
+          />
+        ) : (
+          <Avatar size="lg" name={initials} />
+        )}
+        <Stack gap={1} style={{ flex: 1 }}>
+          <Text size="lg" style={{ fontWeight: 600, color: "var(--text-primary)" }}>
+            {residentNameZh}
+          </Text>
+          <Text size="sm" color="secondary">{residentName}</Text>
+          <Text size="sm" style={{ color: "var(--status-warning-text)", fontWeight: 500 }}>
+            ⚠ 請確認院友身份後給藥
+          </Text>
+        </Stack>
+      </Inline>
+    </Surface>
   );
 }
 

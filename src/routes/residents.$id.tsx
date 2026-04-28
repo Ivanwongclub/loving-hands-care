@@ -441,6 +441,8 @@ function ResidentDetailPage() {
               staffRole={staff?.role ?? null}
               residentNameZh={resident.name_zh}
               residentName={resident.name}
+              residentPhotoPath={resident.photo_storage_path ?? null}
+              residentPhotoDeclined={resident.photo_declined}
               logAction={logAction}
             />
           )}

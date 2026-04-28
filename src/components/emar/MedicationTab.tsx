@@ -23,6 +23,8 @@ interface MedicationTabProps {
   staffRole: Enums<"staff_role"> | null;
   residentNameZh: string;
   residentName: string;
+  residentPhotoPath: string | null;
+  residentPhotoDeclined: boolean;
   logAction: ReturnType<typeof useAuditLog>["logAction"];
 }
 
@@ -76,7 +78,8 @@ function scheduleTimes(o: MedOrderRow): string[] {
 }
 
 export function MedicationTab({
-  residentId, branchId, staffId, staffRole, residentNameZh, residentName, logAction,
+  residentId, branchId, staffId, staffRole, residentNameZh, residentName,
+  residentPhotoPath, residentPhotoDeclined, logAction,
 }: MedicationTabProps) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -237,6 +240,8 @@ export function MedicationTab({
         staffId={staffId ?? ""}
         date={date}
         residentId={residentId}
+        residentPhotoPath={residentPhotoPath}
+        residentPhotoDeclined={residentPhotoDeclined}
         logAction={logAction}
       />
     </Stack>
