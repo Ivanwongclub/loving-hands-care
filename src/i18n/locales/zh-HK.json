@@ -122,13 +122,34 @@
     "title": "控制台",
     "residentsToday": "今日院友",
     "openAlerts": "待處理警報",
-    "overdueTasks": "逾期任務",
+    "overdueTasks": "今日逾期任務",
     "dcuAttendance": "今日出席",
     "criticalAlert": "危急警報：305 室院友未回應呼叫鈴超過 5 分鐘",
     "recentTasks": "最近任務",
     "recentActivity": "近期活動",
     "openAlertsDesc": "個警報待處理",
-    "noActivity": "暫無活動記錄"
+    "noActivity": "暫無活動記錄",
+    "admittedResidents": "在院人數",
+    "dcuCheckins": "今日日護簽到",
+    "incidents24h": "24 小時內事故 {{count}} 宗",
+    "criticalAlertBanner": "{{count}} 項緊急警報需即時處理",
+    "viewAlerts": "查看警報",
+    "todayTasks": "今日任務",
+    "todayTasksEmpty": "今日暫無待辦任務",
+    "todayTasksEmptyHint": "良好開始 — 所有任務已完成或尚未到期",
+    "viewAllTasks": "查看全部",
+    "todayTaskMore": "其餘 {{count}} 項任務 — 查看全部",
+    "handover": {
+      "title": "交班摘要",
+      "alerts": "待處理警報",
+      "medsNext2h": "未來 2 小時藥物",
+      "recentActivity": "最近活動"
+    },
+    "empty": {
+      "noAlerts": "目前無警報",
+      "noMedsDue": "未來 2 小時無藥物",
+      "noActivity": "暫無活動記錄"
+    }
   },
   "common": {
     "comingSoon": "下一期開發中",
@@ -140,7 +161,8 @@
     "language": "語言",
     "retry": "重試",
     "saved": "已儲存",
-    "loading": "載入中..."
+    "loading": "載入中...",
+    "status": "狀態"
   },
   "settings": {
     "comingSoon": "即將推出",
@@ -628,7 +650,29 @@
     "summary": "摘要",
     "insufficientPermissions": "權限不足",
     "exportAuditLog": "匯出審計記錄",
-    "exportSuccess": "審計記錄已匯出"
+    "exportSuccess": "審計記錄已匯出",
+    "actions": {
+      "RESIDENT_ADMITTED": "院友入住",
+      "RESIDENT_DISCHARGED": "院友離院",
+      "RESIDENT_UPDATED": "院友資料更新",
+      "RESIDENT_TRANSFERRED": "床位轉移",
+      "EMAR_ADMINISTERED": "已給藥",
+      "EMAR_REFUSED": "拒絕用藥",
+      "EMAR_HELD": "暫停用藥",
+      "ALERT_TRIGGERED": "警報觸發",
+      "ALERT_ACKNOWLEDGED": "警報已確認",
+      "ALERT_RESOLVED": "警報已解決",
+      "ALERT_ESCALATED": "警報已升級",
+      "ALERT_AUTO_ESCALATED": "警報自動升級",
+      "TASK_COMPLETED": "任務完成",
+      "TASK_CANCELLED": "任務取消",
+      "INCIDENT_REPORTED": "事故報告",
+      "INCIDENT_RESOLVED": "事故解決",
+      "VITALS_RECORDED": "生命體徵記錄",
+      "WOUND_RECORDED": "傷口記錄",
+      "STAFF_LOGIN": "員工登入",
+      "STAFF_INVITED": "邀請員工"
+    }
   },
   "reports": {
     "title": "報表中心",

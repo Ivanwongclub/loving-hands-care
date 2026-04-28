@@ -122,13 +122,34 @@
     "title": "Dashboard",
     "residentsToday": "Residents Today",
     "openAlerts": "Open Alerts",
-    "overdueTasks": "Overdue Tasks",
+    "overdueTasks": "Today's Overdue Tasks",
     "dcuAttendance": "DCU Attendance Today",
     "criticalAlert": "CRITICAL: Room 305 resident call bell unanswered for over 5 minutes",
     "recentTasks": "Recent Tasks",
     "recentActivity": "Recent Activity",
     "openAlertsDesc": "open alerts require attention",
-    "noActivity": "No recent activity"
+    "noActivity": "No recent activity",
+    "admittedResidents": "Admitted Residents",
+    "dcuCheckins": "DCU Check-ins Today",
+    "incidents24h": "{{count}} incidents in 24h",
+    "criticalAlertBanner": "{{count}} critical alert(s) require immediate action",
+    "viewAlerts": "View alerts",
+    "todayTasks": "Today's Tasks",
+    "todayTasksEmpty": "No tasks due today",
+    "todayTasksEmptyHint": "Great start — everything is completed or not yet due",
+    "viewAllTasks": "View all",
+    "todayTaskMore": "{{count}} more task(s) — view all",
+    "handover": {
+      "title": "Handover Summary",
+      "alerts": "Open Alerts",
+      "medsNext2h": "Meds (next 2h)",
+      "recentActivity": "Recent Activity"
+    },
+    "empty": {
+      "noAlerts": "No active alerts",
+      "noMedsDue": "No medications due in the next 2 hours",
+      "noActivity": "No recent activity"
+    }
   },
   "common": {
     "comingSoon": "Coming in next sprint",
@@ -140,7 +161,8 @@
     "language": "Language",
     "retry": "Retry",
     "saved": "Saved",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "status": "Status"
   },
   "settings": {
     "comingSoon": "Coming in a future sprint",
@@ -628,7 +650,29 @@
     "summary": "Summary",
     "insufficientPermissions": "Insufficient permissions",
     "exportAuditLog": "Export Audit Log",
-    "exportSuccess": "Audit log exported"
+    "exportSuccess": "Audit log exported",
+    "actions": {
+      "RESIDENT_ADMITTED": "Resident admitted",
+      "RESIDENT_DISCHARGED": "Resident discharged",
+      "RESIDENT_UPDATED": "Resident updated",
+      "RESIDENT_TRANSFERRED": "Bed transfer",
+      "EMAR_ADMINISTERED": "Medication administered",
+      "EMAR_REFUSED": "Medication refused",
+      "EMAR_HELD": "Medication held",
+      "ALERT_TRIGGERED": "Alert triggered",
+      "ALERT_ACKNOWLEDGED": "Alert acknowledged",
+      "ALERT_RESOLVED": "Alert resolved",
+      "ALERT_ESCALATED": "Alert escalated",
+      "ALERT_AUTO_ESCALATED": "Alert auto-escalated",
+      "TASK_COMPLETED": "Task completed",
+      "TASK_CANCELLED": "Task cancelled",
+      "INCIDENT_REPORTED": "Incident reported",
+      "INCIDENT_RESOLVED": "Incident resolved",
+      "VITALS_RECORDED": "Vitals recorded",
+      "WOUND_RECORDED": "Wound recorded",
+      "STAFF_LOGIN": "Staff login",
+      "STAFF_INVITED": "Staff invited"
+    }
   },
   "reports": {
     "title": "Reports Center",
