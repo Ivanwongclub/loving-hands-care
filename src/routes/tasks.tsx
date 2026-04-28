@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { MoreHorizontal } from "lucide-react";
+import { ClipboardList, List, MoreHorizontal } from "lucide-react";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
@@ -36,6 +36,7 @@ import { useTasks, type TaskRow, type TaskStatus, type TaskType } from "@/hooks/
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { RoundModeView } from "@/components/tasks/RoundModeView";
 
 const STATUS_TONE: Record<TaskStatus, "neutral" | "warning" | "success" | "error" | "info"> = {
   PENDING: "neutral",
@@ -74,6 +75,19 @@ function TasksDashboardPage() {
   const [cancelling, setCancelling] = useState<TaskRow | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  // Round mode state
+  const [roundMode, setRoundMode] = useState(true);
+  const [scopeFilter, setScopeFilter] = useState<"me" | "all">("all");
+  const [scopeInitialised, setScopeInitialised] = useState(false);
+  const [sessionCompleted, setSessionCompleted] = useState<Set<string>>(new Set());
+
+  // Initialise default scope based on current staff role
+  useEffect(() => {
+    if (scopeInitialised || !staff) return;
+    setScopeFilter(staff.role === "NURSE" || staff.role === "CAREGIVER" ? "me" : "all");
+    setScopeInitialised(true);
+  }, [staff, scopeInitialised]);
 
   const { tasks, isLoading } = useTasks({ branchId, status: statusFilter, pageSize: 200 });
 
@@ -130,6 +144,51 @@ function TasksDashboardPage() {
       return true;
     });
   }, [tasks, typeFilter, search]);
+
+  // Round mode: filter to active + scope, sort overdue-first
+  const roundTasks = useMemo(() => {
+    let filtered = tasks.filter(
+      (tk) => tk.status === "PENDING" || tk.status === "IN_PROGRESS" || tk.status === "OVERDUE",
+    );
+    if (scopeFilter === "me" && staff) {
+      filtered = filtered.filter(
+        (tk) => tk.assigned_to === staff.id || tk.assigned_to === null,
+      );
+    }
+    return [...filtered].sort((a, b) => {
+      if (a.status === "OVERDUE" && b.status !== "OVERDUE") return -1;
+      if (b.status === "OVERDUE" && a.status !== "OVERDUE") return 1;
+      return new Date(a.due_at).getTime() - new Date(b.due_at).getTime();
+    });
+  }, [tasks, scopeFilter, staff]);
+
+  const dueRoundCount = roundTasks.length;
+
+  // Detect newly-completed tasks during round (5-min heuristic, mirrors eMAR)
+  useEffect(() => {
+    if (!roundMode) return;
+    const fiveMin = 5 * 60_000;
+    const now = Date.now();
+    let next: Set<string> | null = null;
+    for (const task of tasks) {
+      if (
+        task.status === "COMPLETED" &&
+        task.completed_at &&
+        now - new Date(task.completed_at).getTime() < fiveMin &&
+        !sessionCompleted.has(task.id)
+      ) {
+        if (!next) next = new Set(sessionCompleted);
+        next.add(task.id);
+      }
+    }
+    if (next) setSessionCompleted(next);
+  }, [tasks, roundMode, sessionCompleted]);
+
+  const handleEndRound = () => {
+    setRoundMode(false);
+    setSessionCompleted(new Set());
+  };
+  const handleClearCompleted = () => setSessionCompleted(new Set());
 
   const invalidate = () => void qc.invalidateQueries({ queryKey: ["tasks"] });
 
@@ -290,91 +349,141 @@ function TasksDashboardPage() {
         <Stack gap={4}>
           <PageHeader
             title={t("tasks.overviewTitle")}
-            description={t("tasks.branchDashboard")}
+            description={
+              roundMode
+                ? t("tasks.branchDashboard")
+                : `${t("tasks.branchDashboard")} · ${t("tasks.round.history")}`
+            }
+            actions={
+              roundMode ? (
+                <Button
+                  variant="ghost"
+                  leadingIcon={<List size={16} />}
+                  onClick={() => setRoundMode(false)}
+                >
+                  {t("tasks.round.viewHistory")}
+                </Button>
+              ) : (
+                <Button
+                  variant="primary"
+                  leadingIcon={<ClipboardList size={16} />}
+                  onClick={() => {
+                    setRoundMode(true);
+                    setSessionCompleted(new Set());
+                  }}
+                  disabled={dueRoundCount === 0}
+                >
+                  {t("tasks.round.backToRound")} ({dueRoundCount})
+                </Button>
+              )
+            }
           />
 
-          {stats.overdue > 0 && (
-            <Alert
-              severity="warning"
-              description={t("tasks.overdueWarning", { count: stats.overdue })}
-            />
-          )}
-
-          <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
-            <StatCard label={t("tasks.todayDue")} value={stats.dueToday} tone="info" />
-            <StatCard label={t("tasks.overdueCount")} value={stats.overdue} tone="error" />
-            <StatCard label={t("tasks.pendingCount")} value={stats.pending} tone="neutral" />
-            <StatCard label={t("tasks.completedToday")} value={stats.completedToday} tone="success" />
-          </div>
-
-          <FilterBar>
-            <div style={{ width: 200 }}>
-              <Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter((e.target as HTMLSelectElement).value as TaskStatus | "ALL")}
-                options={[
-                  { value: "ALL", label: t("tasks.status.ALL") },
-                  { value: "PENDING", label: t("tasks.status.PENDING") },
-                  { value: "IN_PROGRESS", label: t("tasks.status.IN_PROGRESS") },
-                  { value: "OVERDUE", label: t("tasks.status.OVERDUE") },
-                  { value: "COMPLETED", label: t("tasks.status.COMPLETED") },
-                  { value: "CANCELLED", label: t("tasks.status.CANCELLED") },
-                ]}
+          {roundMode ? (
+            isLoading ? (
+              <div className="flex items-center justify-center" style={{ minHeight: 240 }}>
+                <Spinner size="md" />
+              </div>
+            ) : (
+              <RoundModeView
+                tasks={roundTasks}
+                sessionCompleted={sessionCompleted}
+                scopeFilter={scopeFilter}
+                onScopeChange={setScopeFilter}
+                onComplete={(task) => { setCompletionNotes(""); setCompleting(task); }}
+                onCancel={(task) => setCancelling(task)}
+                onViewResident={(rid) => goToResident(rid)}
+                onEndRound={handleEndRound}
+                onClearCompleted={handleClearCompleted}
+                staffRole={staff?.role ?? null}
               />
-            </div>
-            <div style={{ width: 200 }}>
-              <Select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter((e.target as HTMLSelectElement).value as TaskType | "ALL")}
-                options={[
-                  { value: "ALL", label: t("tasks.allTypes") },
-                  { value: "ADL", label: t("tasks.type.ADL") },
-                  { value: "VITALS", label: t("tasks.type.VITALS") },
-                  { value: "MEDICATION_PREP", label: t("tasks.type.MEDICATION_PREP") },
-                  { value: "WOUND_CARE", label: t("tasks.type.WOUND_CARE") },
-                  { value: "REPOSITIONING", label: t("tasks.type.REPOSITIONING") },
-                  { value: "ASSESSMENT", label: t("tasks.type.ASSESSMENT") },
-                  { value: "FOLLOW_UP", label: t("tasks.type.FOLLOW_UP") },
-                  { value: "OTHER", label: t("tasks.type.OTHER") },
-                ]}
-              />
-            </div>
-            <div style={{ flex: 1, minWidth: 220 }}>
-              <SearchField
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("tasks.searchPlaceholder")}
-              />
-            </div>
-            <div style={{ marginLeft: "auto" }}>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  toast.message(t("tasks.addFromResidentHint"));
-                  void navigate({ to: "/residents" });
-                }}
-              >
-                {t("tasks.new")}
-              </Button>
-            </div>
-          </FilterBar>
-
-          {isLoading ? (
-            <div className="flex items-center justify-center" style={{ minHeight: 240 }}>
-              <Spinner size="md" />
-            </div>
-          ) : filtered.length === 0 ? (
-            <Card padding="lg">
-              <EmptyState title={t("tasks.noTasksToday")} />
-            </Card>
+            )
           ) : (
-            <Table<TaskRow>
-              columns={columns}
-              rows={filtered}
-              rowKey={(r) => r.id}
-              onRowClick={(r) => r.resident && goToResident(r.resident.id)}
-              empty={<EmptyState title={t("tasks.noTasksToday")} />}
-            />
+            <>
+              {stats.overdue > 0 && (
+                <Alert
+                  severity="warning"
+                  description={t("tasks.overdueWarning", { count: stats.overdue })}
+                />
+              )}
+
+              <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+                <StatCard label={t("tasks.todayDue")} value={stats.dueToday} tone="info" />
+                <StatCard label={t("tasks.overdueCount")} value={stats.overdue} tone="error" />
+                <StatCard label={t("tasks.pendingCount")} value={stats.pending} tone="neutral" />
+                <StatCard label={t("tasks.completedToday")} value={stats.completedToday} tone="success" />
+              </div>
+
+              <FilterBar>
+                <div style={{ width: 200 }}>
+                  <Select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter((e.target as HTMLSelectElement).value as TaskStatus | "ALL")}
+                    options={[
+                      { value: "ALL", label: t("tasks.status.ALL") },
+                      { value: "PENDING", label: t("tasks.status.PENDING") },
+                      { value: "IN_PROGRESS", label: t("tasks.status.IN_PROGRESS") },
+                      { value: "OVERDUE", label: t("tasks.status.OVERDUE") },
+                      { value: "COMPLETED", label: t("tasks.status.COMPLETED") },
+                      { value: "CANCELLED", label: t("tasks.status.CANCELLED") },
+                    ]}
+                  />
+                </div>
+                <div style={{ width: 200 }}>
+                  <Select
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter((e.target as HTMLSelectElement).value as TaskType | "ALL")}
+                    options={[
+                      { value: "ALL", label: t("tasks.allTypes") },
+                      { value: "ADL", label: t("tasks.type.ADL") },
+                      { value: "VITALS", label: t("tasks.type.VITALS") },
+                      { value: "MEDICATION_PREP", label: t("tasks.type.MEDICATION_PREP") },
+                      { value: "WOUND_CARE", label: t("tasks.type.WOUND_CARE") },
+                      { value: "REPOSITIONING", label: t("tasks.type.REPOSITIONING") },
+                      { value: "ASSESSMENT", label: t("tasks.type.ASSESSMENT") },
+                      { value: "FOLLOW_UP", label: t("tasks.type.FOLLOW_UP") },
+                      { value: "OTHER", label: t("tasks.type.OTHER") },
+                    ]}
+                  />
+                </div>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <SearchField
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder={t("tasks.searchPlaceholder")}
+                  />
+                </div>
+                <div style={{ marginLeft: "auto" }}>
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      toast.message(t("tasks.addFromResidentHint"));
+                      void navigate({ to: "/residents" });
+                    }}
+                  >
+                    {t("tasks.new")}
+                  </Button>
+                </div>
+              </FilterBar>
+
+              {isLoading ? (
+                <div className="flex items-center justify-center" style={{ minHeight: 240 }}>
+                  <Spinner size="md" />
+                </div>
+              ) : filtered.length === 0 ? (
+                <Card padding="lg">
+                  <EmptyState title={t("tasks.noTasksToday")} />
+                </Card>
+              ) : (
+                <Table<TaskRow>
+                  columns={columns}
+                  rows={filtered}
+                  rowKey={(r) => r.id}
+                  onRowClick={(r) => r.resident && goToResident(r.resident.id)}
+                  empty={<EmptyState title={t("tasks.noTasksToday")} />}
+                />
+              )}
+            </>
           )}
         </Stack>
 

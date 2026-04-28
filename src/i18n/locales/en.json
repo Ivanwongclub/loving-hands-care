@@ -1096,7 +1096,30 @@
     "viewResident": "View Resident",
     "unassigned": "Unassigned",
     "allTypes": "All Types",
-    "searchPlaceholder": "Search resident or task..."
+    "searchPlaceholder": "Search resident or task...",
+    "round": {
+      "title": "Round",
+      "viewHistory": "View history",
+      "backToRound": "Back to round",
+      "history": "History",
+      "myTasks": "My tasks",
+      "allTasks": "All tasks",
+      "endRound": "End round",
+      "clearCompleted": "Clear completed",
+      "pending": "Pending",
+      "overdue": "Overdue",
+      "completed": "Completed",
+      "lateMinutes": "{{count}} min late",
+      "assignedTo": "Assigned to",
+      "unassigned": "Unassigned",
+      "fromIcp": "From care plan",
+      "noTasks": "No pending tasks",
+      "noMyTasks": "You have no pending tasks",
+      "allCaughtUp": "All caught up",
+      "roundComplete": "Round complete",
+      "allTasksCompleted": "{{count}} tasks completed this round",
+      "unknownResident": "Unknown resident"
+    }
   },
   "vitals": {
     "title": "Vitals",
