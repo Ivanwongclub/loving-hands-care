@@ -123,8 +123,9 @@ function KioskPage() {
   }, []);
 
   // Core scan processor. originalEventTime is provided when replaying a queued scan.
+  // skipHighRiskGate: when true, bypass the wandering HIGH-risk confirmation (after user confirms).
   const processScan = useCallback(
-    async (qrCodeUUID: string, originalEventTime?: string): Promise<void> => {
+    async (qrCodeUUID: string, originalEventTime?: string, skipHighRiskGate = false): Promise<void> => {
       if (!branchId) {
         setErrorMsg(t("kiosk.invalidQR"));
         setState("ERROR");
@@ -134,7 +135,7 @@ function KioskPage() {
       const { data: enrollment, error: eErr } = await supabase
         .from("dcu_enrollments")
         .select(
-          "id, status, resident_id, residents:resident_id(name_zh, name, photo_storage_path)",
+          "id, status, resident_id, residents:resident_id(name_zh, name, photo_storage_path, wandering_risk_level, wandering_risk_notes)",
         )
         .eq("qr_code_uuid", qrCodeUUID)
         .maybeSingle();
@@ -171,6 +172,24 @@ function KioskPage() {
 
       const nextEventType: "CHECK_IN" | "CHECK_OUT" = hasCheckIn ? "CHECK_OUT" : "CHECK_IN";
       const eventTime = originalEventTime ?? new Date().toISOString();
+
+      // HIGH-risk wandering gate (skip for queued replays — already confirmed at scan time)
+      const resForGate = enrollment.residents;
+      if (
+        nextEventType === "CHECK_OUT" &&
+        !skipHighRiskGate &&
+        !originalEventTime &&
+        resForGate?.wandering_risk_level === "HIGH"
+      ) {
+        setPendingHighRiskCheckOut({
+          enrollmentId: enrollment.id,
+          residentName: resForGate.name_zh ?? resForGate.name ?? "—",
+          wanderingNotes: resForGate.wandering_risk_notes ?? null,
+          photoPath: resForGate.photo_storage_path ?? null,
+          eventTime,
+        });
+        return;
+      }
 
       const { data: insertedEvent, error: insErr } = await supabase
         .from("attendance_events")
