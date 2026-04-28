@@ -246,180 +246,226 @@ function DashboardBody({ branchId, staffId }: { branchId: string; staffId: strin
         title={t("emar.dashboardTitle")}
         description={branchName}
         actions={
-          <div style={{ width: 180 }}>
-            <FormField label={t("emar.selectDate")}>
-              <TextField type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-            </FormField>
-          </div>
+          <Inline gap={3} align="end">
+            <div style={{ width: 180 }}>
+              <FormField label={t("emar.selectDate")}>
+                <TextField type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              </FormField>
+            </div>
+            {!passMode ? (
+              <Button
+                variant="primary"
+                leadingIcon={<Pill size={16} />}
+                onClick={() => setPassMode(true)}
+                disabled={dueRecordCount === 0}
+              >
+                {t("emar.pass.start")} ({dueRecordCount})
+              </Button>
+            ) : (
+              <Button variant="ghost" onClick={handleEndSession}>
+                {t("emar.pass.endSession")}
+              </Button>
+            )}
+          </Inline>
         }
       />
 
-      {counts.MISSED > 0 && (
-        <Alert
-          severity="warning"
-          description={t("emar.missedAlert", { count: counts.MISSED })}
-        />
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 w-full">
-        <StatCard label={t("emar.dueCount")} value={counts.DUE} tone="warning" />
-        <StatCard label={t("emar.lateCount")} value={counts.LATE} tone="error" />
-        <StatCard label={t("emar.administeredCount")} value={counts.ADMINISTERED} tone="success" />
-        <StatCard label={t("emar.missedCount")} value={counts.MISSED} tone="error" />
-        <StatCard label={t("emar.refusedCount")} value={counts.REFUSED} tone="neutral" />
-      </div>
-
-      <Card padding="md">
-        <Stack gap={2}>
-          <Inline justify="between" align="center" className="w-full">
-            <Text size="sm" color="secondary">{t("emar.complianceRate")}</Text>
-            <Text size="md" className="font-semibold">{compliance}%</Text>
-          </Inline>
-          <div
-            style={{
-              width: "100%",
-              height: 8,
-              backgroundColor: "var(--status-success-bg)",
-              borderRadius: "var(--radius-sm)",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                width: `${compliance}%`,
-                height: "100%",
-                backgroundColor: "var(--status-success-accent)",
-                transition: "width 240ms ease",
-              }}
+      {passMode ? (
+        <>
+          <PassModeView
+            records={passRecords}
+            sessionCompleted={sessionCompleted}
+            onAdminister={(rec) => setAdminRecord(rec)}
+            onEndSession={handleEndSession}
+            onClearCompleted={handleClearCompleted}
+          />
+          {adminRecord && (
+            <AdministerModal
+              open={!!adminRecord}
+              onClose={() => setAdminRecord(null)}
+              record={adminRecord}
+              residentNameZh={adminRecord.residents?.name_zh ?? ""}
+              residentName={adminRecord.residents?.name ?? ""}
+              branchId={branchId}
+              staffId={staffId}
+              date={date}
+              residentId={adminRecord.resident_id}
+              residentPhotoPath={adminRecord.residents?.photo_storage_path ?? null}
+              residentPhotoDeclined={adminRecord.residents?.photo_declined ?? false}
+              logAction={logAction}
             />
+          )}
+        </>
+      ) : (
+        <>
+          {counts.MISSED > 0 && (
+            <Alert
+              severity="warning"
+              description={t("emar.missedAlert", { count: counts.MISSED })}
+            />
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 w-full">
+            <StatCard label={t("emar.dueCount")} value={counts.DUE} tone="warning" />
+            <StatCard label={t("emar.lateCount")} value={counts.LATE} tone="error" />
+            <StatCard label={t("emar.administeredCount")} value={counts.ADMINISTERED} tone="success" />
+            <StatCard label={t("emar.missedCount")} value={counts.MISSED} tone="error" />
+            <StatCard label={t("emar.refusedCount")} value={counts.REFUSED} tone="neutral" />
           </div>
-        </Stack>
-      </Card>
 
-      <FilterBar>
-        <div style={{ minWidth: 280, flex: 1 }}>
-          <SearchField
-            placeholder={t("emar.filterByDrug")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onClear={() => setSearch("")}
-          />
-        </div>
-        <div style={{ minWidth: 180 }}>
-          <Select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            options={[
-              { value: "ALL", label: t("emar.allResidents") },
-              { value: "DUE", label: t("emar.emarStatus.DUE") },
-              { value: "LATE", label: t("emar.emarStatus.LATE") },
-              { value: "ADMINISTERED", label: t("emar.emarStatus.ADMINISTERED") },
-              { value: "MISSED", label: t("emar.emarStatus.MISSED") },
-              { value: "REFUSED", label: t("emar.emarStatus.REFUSED") },
-              { value: "HELD", label: t("emar.emarStatus.HELD") },
-            ]}
-          />
-        </div>
-      </FilterBar>
-
-      <Card padding="none">
-        {isLoading ? (
-          <div className="p-4">
+          <Card padding="md">
             <Stack gap={2}>
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
+              <Inline justify="between" align="center" className="w-full">
+                <Text size="sm" color="secondary">{t("emar.complianceRate")}</Text>
+                <Text size="md" className="font-semibold">{compliance}%</Text>
+              </Inline>
+              <div
+                style={{
+                  width: "100%",
+                  height: 8,
+                  backgroundColor: "var(--status-success-bg)",
+                  borderRadius: "var(--radius-sm)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    width: `${compliance}%`,
+                    height: "100%",
+                    backgroundColor: "var(--status-success-accent)",
+                    transition: "width 240ms ease",
+                  }}
+                />
+              </div>
             </Stack>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="p-6">
-            <EmptyState title={t("emar.noEMARToday")} />
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("residents.columns.name")}</TableHead>
-                <TableHead>{t("emar.drug")}</TableHead>
-                <TableHead>{t("attendance.checkInTime")}</TableHead>
-                <TableHead>{t("residents.columns.status")}</TableHead>
-                <TableHead>{t("emar.dualVerification")}</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((r) => {
-                const rid = r.residents?.id ?? r.resident_id;
-                const isLate = r.status === "LATE" || r.status === "MISSED";
-                const dualVerified = r.barcode_verified && r.shift_pin_verified;
-                const pinOnly = !r.barcode_verified && r.shift_pin_verified;
-                return (
-                  <TableRow
-                    key={r.id}
-                    onClick={() => navigate({ to: "/residents/$id", params: { id: rid } })}
-                    className="cursor-pointer"
-                  >
-                    <TableCell>
-                      <Stack gap={1}>
-                        <Text size="sm" className="font-semibold">
-                          {r.residents?.name_zh ?? "—"}
-                        </Text>
-                        <Text size="sm" color="tertiary">{r.residents?.name ?? ""}</Text>
-                      </Stack>
-                    </TableCell>
-                    <TableCell>
-                      <Inline gap={2} align="center" wrap>
-                        <Text size="sm">
-                          {r.order?.drug_name_zh ?? r.order?.drug_name ?? "—"}
-                        </Text>
-                        {r.order?.dose && <Badge tone="neutral">{r.order.dose}</Badge>}
-                        {r.order?.is_prn && <Badge tone="warning" emphasis="strong">PRN</Badge>}
-                      </Inline>
-                    </TableCell>
-                    <TableCell>
-                      <Text
-                        size="sm"
-                        style={{ color: isLate ? "var(--status-error-accent)" : undefined }}
-                      >
-                        {formatTime(r.due_at)}
-                      </Text>
-                    </TableCell>
-                    <TableCell>
-                      <Badge tone={STATUS_TONE[r.status]}>
-                        {t(`emar.emarStatus.${r.status}`)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {dualVerified ? (
-                        <Inline gap={1} align="center">
-                          <Shield size={14} style={{ color: "var(--status-success-accent)" }} />
-                          <Text size="sm" color="secondary">{t("emar.pinVerified")}</Text>
-                        </Inline>
-                      ) : pinOnly ? (
-                        <Inline gap={1} align="center">
-                          <Shield size={14} style={{ color: "var(--text-tertiary)" }} />
-                          <Text size="sm" color="tertiary">PIN</Text>
-                        </Inline>
-                      ) : (
-                        <Text size="sm" color="tertiary">—</Text>
-                      )}
-                    </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        variant="ghost"
-                        size="compact"
-                        onClick={() => navigate({ to: "/residents/$id", params: { id: rid } })}
-                      >
-                        {t("residents.bedDrawer.viewResident")}
-                      </Button>
-                    </TableCell>
+          </Card>
+
+          <FilterBar>
+            <div style={{ minWidth: 280, flex: 1 }}>
+              <SearchField
+                placeholder={t("emar.filterByDrug")}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onClear={() => setSearch("")}
+              />
+            </div>
+            <div style={{ minWidth: 180 }}>
+              <Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                options={[
+                  { value: "ALL", label: t("emar.allResidents") },
+                  { value: "DUE", label: t("emar.emarStatus.DUE") },
+                  { value: "LATE", label: t("emar.emarStatus.LATE") },
+                  { value: "ADMINISTERED", label: t("emar.emarStatus.ADMINISTERED") },
+                  { value: "MISSED", label: t("emar.emarStatus.MISSED") },
+                  { value: "REFUSED", label: t("emar.emarStatus.REFUSED") },
+                  { value: "HELD", label: t("emar.emarStatus.HELD") },
+                ]}
+              />
+            </div>
+          </FilterBar>
+
+          <Card padding="none">
+            {isLoading ? (
+              <div className="p-4">
+                <Stack gap={2}>
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                  ))}
+                </Stack>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="p-6">
+                <EmptyState title={t("emar.noEMARToday")} />
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("residents.columns.name")}</TableHead>
+                    <TableHead>{t("emar.drug")}</TableHead>
+                    <TableHead>{t("attendance.checkInTime")}</TableHead>
+                    <TableHead>{t("residents.columns.status")}</TableHead>
+                    <TableHead>{t("emar.dualVerification")}</TableHead>
+                    <TableHead></TableHead>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        )}
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((r) => {
+                    const rid = r.residents?.id ?? r.resident_id;
+                    const isLate = r.status === "LATE" || r.status === "MISSED";
+                    const dualVerified = r.barcode_verified && r.shift_pin_verified;
+                    const pinOnly = !r.barcode_verified && r.shift_pin_verified;
+                    return (
+                      <TableRow
+                        key={r.id}
+                        onClick={() => navigate({ to: "/residents/$id", params: { id: rid } })}
+                        className="cursor-pointer"
+                      >
+                        <TableCell>
+                          <Stack gap={1}>
+                            <Text size="sm" className="font-semibold">
+                              {r.residents?.name_zh ?? "—"}
+                            </Text>
+                            <Text size="sm" color="tertiary">{r.residents?.name ?? ""}</Text>
+                          </Stack>
+                        </TableCell>
+                        <TableCell>
+                          <Inline gap={2} align="center" wrap>
+                            <Text size="sm">
+                              {r.order?.drug_name_zh ?? r.order?.drug_name ?? "—"}
+                            </Text>
+                            {r.order?.dose && <Badge tone="neutral">{r.order.dose}</Badge>}
+                            {r.order?.is_prn && <Badge tone="warning" emphasis="strong">PRN</Badge>}
+                          </Inline>
+                        </TableCell>
+                        <TableCell>
+                          <Text
+                            size="sm"
+                            style={{ color: isLate ? "var(--status-error-accent)" : undefined }}
+                          >
+                            {formatTime(r.due_at)}
+                          </Text>
+                        </TableCell>
+                        <TableCell>
+                          <Badge tone={STATUS_TONE[r.status]}>
+                            {t(`emar.emarStatus.${r.status}`)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {dualVerified ? (
+                            <Inline gap={1} align="center">
+                              <Shield size={14} style={{ color: "var(--status-success-accent)" }} />
+                              <Text size="sm" color="secondary">{t("emar.pinVerified")}</Text>
+                            </Inline>
+                          ) : pinOnly ? (
+                            <Inline gap={1} align="center">
+                              <Shield size={14} style={{ color: "var(--text-tertiary)" }} />
+                              <Text size="sm" color="tertiary">PIN</Text>
+                            </Inline>
+                          ) : (
+                            <Text size="sm" color="tertiary">—</Text>
+                          )}
+                        </TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="compact"
+                            onClick={() => navigate({ to: "/residents/$id", params: { id: rid } })}
+                          >
+                            {t("residents.bedDrawer.viewResident")}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </Card>
+        </>
+      )}
     </Stack>
   );
 }
