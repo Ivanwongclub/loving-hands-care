@@ -189,6 +189,7 @@ function KioskPage() {
           wanderingNotes: resForGate.wandering_risk_notes ?? null,
           photoPath: resForGate.photo_storage_path ?? null,
           eventTime,
+          qrCodeUUID,
         });
         return;
       }
