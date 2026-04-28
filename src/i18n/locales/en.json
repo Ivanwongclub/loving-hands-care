@@ -1520,7 +1520,26 @@
     "filterByDrug": "Filter by drug",
     "complianceRate": "Compliance rate",
     "noEMARToday": "No medication records today",
-    "missedAlert": "{{count}} missed administration record(s) require follow-up"
+    "missedAlert": "{{count}} missed administration record(s) require follow-up",
+    "pass": {
+      "start": "Start medication pass",
+      "startTooltip": "Begin medication pass — administer all due medications",
+      "endSession": "End session",
+      "sessionTitle": "eMAR — Medication Pass",
+      "pending": "Pending",
+      "overdue": "Overdue",
+      "completed": "Completed",
+      "clearCompleted": "Clear completed",
+      "dueMedications": "Due medications",
+      "administer": "Administer",
+      "allDone": "All done",
+      "lateMinutes": "{{count}} min late",
+      "photoMissing": "Photo missing",
+      "noPendingMeds": "No pending medications",
+      "allCaughtUp": "All caught up",
+      "sessionComplete": "Pass complete",
+      "allMedsAdministered": "{{count}} medications administered this session"
+    }
   },
   "staff": {
     "title": "Staff Management",

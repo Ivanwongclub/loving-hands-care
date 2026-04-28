@@ -1520,7 +1520,26 @@
     "filterByDrug": "按藥物篩選",
     "complianceRate": "服藥依從率",
     "noEMARToday": "今日沒有給藥記錄",
-    "missedAlert": "有 {{count}} 個漏服記錄需要跟進"
+    "missedAlert": "有 {{count}} 個漏服記錄需要跟進",
+    "pass": {
+      "start": "開始給藥",
+      "startTooltip": "開始給藥工作 — 為所有院友處理待給藥物",
+      "endSession": "結束工作",
+      "sessionTitle": "電子用藥記錄 — 給藥工作",
+      "pending": "待處理",
+      "overdue": "已逾期",
+      "completed": "已完成",
+      "clearCompleted": "清除已完成",
+      "dueMedications": "待給藥物",
+      "administer": "給藥",
+      "allDone": "全部完成",
+      "lateMinutes": "逾期 {{count}} 分鐘",
+      "photoMissing": "缺少相片",
+      "noPendingMeds": "目前無待給藥物",
+      "allCaughtUp": "所有藥物已處理",
+      "sessionComplete": "本次工作完成",
+      "allMedsAdministered": "本次已處理 {{count}} 項藥物"
+    }
   },
   "staff": {
     "title": "員工管理",
