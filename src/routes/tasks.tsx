@@ -145,6 +145,51 @@ function TasksDashboardPage() {
     });
   }, [tasks, typeFilter, search]);
 
+  // Round mode: filter to active + scope, sort overdue-first
+  const roundTasks = useMemo(() => {
+    let filtered = tasks.filter(
+      (tk) => tk.status === "PENDING" || tk.status === "IN_PROGRESS" || tk.status === "OVERDUE",
+    );
+    if (scopeFilter === "me" && staff) {
+      filtered = filtered.filter(
+        (tk) => tk.assigned_to === staff.id || tk.assigned_to === null,
+      );
+    }
+    return [...filtered].sort((a, b) => {
+      if (a.status === "OVERDUE" && b.status !== "OVERDUE") return -1;
+      if (b.status === "OVERDUE" && a.status !== "OVERDUE") return 1;
+      return new Date(a.due_at).getTime() - new Date(b.due_at).getTime();
+    });
+  }, [tasks, scopeFilter, staff]);
+
+  const dueRoundCount = roundTasks.length;
+
+  // Detect newly-completed tasks during round (5-min heuristic, mirrors eMAR)
+  useEffect(() => {
+    if (!roundMode) return;
+    const fiveMin = 5 * 60_000;
+    const now = Date.now();
+    let next: Set<string> | null = null;
+    for (const task of tasks) {
+      if (
+        task.status === "COMPLETED" &&
+        task.completed_at &&
+        now - new Date(task.completed_at).getTime() < fiveMin &&
+        !sessionCompleted.has(task.id)
+      ) {
+        if (!next) next = new Set(sessionCompleted);
+        next.add(task.id);
+      }
+    }
+    if (next) setSessionCompleted(next);
+  }, [tasks, roundMode, sessionCompleted]);
+
+  const handleEndRound = () => {
+    setRoundMode(false);
+    setSessionCompleted(new Set());
+  };
+  const handleClearCompleted = () => setSessionCompleted(new Set());
+
   const invalidate = () => void qc.invalidateQueries({ queryKey: ["tasks"] });
 
   const doComplete = async () => {
