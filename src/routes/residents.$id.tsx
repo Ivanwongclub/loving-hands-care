@@ -1576,6 +1576,49 @@ function ProfileTab({ resident, canEdit, canEditAdmin, canEditClinical, editMode
         logAction={logAction}
       />
 
+      {/* Card 4b — Wandering Risk */}
+      <Card padding="md">
+        <Stack gap={3}>
+          <Inline justify="between" align="center">
+            <Heading level={4}>{t("wandering.title")}</Heading>
+            {canEditClinical && (
+              <Button variant="ghost" size="compact" onClick={() => setWanderingModalOpen(true)}>
+                {wanderingLevel === "NONE" ? t("wandering.assess") : t("wandering.reassess")}
+              </Button>
+            )}
+          </Inline>
+          <Inline gap={2} align="center">
+            <Text size="sm" color="tertiary">{t("wandering.label")}:</Text>
+            {wanderingLevel === "NONE" ? (
+              <Text size="sm">{t("wandering.NONE")}</Text>
+            ) : (
+              <Badge tone={wanderingTone} emphasis={wanderingLevel === "HIGH" ? "strong" : "subtle"}>
+                {t(`wandering.${wanderingLevel}`)}
+              </Badge>
+            )}
+          </Inline>
+          {resident.wandering_risk_notes && (
+            <Text size="sm" color="secondary">{resident.wandering_risk_notes}</Text>
+          )}
+          {resident.wandering_risk_assessed_at && (
+            <Text size="caption" color="tertiary">
+              {t("wandering.lastAssessment")}: {new Date(resident.wandering_risk_assessed_at).toISOString().slice(0, 10)}
+            </Text>
+          )}
+        </Stack>
+      </Card>
+
+      {wanderingModalOpen && (
+        <WanderingAssessmentModal
+          open={wanderingModalOpen}
+          onClose={() => setWanderingModalOpen(false)}
+          resident={resident}
+          staffId={staffId}
+          logAction={logAction}
+          onSaved={async () => { await onSaved(); }}
+        />
+      )}
+
       {/* Card 5 — Dietary */}
       <Card padding="md">
         <Heading level={3} className="mb-3">{t("residents.diet.title")}</Heading>
