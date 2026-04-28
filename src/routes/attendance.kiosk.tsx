@@ -546,12 +546,44 @@ function KioskPage() {
         open={state === "MANUAL_OVERRIDE"}
         onClose={() => setState("STANDBY")}
         branchId={branchId}
+        onRequestHighRiskCheckOut={(payload) => {
+          setPendingHighRiskCheckOut({
+            enrollmentId: payload.enrollmentId,
+            residentName: payload.residentName,
+            wanderingNotes: payload.wanderingNotes,
+            photoPath: null,
+            eventTime: new Date().toISOString(),
+            manual: { residentId: payload.residentId, reason: payload.reason },
+          });
+          setState("STANDBY");
+        }}
         onSubmitted={() => {
           void qc.invalidateQueries({ queryKey: ["attendanceEvents"] });
           void qc.invalidateQueries({ queryKey: ["attendanceSessions"] });
           setState("STANDBY");
         }}
       />
+
+      {pendingHighRiskCheckOut && (
+        <ConfirmDialog
+          open={true}
+          onClose={() => setPendingHighRiskCheckOut(null)}
+          onConfirm={() => {
+            const p = pendingHighRiskCheckOut;
+            setPendingHighRiskCheckOut(null);
+            if (p.manual) {
+              void performManualCheckOut(p.manual.residentId, p.manual.reason);
+            } else if (p.qrCodeUUID) {
+              void processScan(p.qrCodeUUID, undefined, true);
+            }
+          }}
+          title={t("wandering.checkOutWarning")}
+          summary={`${t("wandering.checkOutConfirm")} ${pendingHighRiskCheckOut.residentName}`}
+          consequence={pendingHighRiskCheckOut.wanderingNotes ?? undefined}
+          confirmLabel={t("wandering.checkOutProceed")}
+          cancelLabel={t("wandering.checkOutCancel")}
+        />
+      )}
     </KioskShell>
   );
 }
