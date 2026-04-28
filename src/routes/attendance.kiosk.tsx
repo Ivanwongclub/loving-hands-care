@@ -753,6 +753,22 @@ function ManualOverrideDrawer({ open, onClose, branchId, onSubmitted, onRequestH
       if (enrErr) throw enrErr;
       if (!enrollment) throw new Error(t("kiosk.enrollmentInactive"));
 
+      // HIGH-risk wandering gate for manual CHECK_OUT
+      if (
+        eventType === "CHECK_OUT" &&
+        selectedResident.wandering_risk_level === "HIGH"
+      ) {
+        setSubmitting(false);
+        onRequestHighRiskCheckOut({
+          residentId: selectedResident.id,
+          residentName: selectedResident.name_zh ?? selectedResident.name,
+          wanderingNotes: selectedResident.wandering_risk_notes ?? null,
+          enrollmentId: enrollment.id,
+          reason: reason.trim(),
+        });
+        return;
+      }
+
       const nowIso = new Date().toISOString();
       const today = todayDateStr();
       const { data: inserted, error: insErr } = await supabase
