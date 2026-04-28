@@ -871,7 +871,7 @@ function StaffDetailDrawer({ staff, onClose, callerRole, callerBranchIds, branch
 /* ─────────────────── Reassign Before Deactivate Modal ─────────────────── */
 
 interface OpenTask { id: string; title: string; due_at: string; resident_id: string; branch_id: string }
-interface OpenAlert { id: string; type: string; triggered_at: string; resident_id: string; branch_id: string }
+interface OpenAlert { id: string; type: string; triggered_at: string; resident_id: string | null; branch_id: string }
 interface ReassignAssignment { itemId: string; toStaffId: string }
 interface ReassignAssignments { tasks: ReassignAssignment[]; alerts: ReassignAssignment[] }
 
