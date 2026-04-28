@@ -1815,7 +1815,7 @@ export type Database = {
           photo_storage_path: string | null
           photo_updated_at: string | null
           preferred_name: string | null
-          resuscitation_status: Database["public"]["Enums"]["resuscitation_status"]
+          resuscitation_status: string
           resuscitation_status_updated_at: string | null
           resuscitation_status_updated_by: string | null
           risk_level: Database["public"]["Enums"]["risk_level"] | null
@@ -1851,7 +1851,7 @@ export type Database = {
           photo_storage_path?: string | null
           photo_updated_at?: string | null
           preferred_name?: string | null
-          resuscitation_status?: Database["public"]["Enums"]["resuscitation_status"]
+          resuscitation_status?: string
           resuscitation_status_updated_at?: string | null
           resuscitation_status_updated_by?: string | null
           risk_level?: Database["public"]["Enums"]["risk_level"] | null
@@ -1887,7 +1887,7 @@ export type Database = {
           photo_storage_path?: string | null
           photo_updated_at?: string | null
           preferred_name?: string | null
-          resuscitation_status?: Database["public"]["Enums"]["resuscitation_status"]
+          resuscitation_status?: string
           resuscitation_status_updated_at?: string | null
           resuscitation_status_updated_by?: string | null
           risk_level?: Database["public"]["Enums"]["risk_level"] | null
@@ -1907,6 +1907,13 @@ export type Database = {
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "residents_resuscitation_status_updated_by_fkey"
+            columns: ["resuscitation_status_updated_by"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -2563,10 +2570,7 @@ export type Database = {
         | "FAILED"
         | "RETRYING"
       resident_status: "ADMITTED" | "DISCHARGED" | "LOA" | "DECEASED"
-      resuscitation_status:
-        | "FULL_RESUSCITATION"
-        | "DNACPR"
-        | "AD_LIMITED"
+      resuscitation_status: "FULL_RESUSCITATION" | "DNACPR" | "AD_LIMITED"
       risk_level: "LOW" | "MEDIUM" | "HIGH"
       staff_role:
         | "SYSTEM_ADMIN"
@@ -2762,6 +2766,7 @@ export const Constants = {
         "RETRYING",
       ],
       resident_status: ["ADMITTED", "DISCHARGED", "LOA", "DECEASED"],
+      resuscitation_status: ["FULL_RESUSCITATION", "DNACPR", "AD_LIMITED"],
       risk_level: ["LOW", "MEDIUM", "HIGH"],
       staff_role: [
         "SYSTEM_ADMIN",
