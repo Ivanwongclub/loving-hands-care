@@ -28,36 +28,78 @@
     "settings": "設定"
   },
   "actions": {
-    "save": "儲存", "cancel": "取消", "confirm": "確認", "delete": "刪除",
-    "edit": "編輯", "view": "查看", "export": "匯出", "import": "匯入",
-    "approve": "批准", "reject": "拒絕", "submit": "提交", "reset": "重設",
-    "search": "搜尋", "filter": "篩選", "back": "返回", "next": "下一步",
-    "done": "完成", "close": "關閉", "add": "新增", "remove": "移除",
-    "deactivate": "停用", "activate": "啟用", "unlock": "解鎖", "override": "覆寫",
-    "signIn": "登入", "signOut": "登出", "rescan": "重新掃描", "retry": "重試",
-    "print": "列印", "copy": "複製", "regenerate": "重新產生"
+    "save": "儲存",
+    "cancel": "取消",
+    "confirm": "確認",
+    "delete": "刪除",
+    "edit": "編輯",
+    "view": "查看",
+    "export": "匯出",
+    "import": "匯入",
+    "approve": "批准",
+    "reject": "拒絕",
+    "submit": "提交",
+    "reset": "重設",
+    "search": "搜尋",
+    "filter": "篩選",
+    "back": "返回",
+    "next": "下一步",
+    "done": "完成",
+    "close": "關閉",
+    "add": "新增",
+    "remove": "移除",
+    "deactivate": "停用",
+    "activate": "啟用",
+    "unlock": "解鎖",
+    "override": "覆寫",
+    "signIn": "登入",
+    "signOut": "登出",
+    "rescan": "重新掃描",
+    "retry": "重試",
+    "print": "列印",
+    "copy": "複製",
+    "regenerate": "重新產生"
   },
   "alertStatus": {
-    "open": "待處理", "acknowledged": "已確認", "assigned": "已指派",
-    "resolved": "已解決", "escalated": "已升級"
+    "open": "待處理",
+    "acknowledged": "已確認",
+    "assigned": "已指派",
+    "resolved": "已解決",
+    "escalated": "已升級"
   },
   "taskStatus": {
-    "pending": "待辦", "inProgress": "進行中", "completed": "已完成",
-    "overdue": "逾期", "cancelled": "已取消"
+    "pending": "待辦",
+    "inProgress": "進行中",
+    "completed": "已完成",
+    "overdue": "逾期",
+    "cancelled": "已取消"
   },
   "emarStatus": {
-    "due": "應派", "administered": "已派發", "refused": "拒服",
-    "held": "暫停", "late": "延誤", "missed": "遺漏"
+    "due": "應派",
+    "administered": "已派發",
+    "refused": "拒服",
+    "held": "暫停",
+    "late": "延誤",
+    "missed": "遺漏"
   },
   "icpStatus": {
-    "draft": "草稿", "pendingApproval": "待批准", "active": "生效中",
-    "superseded": "已取代", "rejected": "已拒絕"
+    "draft": "草稿",
+    "pendingApproval": "待批准",
+    "active": "生效中",
+    "superseded": "已取代",
+    "rejected": "已拒絕"
   },
   "bedStatus": {
-    "available": "空置", "occupied": "已佔用", "reserved": "已預留", "outOfService": "停用"
+    "available": "空置",
+    "occupied": "已佔用",
+    "reserved": "已預留",
+    "outOfService": "停用"
   },
   "incidentSeverity": {
-    "low": "輕微", "medium": "中度", "high": "嚴重", "critical": "危急"
+    "low": "輕微",
+    "medium": "中度",
+    "high": "嚴重",
+    "critical": "危急"
   },
   "auth": {
     "signInTitle": "登入系統",
@@ -70,7 +112,8 @@
     "familyPortalHelp": "請使用您註冊的電郵地址，我們會發送登入連結給您。",
     "pinSetTitle": "設定工作密碼",
     "pinSetHelp": "請設定您的4位數工作密碼，用於藥物記錄確認",
-    "pinNew": "新密碼", "pinConfirm": "確認密碼",
+    "pinNew": "新密碼",
+    "pinConfirm": "確認密碼",
     "pinMismatch": "密碼不相符",
     "pinAttemptsRemaining": "{{count}} 次剩餘",
     "pinConfirmIdentity": "確認身份"
@@ -89,7 +132,10 @@
   },
   "common": {
     "comingSoon": "下一期開發中",
-    "branch": "分院", "branches": "分院", "ward": "病房", "shift": "班次",
+    "branch": "分院",
+    "branches": "分院",
+    "ward": "病房",
+    "shift": "班次",
     "morningShift": "早班",
     "language": "語言",
     "retry": "重試",
@@ -252,8 +298,12 @@
     }
   },
   "branches": {
-    "title": "院舍管理", "list": "院舍列表", "detail": "院舍詳情",
-    "settings": "院舍設定", "bedBoard": "床位概覽", "occupancy": "入住率",
+    "title": "院舍管理",
+    "list": "院舍列表",
+    "detail": "院舍詳情",
+    "settings": "院舍設定",
+    "bedBoard": "床位概覽",
+    "occupancy": "入住率",
     "addBranch": "新增院舍",
     "allTypes": "所有類型",
     "statusActive": "啟用",
@@ -286,61 +336,135 @@
       "isActive": "啟用"
     },
     "branchType": {
-      "CARE_HOME": "護老院", "DCU": "日間護理單位",
-      "HOUSING": "老人之家", "REHABILITATION": "復康服務"
+      "CARE_HOME": "護老院",
+      "DCU": "日間護理單位",
+      "HOUSING": "老人之家",
+      "REHABILITATION": "復康服務"
     }
   },
   "locations": {
-    "building": "大廈", "floor": "樓層", "room": "房間", "bed": "床位", "zone": "區域",
-    "addLocation": "新增位置", "editLocation": "編輯位置",
-    "outOfService": "停用", "markOOS": "標記為停用", "markAvailable": "標記為可用"
+    "building": "大廈",
+    "floor": "樓層",
+    "room": "房間",
+    "bed": "床位",
+    "zone": "區域",
+    "addLocation": "新增位置",
+    "editLocation": "編輯位置",
+    "outOfService": "停用",
+    "markOOS": "標記為停用",
+    "markAvailable": "標記為可用"
   },
   "residents": {
-    "title": "院友管理", "list": "院友列表", "detail": "院友資料",
-    "newAdmission": "新入住申請", "transfer": "轉床", "discharge": "辦理出院",
+    "title": "院友管理",
+    "list": "院友列表",
+    "detail": "院友資料",
+    "newAdmission": "新入住申請",
+    "transfer": "轉床",
+    "discharge": "辦理出院",
     "startDischarge": "辦理出院",
     "editProfile": "編輯資料",
     "viewProfile": "查看資料",
-    "profile": "個人資料", "contacts": "聯絡人", "documents": "文件",
-    "bedHistory": "床位記錄", "activity": "活動記錄",
-    "medicalHistory": "病歷", "allergies": "過敏記錄",
+    "profile": "個人資料",
+    "contacts": "聯絡人",
+    "documents": "文件",
+    "bedHistory": "床位記錄",
+    "activity": "活動記錄",
+    "medicalHistory": "病歷",
+    "allergies": "過敏記錄",
     "doNotShareFamily": "不向家屬披露",
     "doNotShareWarning": "此院友的資料已設定為不向家屬披露",
     "doNotShareConflictWarning": "此院友已設定不向家屬披露，但有聯絡人仍啟用通知",
-    "admissionDate": "入住日期", "dischargeDate": "出院日期",
-    "bedAssignment": "床位分配", "currentBed": "現時床位",
-    "bedBoard": "床位概覽", "residentsList": "院友列表",
+    "admissionDate": "入住日期",
+    "dischargeDate": "出院日期",
+    "bedAssignment": "床位分配",
+    "currentBed": "現時床位",
+    "bedBoard": "床位概覽",
+    "residentsList": "院友列表",
     "noBed": "—",
     "ageYears": "歲",
     "notFound": "院友記錄不存在",
     "comingSoon": "即將推出",
     "noneRecorded": "無記錄",
     "private": "不披露",
-    "riskLevel": { "LOW": "低風險", "MEDIUM": "中等風險", "HIGH": "高風險" },
-    "gender": { "M": "男", "F": "女", "OTHER": "其他" },
-    "status": {
-      "ADMITTED": "在院", "DISCHARGED": "已出院", "LOA": "外出假", "DECEASED": "已離世"
+    "riskLevel": {
+      "LOW": "低風險",
+      "MEDIUM": "中等風險",
+      "HIGH": "高風險"
     },
-    "filters": { "allStatus": "所有狀態", "allRisk": "所有風險" },
+    "gender": {
+      "M": "男",
+      "F": "女",
+      "OTHER": "其他"
+    },
+    "status": {
+      "ADMITTED": "在院",
+      "DISCHARGED": "已出院",
+      "LOA": "外出假",
+      "DECEASED": "已離世"
+    },
+    "filters": {
+      "allStatus": "所有狀態",
+      "allRisk": "所有風險"
+    },
     "columns": {
-      "photo": "相片", "name": "姓名", "bed": "床位", "admission": "入住日期",
-      "risk": "風險", "status": "狀態", "private": "不披露"
+      "photo": "相片",
+      "name": "姓名",
+      "bed": "床位",
+      "admission": "入住日期",
+      "risk": "風險",
+      "status": "狀態",
+      "private": "不披露"
     },
     "demographics": {
       "title": "人口資料",
-      "dob": "出生日期", "gender": "性別", "language": "語言偏好", "preferredName": "慣用名稱"
+      "dob": "出生日期",
+      "gender": "性別",
+      "language": "語言偏好",
+      "preferredName": "慣用名稱"
     },
     "allergiesSection": {
       "title": "過敏及病歷",
-      "diagnoses": "診斷", "specialInstructions": "特別指示",
-      "severity": { "MILD": "輕微", "MODERATE": "中度", "SEVERE": "嚴重" }
+      "diagnoses": "診斷",
+      "specialInstructions": "特別指示",
+      "severity": "嚴重程度",
+      "add": "新增過敏紀錄",
+      "edit": "編輯過敏紀錄",
+      "drug": "藥物 / 過敏原",
+      "reaction": "反應",
+      "source": "來源",
+      "isActive": "啟用中",
+      "recordedAt": "記錄日期",
+      "showHistorical": "顯示歷史記錄",
+      "anaphylaxisBanner": "嚴重過敏史",
+      "anaphylaxisDetail": "曾發生過敏性休克",
+      "empty": "未記錄任何過敏",
+      "sources": {
+        "RESIDENT_REPORTED": "院友自述",
+        "FAMILY_REPORTED": "家屬告知",
+        "MEDICAL_RECORD": "醫療紀錄",
+        "OBSERVED": "臨床觀察"
+      },
+      "severities": {
+        "MILD": "輕微",
+        "MODERATE": "中度",
+        "SEVERE": "嚴重",
+        "ANAPHYLAXIS": "過敏性休克"
+      }
     },
-    "diet": { "title": "飲食要求" },
+    "diet": {
+      "title": "飲食要求"
+    },
     "admissionWizard": {
-      "step1": "個人資料", "step2": "病歷資料", "step3": "緊急聯絡人",
-      "step4": "上載文件", "step5": "床位分配", "step6": "同意書", "step7": "確認資料"
+      "step1": "個人資料",
+      "step2": "病歷資料",
+      "step3": "緊急聯絡人",
+      "step4": "上載文件",
+      "step5": "床位分配",
+      "step6": "同意書",
+      "step7": "確認資料"
     },
-    "hkid": "香港身份證", "hkidHint": "只儲存雜湊值，不儲存原始號碼",
+    "hkid": "香港身份證",
+    "hkidHint": "只儲存雜湊值，不儲存原始號碼",
     "dischargeChecklist": "出院核對清單",
     "transferReason": "轉床原因",
     "searchPlaceholder": "搜尋院友姓名或房號...",
@@ -348,6 +472,66 @@
     "bedDrawer": {
       "viewResident": "查看院友資料",
       "availableInfo": "此床位現時空置"
+    },
+    "photo": {
+      "upload": "上傳相片",
+      "take": "拍攝相片",
+      "choose": "選擇檔案",
+      "declined": "不拍照",
+      "markDeclined": "標記為不拍照",
+      "needsUpdate": "相片需更新",
+      "uploading": "上傳中...",
+      "title": "院友相片"
+    },
+    "resuscitation": {
+      "title": "復甦狀態",
+      "FULL_RESUSCITATION": "全力搶救",
+      "DNACPR": "DNACPR",
+      "AD_LIMITED": "預設醫療指示",
+      "adOnFile": "預設醫療指示在檔",
+      "adNotOnFile": "未在檔",
+      "adUploadedAt": "上載日期",
+      "lpoa": "持久授權書持有人",
+      "lpoaName": "持有人姓名",
+      "lpoaRelationship": "關係",
+      "lpoaPhone": "聯絡電話",
+      "changeWarning": "更改復甦狀態是重要的臨床決定。確認更改？",
+      "editTitle": "更改復甦狀態",
+      "guardian": "監護人"
+    },
+    "consents": {
+      "title": "同意及法律文件",
+      "familyInfoSharing": "家庭資訊共享",
+      "photographyPublications": "出版物相片",
+      "telehealth": "遠程醫療同意",
+      "religiousEol": "宗教身後事安排",
+      "noGuardian": "未設定監護人",
+      "changeFromHeader": "在標題處更改",
+      "lastUpdated": "最後更新"
+    },
+    "careSummary": {
+      "title": "即時護理摘要",
+      "openAlerts": "待處理警報",
+      "overdueTasks": "逾期任務",
+      "todayMeds": "今日藥物",
+      "latestBp": "最新血壓",
+      "spo2": "血氧",
+      "icpStatus": "照顧計劃",
+      "lastVitals": "最後記錄生命體徵",
+      "noPendingItems": "今日無待處理事項",
+      "alertBanner": "最高警報",
+      "icpReviewDue": "複查到期",
+      "daysAway": "天後",
+      "hoursAgo": "小時前",
+      "minutesAgo": "分鐘前",
+      "refresh": "重新整理",
+      "none": "無",
+      "activeIcp": "生效中",
+      "pendingIcp": "待批核"
+    },
+    "tabGroups": {
+      "clinical": "臨床記錄",
+      "admin": "行政記錄"
     }
   },
   "contacts": {
@@ -361,16 +545,24 @@
     "notifications": "通知",
     "empty": "暫無聯絡人記錄",
     "fields": {
-      "nameZh": "中文姓名", "name": "英文姓名",
+      "nameZh": "中文姓名",
+      "name": "英文姓名",
       "relationship": "關係",
-      "whatsapp": "WhatsApp", "sms": "SMS", "email": "電郵",
-      "isPrimary": "主要聯絡人", "isEmergency": "緊急聯絡人",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "email": "電郵",
+      "isPrimary": "主要聯絡人",
+      "isEmergency": "緊急聯絡人",
       "consentNotifications": "接收通知"
     },
     "columns": {
-      "name": "姓名", "relationship": "關係",
-      "whatsapp": "WhatsApp", "sms": "SMS",
-      "primary": "主要", "emergency": "緊急", "notifications": "通知"
+      "name": "姓名",
+      "relationship": "關係",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "primary": "主要",
+      "emergency": "緊急",
+      "notifications": "通知"
     }
   },
   "documents": {
@@ -396,7 +588,11 @@
   },
   "bedHistory": {
     "columns": {
-      "bed": "床位", "from": "入住", "to": "離開", "reason": "原因", "by": "負責人"
+      "bed": "床位",
+      "from": "入住",
+      "to": "離開",
+      "reason": "原因",
+      "by": "負責人"
     },
     "current": "現時",
     "empty": "暫無轉床記錄"
@@ -406,7 +602,10 @@
     "empty": "暫無活動記錄"
   },
   "audit": {
-    "by": "操作員", "at": "時間", "action": "操作", "entity": "對象",
+    "by": "操作員",
+    "at": "時間",
+    "action": "操作",
+    "entity": "對象",
     "title": "系統審計記錄",
     "viewerTitle": "審計記錄查閱",
     "actor": "操作人員",
@@ -533,14 +732,25 @@
   },
   "admission": {
     "title": "新入住申請",
-    "step1": "個人資料", "step2": "病歷資料", "step3": "緊急聯絡人",
-    "step4": "上載文件", "step5": "床位分配", "step6": "同意書", "step7": "確認資料",
+    "step1": "個人資料",
+    "step2": "病歷資料",
+    "step3": "緊急聯絡人",
+    "step4": "上載文件",
+    "step5": "床位分配",
+    "step6": "同意書",
+    "step7": "確認資料",
     "hkidLabel": "香港身份證號碼",
     "hkidHint": "系統只儲存雜湊值，不儲存原始號碼",
     "hkidPlaceholder": "A123456(7)",
     "addAllergy": "新增過敏記錄",
-    "allergyDrug": "藥物名稱", "allergyReaction": "反應", "allergySeverity": "嚴重程度",
-    "severity": { "MILD": "輕微", "MODERATE": "中等", "SEVERE": "嚴重" },
+    "allergyDrug": "藥物名稱",
+    "allergyReaction": "反應",
+    "allergySeverity": "嚴重程度",
+    "severity": {
+      "MILD": "輕微",
+      "MODERATE": "中等",
+      "SEVERE": "嚴重"
+    },
     "addContact": "新增聯絡人",
     "minOneContact": "最少需要一位聯絡人",
     "documentOptional": "文件上載為選填，可於入住後補交",
@@ -620,7 +830,9 @@
     "qrRegenerateConfirm": "重新生成 QR 碼後，舊卡將即時失效。確認繼續？",
     "qrRegenerateSuccess": "QR 碼已重新生成，請重新列印卡片",
     "qrActive": "有效",
-    "filters": { "allStatus": "所有狀態" },
+    "filters": {
+      "allStatus": "所有狀態"
+    },
     "searchPlaceholder": "搜尋院友姓名...",
     "emptyList": "尚未有登記記錄",
     "noResidents": "未有合資格院友",
@@ -1091,7 +1303,6 @@
     "escalationWorkerTitle": "自動升級引擎",
     "lastRun": "上次執行",
     "nextRun": "下次執行",
-    "view": "查看",
     "assignedTo": "指派人員",
     "assign": "指派",
     "assignToSelf": "自己",
@@ -1139,7 +1350,8 @@
     "manualEscalatedToday": "👤 手動升級",
     "timesUnit": "次",
     "cronScheduleNote": "pg_cron 排程：每 15 分鐘自動執行",
-    "cronScheduleHint": "需要在 Lovable Cloud 啟用 pg_cron 擴展"
+    "cronScheduleHint": "需要在 Lovable Cloud 啟用 pg_cron 擴展",
+    "residentBanner": "此院友有 {{count}} 個待處理警報"
   },
   "emar": {
     "title": "電子藥物記錄",
