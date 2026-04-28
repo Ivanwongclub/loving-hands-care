@@ -143,7 +143,7 @@ export function VaccinationsTab({
           staffId={staffId}
           defaultType={defaultType}
           logAction={logAction}
-          onSaved={refetch}
+          onSaved={async () => { await refetch(); }}
         />
       )}
 
