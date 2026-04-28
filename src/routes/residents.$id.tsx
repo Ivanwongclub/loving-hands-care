@@ -465,6 +465,15 @@ function ResidentDetailPage() {
               logAction={logAction}
             />
           )}
+          {tab === "restraints" && (
+            <RestraintsTab
+              residentId={id}
+              branchId={resident.branch_id}
+              staffId={staff?.id ?? null}
+              staffRole={staff?.role ?? null}
+              logAction={logAction}
+            />
+          )}
         </Stack>
         <TransferBedModal
           open={transferOpen}
