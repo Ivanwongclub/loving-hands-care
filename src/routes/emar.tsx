@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Shield } from "lucide-react";
+import { Pill, Shield } from "lucide-react";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
@@ -14,6 +14,9 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
+import { useAuditLog } from "@/hooks/useAuditLog";
+import { AdministerModal } from "@/components/emar/AdministerModal";
+import { PassModeView, type PassModeRecord } from "@/components/emar/PassModeView";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/emar")({
@@ -23,8 +26,23 @@ export const Route = createFileRoute("/emar")({
 type EMARStatus = Enums<"emar_status">;
 
 type EMARDashboardRow = Tables<"emar_records"> & {
-  order: { drug_name: string; drug_name_zh: string | null; dose: string; is_prn: boolean } | null;
-  residents: { id: string; name: string; name_zh: string } | null;
+  order: {
+    drug_name: string;
+    drug_name_zh: string | null;
+    dose: string;
+    route: string;
+    is_prn: boolean;
+    barcode: string | null;
+  } | null;
+  residents: {
+    id: string;
+    name: string;
+    name_zh: string | null;
+    photo_storage_path: string | null;
+    photo_declined: boolean;
+    resuscitation_status: string | null;
+    allergies: unknown;
+  } | null;
 };
 
 const STATUS_TONE: Record<EMARStatus, "warning" | "success" | "error" | "neutral"> = {
@@ -50,12 +68,13 @@ function EMARDashboardPage() {
   const { t } = useTranslation();
   const { staff } = useCurrentStaff();
   const branchId = staff?.branch_ids?.[0] ?? null;
+  const staffId = staff?.id ?? null;
 
   return (
     <ProtectedRoute>
       <AdminDesktopShell pageTitle={t("emar.dashboardTitle")}>
-        {branchId ? (
-          <DashboardBody branchId={branchId} />
+        {branchId && staffId ? (
+          <DashboardBody branchId={branchId} staffId={staffId} />
         ) : (
           <Card padding="lg">
             <EmptyState title={t("common.loading")} />
@@ -66,15 +85,19 @@ function EMARDashboardPage() {
   );
 }
 
-function DashboardBody({ branchId }: { branchId: string }) {
+function DashboardBody({ branchId, staffId }: { branchId: string; staffId: string }) {
   const { t } = useTranslation();
   const { branches } = useBranches();
   const branchName = branches[0]?.name_zh ?? "";
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const { logAction } = useAuditLog();
   const [date, setDate] = useState<string>(todayISO());
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [passMode, setPassMode] = useState(false);
+  const [sessionCompleted, setSessionCompleted] = useState<Set<string>>(new Set());
+  const [adminRecord, setAdminRecord] = useState<PassModeRecord | null>(null);
 
   const isToday = date === todayISO();
 
@@ -143,7 +166,7 @@ function DashboardBody({ branchId }: { branchId: string }) {
       const { data, error } = await supabase
         .from("emar_records")
         .select(
-          "*, order:order_id(drug_name, drug_name_zh, dose, is_prn), residents:resident_id(id, name, name_zh)",
+          "*, order:order_id(drug_name, drug_name_zh, dose, route, is_prn, barcode), residents:resident_id(id, name, name_zh, photo_storage_path, photo_declined, resuscitation_status, allergies)",
         )
         .eq("branch_id", branchId)
         .gte("due_at", `${date}T00:00:00`)
@@ -153,6 +176,46 @@ function DashboardBody({ branchId }: { branchId: string }) {
       return (data ?? []) as unknown as EMARDashboardRow[];
     },
   });
+
+  // Detect newly-administered records during pass-mode session
+  // Heuristic: ADMINISTERED with administered_at within last 5 minutes
+  useEffect(() => {
+    if (!passMode) return;
+    const fiveMin = 5 * 60_000;
+    const now = Date.now();
+    let next: Set<string> | null = null;
+    for (const r of rows) {
+      if (
+        r.status === "ADMINISTERED" &&
+        r.administered_at &&
+        now - new Date(r.administered_at).getTime() < fiveMin &&
+        !sessionCompleted.has(r.id)
+      ) {
+        if (!next) next = new Set(sessionCompleted);
+        next.add(r.id);
+      }
+    }
+    if (next) setSessionCompleted(next);
+  }, [rows, passMode, sessionCompleted]);
+
+  const dueRecordCount = useMemo(
+    () => rows.filter((r) => r.status === "DUE" || r.status === "LATE").length,
+    [rows],
+  );
+
+  const passRecords = useMemo<PassModeRecord[]>(
+    () => rows as unknown as PassModeRecord[],
+    [rows],
+  );
+
+  const handleEndSession = () => {
+    setPassMode(false);
+    setSessionCompleted(new Set());
+  };
+
+  const handleClearCompleted = () => {
+    setSessionCompleted(new Set());
+  };
 
   const counts = useMemo(() => {
     const c = { DUE: 0, ADMINISTERED: 0, REFUSED: 0, HELD: 0, LATE: 0, MISSED: 0 };
@@ -183,180 +246,226 @@ function DashboardBody({ branchId }: { branchId: string }) {
         title={t("emar.dashboardTitle")}
         description={branchName}
         actions={
-          <div style={{ width: 180 }}>
-            <FormField label={t("emar.selectDate")}>
-              <TextField type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-            </FormField>
-          </div>
+          <Inline gap={3} align="end">
+            <div style={{ width: 180 }}>
+              <FormField label={t("emar.selectDate")}>
+                <TextField type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              </FormField>
+            </div>
+            {!passMode ? (
+              <Button
+                variant="primary"
+                leadingIcon={<Pill size={16} />}
+                onClick={() => setPassMode(true)}
+                disabled={dueRecordCount === 0}
+              >
+                {t("emar.pass.start")} ({dueRecordCount})
+              </Button>
+            ) : (
+              <Button variant="ghost" onClick={handleEndSession}>
+                {t("emar.pass.endSession")}
+              </Button>
+            )}
+          </Inline>
         }
       />
 
-      {counts.MISSED > 0 && (
-        <Alert
-          severity="warning"
-          description={t("emar.missedAlert", { count: counts.MISSED })}
-        />
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 w-full">
-        <StatCard label={t("emar.dueCount")} value={counts.DUE} tone="warning" />
-        <StatCard label={t("emar.lateCount")} value={counts.LATE} tone="error" />
-        <StatCard label={t("emar.administeredCount")} value={counts.ADMINISTERED} tone="success" />
-        <StatCard label={t("emar.missedCount")} value={counts.MISSED} tone="error" />
-        <StatCard label={t("emar.refusedCount")} value={counts.REFUSED} tone="neutral" />
-      </div>
-
-      <Card padding="md">
-        <Stack gap={2}>
-          <Inline justify="between" align="center" className="w-full">
-            <Text size="sm" color="secondary">{t("emar.complianceRate")}</Text>
-            <Text size="md" className="font-semibold">{compliance}%</Text>
-          </Inline>
-          <div
-            style={{
-              width: "100%",
-              height: 8,
-              backgroundColor: "var(--status-success-bg)",
-              borderRadius: "var(--radius-sm)",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                width: `${compliance}%`,
-                height: "100%",
-                backgroundColor: "var(--status-success-accent)",
-                transition: "width 240ms ease",
-              }}
+      {passMode ? (
+        <>
+          <PassModeView
+            records={passRecords}
+            sessionCompleted={sessionCompleted}
+            onAdminister={(rec) => setAdminRecord(rec)}
+            onEndSession={handleEndSession}
+            onClearCompleted={handleClearCompleted}
+          />
+          {adminRecord && (
+            <AdministerModal
+              open={!!adminRecord}
+              onClose={() => setAdminRecord(null)}
+              record={adminRecord}
+              residentNameZh={adminRecord.residents?.name_zh ?? ""}
+              residentName={adminRecord.residents?.name ?? ""}
+              branchId={branchId}
+              staffId={staffId}
+              date={date}
+              residentId={adminRecord.resident_id}
+              residentPhotoPath={adminRecord.residents?.photo_storage_path ?? null}
+              residentPhotoDeclined={adminRecord.residents?.photo_declined ?? false}
+              logAction={logAction}
             />
+          )}
+        </>
+      ) : (
+        <>
+          {counts.MISSED > 0 && (
+            <Alert
+              severity="warning"
+              description={t("emar.missedAlert", { count: counts.MISSED })}
+            />
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 w-full">
+            <StatCard label={t("emar.dueCount")} value={counts.DUE} tone="warning" />
+            <StatCard label={t("emar.lateCount")} value={counts.LATE} tone="error" />
+            <StatCard label={t("emar.administeredCount")} value={counts.ADMINISTERED} tone="success" />
+            <StatCard label={t("emar.missedCount")} value={counts.MISSED} tone="error" />
+            <StatCard label={t("emar.refusedCount")} value={counts.REFUSED} tone="neutral" />
           </div>
-        </Stack>
-      </Card>
 
-      <FilterBar>
-        <div style={{ minWidth: 280, flex: 1 }}>
-          <SearchField
-            placeholder={t("emar.filterByDrug")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onClear={() => setSearch("")}
-          />
-        </div>
-        <div style={{ minWidth: 180 }}>
-          <Select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            options={[
-              { value: "ALL", label: t("emar.allResidents") },
-              { value: "DUE", label: t("emar.emarStatus.DUE") },
-              { value: "LATE", label: t("emar.emarStatus.LATE") },
-              { value: "ADMINISTERED", label: t("emar.emarStatus.ADMINISTERED") },
-              { value: "MISSED", label: t("emar.emarStatus.MISSED") },
-              { value: "REFUSED", label: t("emar.emarStatus.REFUSED") },
-              { value: "HELD", label: t("emar.emarStatus.HELD") },
-            ]}
-          />
-        </div>
-      </FilterBar>
-
-      <Card padding="none">
-        {isLoading ? (
-          <div className="p-4">
+          <Card padding="md">
             <Stack gap={2}>
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
+              <Inline justify="between" align="center" className="w-full">
+                <Text size="sm" color="secondary">{t("emar.complianceRate")}</Text>
+                <Text size="md" className="font-semibold">{compliance}%</Text>
+              </Inline>
+              <div
+                style={{
+                  width: "100%",
+                  height: 8,
+                  backgroundColor: "var(--status-success-bg)",
+                  borderRadius: "var(--radius-sm)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    width: `${compliance}%`,
+                    height: "100%",
+                    backgroundColor: "var(--status-success-accent)",
+                    transition: "width 240ms ease",
+                  }}
+                />
+              </div>
             </Stack>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="p-6">
-            <EmptyState title={t("emar.noEMARToday")} />
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("residents.columns.name")}</TableHead>
-                <TableHead>{t("emar.drug")}</TableHead>
-                <TableHead>{t("attendance.checkInTime")}</TableHead>
-                <TableHead>{t("residents.columns.status")}</TableHead>
-                <TableHead>{t("emar.dualVerification")}</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((r) => {
-                const rid = r.residents?.id ?? r.resident_id;
-                const isLate = r.status === "LATE" || r.status === "MISSED";
-                const dualVerified = r.barcode_verified && r.shift_pin_verified;
-                const pinOnly = !r.barcode_verified && r.shift_pin_verified;
-                return (
-                  <TableRow
-                    key={r.id}
-                    onClick={() => navigate({ to: "/residents/$id", params: { id: rid } })}
-                    className="cursor-pointer"
-                  >
-                    <TableCell>
-                      <Stack gap={1}>
-                        <Text size="sm" className="font-semibold">
-                          {r.residents?.name_zh ?? "—"}
-                        </Text>
-                        <Text size="sm" color="tertiary">{r.residents?.name ?? ""}</Text>
-                      </Stack>
-                    </TableCell>
-                    <TableCell>
-                      <Inline gap={2} align="center" wrap>
-                        <Text size="sm">
-                          {r.order?.drug_name_zh ?? r.order?.drug_name ?? "—"}
-                        </Text>
-                        {r.order?.dose && <Badge tone="neutral">{r.order.dose}</Badge>}
-                        {r.order?.is_prn && <Badge tone="warning" emphasis="strong">PRN</Badge>}
-                      </Inline>
-                    </TableCell>
-                    <TableCell>
-                      <Text
-                        size="sm"
-                        style={{ color: isLate ? "var(--status-error-accent)" : undefined }}
-                      >
-                        {formatTime(r.due_at)}
-                      </Text>
-                    </TableCell>
-                    <TableCell>
-                      <Badge tone={STATUS_TONE[r.status]}>
-                        {t(`emar.emarStatus.${r.status}`)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {dualVerified ? (
-                        <Inline gap={1} align="center">
-                          <Shield size={14} style={{ color: "var(--status-success-accent)" }} />
-                          <Text size="sm" color="secondary">{t("emar.pinVerified")}</Text>
-                        </Inline>
-                      ) : pinOnly ? (
-                        <Inline gap={1} align="center">
-                          <Shield size={14} style={{ color: "var(--text-tertiary)" }} />
-                          <Text size="sm" color="tertiary">PIN</Text>
-                        </Inline>
-                      ) : (
-                        <Text size="sm" color="tertiary">—</Text>
-                      )}
-                    </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        variant="ghost"
-                        size="compact"
-                        onClick={() => navigate({ to: "/residents/$id", params: { id: rid } })}
-                      >
-                        {t("residents.bedDrawer.viewResident")}
-                      </Button>
-                    </TableCell>
+          </Card>
+
+          <FilterBar>
+            <div style={{ minWidth: 280, flex: 1 }}>
+              <SearchField
+                placeholder={t("emar.filterByDrug")}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onClear={() => setSearch("")}
+              />
+            </div>
+            <div style={{ minWidth: 180 }}>
+              <Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                options={[
+                  { value: "ALL", label: t("emar.allResidents") },
+                  { value: "DUE", label: t("emar.emarStatus.DUE") },
+                  { value: "LATE", label: t("emar.emarStatus.LATE") },
+                  { value: "ADMINISTERED", label: t("emar.emarStatus.ADMINISTERED") },
+                  { value: "MISSED", label: t("emar.emarStatus.MISSED") },
+                  { value: "REFUSED", label: t("emar.emarStatus.REFUSED") },
+                  { value: "HELD", label: t("emar.emarStatus.HELD") },
+                ]}
+              />
+            </div>
+          </FilterBar>
+
+          <Card padding="none">
+            {isLoading ? (
+              <div className="p-4">
+                <Stack gap={2}>
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                  ))}
+                </Stack>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="p-6">
+                <EmptyState title={t("emar.noEMARToday")} />
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("residents.columns.name")}</TableHead>
+                    <TableHead>{t("emar.drug")}</TableHead>
+                    <TableHead>{t("attendance.checkInTime")}</TableHead>
+                    <TableHead>{t("residents.columns.status")}</TableHead>
+                    <TableHead>{t("emar.dualVerification")}</TableHead>
+                    <TableHead></TableHead>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        )}
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((r) => {
+                    const rid = r.residents?.id ?? r.resident_id;
+                    const isLate = r.status === "LATE" || r.status === "MISSED";
+                    const dualVerified = r.barcode_verified && r.shift_pin_verified;
+                    const pinOnly = !r.barcode_verified && r.shift_pin_verified;
+                    return (
+                      <TableRow
+                        key={r.id}
+                        onClick={() => navigate({ to: "/residents/$id", params: { id: rid } })}
+                        className="cursor-pointer"
+                      >
+                        <TableCell>
+                          <Stack gap={1}>
+                            <Text size="sm" className="font-semibold">
+                              {r.residents?.name_zh ?? "—"}
+                            </Text>
+                            <Text size="sm" color="tertiary">{r.residents?.name ?? ""}</Text>
+                          </Stack>
+                        </TableCell>
+                        <TableCell>
+                          <Inline gap={2} align="center" wrap>
+                            <Text size="sm">
+                              {r.order?.drug_name_zh ?? r.order?.drug_name ?? "—"}
+                            </Text>
+                            {r.order?.dose && <Badge tone="neutral">{r.order.dose}</Badge>}
+                            {r.order?.is_prn && <Badge tone="warning" emphasis="strong">PRN</Badge>}
+                          </Inline>
+                        </TableCell>
+                        <TableCell>
+                          <Text
+                            size="sm"
+                            style={{ color: isLate ? "var(--status-error-accent)" : undefined }}
+                          >
+                            {formatTime(r.due_at)}
+                          </Text>
+                        </TableCell>
+                        <TableCell>
+                          <Badge tone={STATUS_TONE[r.status]}>
+                            {t(`emar.emarStatus.${r.status}`)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {dualVerified ? (
+                            <Inline gap={1} align="center">
+                              <Shield size={14} style={{ color: "var(--status-success-accent)" }} />
+                              <Text size="sm" color="secondary">{t("emar.pinVerified")}</Text>
+                            </Inline>
+                          ) : pinOnly ? (
+                            <Inline gap={1} align="center">
+                              <Shield size={14} style={{ color: "var(--text-tertiary)" }} />
+                              <Text size="sm" color="tertiary">PIN</Text>
+                            </Inline>
+                          ) : (
+                            <Text size="sm" color="tertiary">—</Text>
+                          )}
+                        </TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="compact"
+                            onClick={() => navigate({ to: "/residents/$id", params: { id: rid } })}
+                          >
+                            {t("residents.bedDrawer.viewResident")}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </Card>
+        </>
+      )}
     </Stack>
   );
 }
