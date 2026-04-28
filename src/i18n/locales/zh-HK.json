@@ -100,10 +100,37 @@
     "comingSoon": "即將推出",
     "sections": {
       "branches": "院舍管理",
+      "staff": "用戶管理",
       "alerts": "警報設定",
       "notifications": "通知設定",
       "emar": "eMAR 設定",
       "system": "系統設定"
+    },
+    "staff": {
+      "inviteButton": "邀請員工",
+      "inviteTitle": "邀請新員工",
+      "inviteSuccess": "帳戶已建立",
+      "invitePasswordWarning": "此密碼不會再次顯示，請立即複製並以安全方式交予員工。",
+      "tempPassword": "臨時密碼",
+      "sharedDevice": "共用設備帳戶",
+      "sharedDeviceHint": "啟用後角色固定為護士，適用於病房共用平板電腦。",
+      "pinStatus": "PIN 狀態",
+      "pinNotSet": "PIN 未設定",
+      "pinSet": "PIN 已設定",
+      "pinLocked": "PIN 已鎖定",
+      "pinLockedSince": "鎖定時間",
+      "unlockPin": "解鎖 PIN",
+      "resetPin": "重設 PIN",
+      "unlockConfirm": "確認解鎖此員工的 PIN？",
+      "resetConfirm": "重設 PIN 後，員工下次使用電子用藥記錄時需重新設定 PIN。確認繼續？",
+      "deactivate": "停用帳戶",
+      "deactivateConfirm": "停用後員工將立即無法登入系統。確認停用？",
+      "reassignTitle": "重新分配後停用",
+      "reassignHint": "以下項目需重新分配後才可停用帳戶。",
+      "reassignReason": "重新分配原因",
+      "confirmReassignDeactivate": "確認重新分配並停用",
+      "auditTrail": "操作記錄",
+      "viewFullAudit": "查看完整記錄"
     }
   },
   "branches": {
