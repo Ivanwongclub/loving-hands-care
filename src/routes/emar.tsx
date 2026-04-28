@@ -68,12 +68,13 @@ function EMARDashboardPage() {
   const { t } = useTranslation();
   const { staff } = useCurrentStaff();
   const branchId = staff?.branch_ids?.[0] ?? null;
+  const staffId = staff?.id ?? null;
 
   return (
     <ProtectedRoute>
       <AdminDesktopShell pageTitle={t("emar.dashboardTitle")}>
-        {branchId ? (
-          <DashboardBody branchId={branchId} />
+        {branchId && staffId ? (
+          <DashboardBody branchId={branchId} staffId={staffId} />
         ) : (
           <Card padding="lg">
             <EmptyState title={t("common.loading")} />
@@ -84,15 +85,19 @@ function EMARDashboardPage() {
   );
 }
 
-function DashboardBody({ branchId }: { branchId: string }) {
+function DashboardBody({ branchId, staffId }: { branchId: string; staffId: string }) {
   const { t } = useTranslation();
   const { branches } = useBranches();
   const branchName = branches[0]?.name_zh ?? "";
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const { logAction } = useAuditLog();
   const [date, setDate] = useState<string>(todayISO());
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [passMode, setPassMode] = useState(false);
+  const [sessionCompleted, setSessionCompleted] = useState<Set<string>>(new Set());
+  const [adminRecord, setAdminRecord] = useState<PassModeRecord | null>(null);
 
   const isToday = date === todayISO();
 
