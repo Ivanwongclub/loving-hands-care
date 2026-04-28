@@ -35,7 +35,7 @@
     "done": "Done", "close": "Close", "add": "Add", "remove": "Remove",
     "deactivate": "Deactivate", "activate": "Activate", "unlock": "Unlock", "override": "Override",
     "signIn": "Sign In", "signOut": "Sign Out", "rescan": "Rescan", "retry": "Retry",
-    "print": "Print"
+    "print": "Print", "copy": "Copy", "regenerate": "Regenerate"
   },
   "alertStatus": {
     "open": "Open", "acknowledged": "Acknowledged", "assigned": "Assigned",
@@ -89,7 +89,7 @@
   },
   "common": {
     "comingSoon": "Coming in next sprint",
-    "branch": "Branch", "ward": "Ward", "shift": "Shift",
+    "branch": "Branch", "branches": "Branches", "ward": "Ward", "shift": "Shift",
     "morningShift": "Morning Shift",
     "language": "Language",
     "retry": "Retry",
@@ -100,10 +100,37 @@
     "comingSoon": "Coming in a future sprint",
     "sections": {
       "branches": "Branches",
+      "staff": "User management",
       "alerts": "Alert Settings",
       "notifications": "Notification Settings",
       "emar": "eMAR Settings",
       "system": "System Config"
+    },
+    "staff": {
+      "inviteButton": "Invite staff",
+      "inviteTitle": "Invite new staff",
+      "inviteSuccess": "Account created",
+      "invitePasswordWarning": "This password will not be shown again. Copy it now and share securely.",
+      "tempPassword": "Temporary password",
+      "sharedDevice": "Shared device account",
+      "sharedDeviceHint": "When enabled, role is fixed to Nurse. Use for shared ward tablets.",
+      "pinStatus": "PIN status",
+      "pinNotSet": "PIN not set",
+      "pinSet": "PIN set",
+      "pinLocked": "PIN locked",
+      "pinLockedSince": "Locked since",
+      "unlockPin": "Unlock PIN",
+      "resetPin": "Reset PIN",
+      "unlockConfirm": "Confirm unlock this staff member's PIN?",
+      "resetConfirm": "After reset, staff must set a new PIN on their next medication administration. Confirm?",
+      "deactivate": "Deactivate account",
+      "deactivateConfirm": "Staff will be immediately unable to log in. Confirm deactivation?",
+      "reassignTitle": "Reassign before deactivating",
+      "reassignHint": "The following items must be reassigned before deactivating this account.",
+      "reassignReason": "Reason for reassignment",
+      "confirmReassignDeactivate": "Reassign and deactivate",
+      "auditTrail": "Activity log",
+      "viewFullAudit": "View full audit trail"
     }
   },
   "branches": {
@@ -1129,6 +1156,25 @@
     "detail": "Staff Detail",
     "profile": "Profile",
     "role": "Role",
+    "allRoles": "All roles",
+    "allStatuses": "All statuses",
+    "emptyTitle": "No staff yet",
+    "emptyDescription": "Invite staff to get started.",
+    "columns": {
+      "name": "Name",
+      "role": "Role",
+      "type": "Type",
+      "branches": "Branches",
+      "status": "Status"
+    },
+    "fields": {
+      "nameZh": "Chinese name",
+      "name": "English name",
+      "email": "Email",
+      "role": "Role",
+      "phone": "Phone",
+      "branches": "Branches"
+    },
     "roles": {
       "SYSTEM_ADMIN": "System Admin",
       "BRANCH_ADMIN": "Branch Admin",

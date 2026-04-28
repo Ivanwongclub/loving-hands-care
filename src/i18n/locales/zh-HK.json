@@ -35,7 +35,7 @@
     "done": "完成", "close": "關閉", "add": "新增", "remove": "移除",
     "deactivate": "停用", "activate": "啟用", "unlock": "解鎖", "override": "覆寫",
     "signIn": "登入", "signOut": "登出", "rescan": "重新掃描", "retry": "重試",
-    "print": "列印"
+    "print": "列印", "copy": "複製", "regenerate": "重新產生"
   },
   "alertStatus": {
     "open": "待處理", "acknowledged": "已確認", "assigned": "已指派",
@@ -89,7 +89,7 @@
   },
   "common": {
     "comingSoon": "下一期開發中",
-    "branch": "分院", "ward": "病房", "shift": "班次",
+    "branch": "分院", "branches": "分院", "ward": "病房", "shift": "班次",
     "morningShift": "早班",
     "language": "語言",
     "retry": "重試",
@@ -100,10 +100,37 @@
     "comingSoon": "即將推出",
     "sections": {
       "branches": "院舍管理",
+      "staff": "用戶管理",
       "alerts": "警報設定",
       "notifications": "通知設定",
       "emar": "eMAR 設定",
       "system": "系統設定"
+    },
+    "staff": {
+      "inviteButton": "邀請員工",
+      "inviteTitle": "邀請新員工",
+      "inviteSuccess": "帳戶已建立",
+      "invitePasswordWarning": "此密碼不會再次顯示，請立即複製並以安全方式交予員工。",
+      "tempPassword": "臨時密碼",
+      "sharedDevice": "共用設備帳戶",
+      "sharedDeviceHint": "啟用後角色固定為護士，適用於病房共用平板電腦。",
+      "pinStatus": "PIN 狀態",
+      "pinNotSet": "PIN 未設定",
+      "pinSet": "PIN 已設定",
+      "pinLocked": "PIN 已鎖定",
+      "pinLockedSince": "鎖定時間",
+      "unlockPin": "解鎖 PIN",
+      "resetPin": "重設 PIN",
+      "unlockConfirm": "確認解鎖此員工的 PIN？",
+      "resetConfirm": "重設 PIN 後，員工下次使用電子用藥記錄時需重新設定 PIN。確認繼續？",
+      "deactivate": "停用帳戶",
+      "deactivateConfirm": "停用後員工將立即無法登入系統。確認停用？",
+      "reassignTitle": "重新分配後停用",
+      "reassignHint": "以下項目需重新分配後才可停用帳戶。",
+      "reassignReason": "重新分配原因",
+      "confirmReassignDeactivate": "確認重新分配並停用",
+      "auditTrail": "操作記錄",
+      "viewFullAudit": "查看完整記錄"
     }
   },
   "branches": {
@@ -1129,6 +1156,33 @@
     "detail": "員工詳情",
     "profile": "個人資料",
     "role": "職位",
+    "allRoles": "所有職位",
+    "allStatuses": "所有狀態",
+    "emptyTitle": "未有員工記錄",
+    "emptyDescription": "邀請員工以開始管理。",
+    "columns": {
+      "name": "姓名",
+      "role": "職位",
+      "type": "類型",
+      "branches": "分院",
+      "status": "狀態",
+      "resident": "院友",
+      "task": "任務",
+      "due": "到期",
+      "drug": "藥物",
+      "time": "時間",
+      "incidentRef": "事故編號",
+      "type2": "類別",
+      "severity": "嚴重程度"
+    },
+    "fields": {
+      "nameZh": "中文姓名",
+      "name": "英文姓名",
+      "email": "電郵",
+      "role": "職位",
+      "phone": "電話",
+      "branches": "分院"
+    },
     "roles": {
       "SYSTEM_ADMIN": "系統管理員",
       "BRANCH_ADMIN": "院舍管理員",
@@ -1203,16 +1257,6 @@
     "auditActivity": "系統活動",
     "noWorkload": "最近 7 天沒有工作記錄",
     "viewDetail": "查看詳情",
-    "workloadDrawerHint": "此功能完整版請在員工詳情頁查看",
-    "columns": {
-      "resident": "院友",
-      "task": "任務",
-      "due": "到期",
-      "drug": "藥物",
-      "time": "時間",
-      "incidentRef": "事故編號",
-      "type": "類別",
-      "severity": "嚴重程度"
-    }
+    "workloadDrawerHint": "此功能完整版請在員工詳情頁查看"
   }
 }
