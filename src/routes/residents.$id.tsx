@@ -1393,10 +1393,12 @@ interface ProfileTabProps {
   resident: Resident;
   canEdit: boolean;
   canEditAdmin: boolean;
+  canEditClinical: boolean;
   editMode: boolean;
   setEditMode: (v: boolean) => void;
   onSaved: () => Promise<void> | void;
   logAction: LogActionFn;
+  staffId: string | null;
 }
 
 interface EditForm {
@@ -1408,8 +1410,13 @@ interface EditForm {
   language_preference: string;
 }
 
-function ProfileTab({ resident, canEdit, canEditAdmin, editMode, setEditMode, onSaved, logAction }: ProfileTabProps) {
+function ProfileTab({ resident, canEdit, canEditAdmin, canEditClinical, editMode, setEditMode, onSaved, logAction, staffId }: ProfileTabProps) {
   const { t } = useTranslation();
+  const [wanderingModalOpen, setWanderingModalOpen] = useState(false);
+  const wanderingLevel = (resident.wandering_risk_level ?? "NONE") as "NONE" | "LOW" | "MEDIUM" | "HIGH";
+  const wanderingTone: "error" | "warning" | "neutral" =
+    wanderingLevel === "HIGH" ? "error" :
+    wanderingLevel === "MEDIUM" ? "warning" : "neutral";
   const [form, setForm] = useState<EditForm>({
     name_zh: resident.name_zh,
     name: resident.name,
