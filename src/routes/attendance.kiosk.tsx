@@ -300,6 +300,98 @@ function KioskPage() {
     [branchId, t, logAction, qc, getPhotoUrl],
   );
 
+  // Performs a manual CHECK_OUT after the HIGH-risk gate is confirmed.
+  const performManualCheckOut = useCallback(
+    async (residentId: string, reason: string): Promise<void> => {
+      if (!branchId) return;
+      try {
+        const { data: enrollment, error: enrErr } = await supabase
+          .from("dcu_enrollments")
+          .select("id")
+          .eq("resident_id", residentId)
+          .eq("branch_id", branchId)
+          .eq("status", "ACTIVE")
+          .maybeSingle();
+        if (enrErr || !enrollment) throw enrErr ?? new Error(t("kiosk.enrollmentInactive"));
+
+        const nowIso = new Date().toISOString();
+        const today = todayDateStr();
+        const { data: inserted, error: insErr } = await supabase
+          .from("attendance_events")
+          .insert({
+            enrollment_id: enrollment.id,
+            branch_id: branchId,
+            event_type: "CHECK_OUT",
+            event_time: nowIso,
+            operator_type: "STAFF_MANUAL",
+            is_manual: true,
+            manual_reason: reason,
+          })
+          .select()
+          .single();
+        if (insErr || !inserted) throw insErr ?? new Error("Insert failed");
+
+        const { data: session } = await supabase
+          .from("attendance_sessions")
+          .select("id, check_in_at")
+          .eq("enrollment_id", enrollment.id)
+          .eq("session_date", today)
+          .maybeSingle();
+        const dur = session?.check_in_at
+          ? Math.max(
+              0,
+              Math.round(
+                (new Date(inserted.event_time).getTime() -
+                  new Date(session.check_in_at).getTime()) / 60000,
+              ),
+            )
+          : null;
+        if (session) {
+          await supabase
+            .from("attendance_sessions")
+            .update({
+              check_out_event_id: inserted.id,
+              check_out_at: inserted.event_time,
+              duration_minutes: dur,
+              status: "PRESENT",
+              swd_flagged: true,
+            })
+            .eq("id", session.id);
+        } else {
+          await supabase.from("attendance_sessions").insert({
+            enrollment_id: enrollment.id,
+            branch_id: branchId,
+            session_date: today,
+            check_out_event_id: inserted.id,
+            check_out_at: inserted.event_time,
+            status: "PARTIAL",
+            swd_flagged: true,
+          });
+        }
+
+        await logAction({
+          action: "DCU_CHECKOUT",
+          entity_type: "attendance_events",
+          entity_id: inserted.id,
+          branch_id: branchId,
+          after_state: {
+            enrollment_id: enrollment.id,
+            event_type: "CHECK_OUT",
+            event_time: inserted.event_time,
+          },
+          metadata: { manual: true, reason, wandering_high_risk_confirmed: true },
+        });
+
+        void qc.invalidateQueries({ queryKey: ["attendanceEvents"] });
+        void qc.invalidateQueries({ queryKey: ["attendanceSessions"] });
+      } catch (err) {
+        setErrorMsg(err instanceof Error ? err.message : String(err));
+        setState("ERROR");
+      }
+    },
+    [branchId, t, logAction, qc],
+  );
+
   const syncOfflineQueue = useCallback(async () => {
     if (!branchId) return;
     setSyncing(true);
