@@ -66,6 +66,13 @@ function KioskPage() {
   );
   const [queueCount, setQueueCount] = useState<number>(0);
   const [syncing, setSyncing] = useState<boolean>(false);
+  const [pendingHighRiskCheckOut, setPendingHighRiskCheckOut] = useState<{
+    enrollmentId: string;
+    residentName: string;
+    wanderingNotes: string | null;
+    photoPath: string | null;
+    eventTime: string;
+  } | null>(null);
 
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const processingRef = useRef<boolean>(false);
