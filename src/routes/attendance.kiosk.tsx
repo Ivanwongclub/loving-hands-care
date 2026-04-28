@@ -72,6 +72,8 @@ function KioskPage() {
     wanderingNotes: string | null;
     photoPath: string | null;
     eventTime: string;
+    qrCodeUUID?: string;
+    manual?: { residentId: string; reason: string };
   } | null>(null);
 
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
