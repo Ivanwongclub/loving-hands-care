@@ -1,15 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Lock, Upload, MoreHorizontal } from "lucide-react";
+import {
+  ArrowLeft, Lock, Upload, MoreHorizontal, Camera, RefreshCw, AlertTriangle, ShieldAlert, Heart, CheckCircle2, Activity,
+} from "lucide-react";
 import { toast } from "sonner";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
   Avatar, Badge, Button, Card, Heading, Inline, Stack, Text, Divider, Surface,
-  Tabs, Table, TableToolbar, EmptyState, Spinner, Alert, Switch, Modal, Drawer,
+  Tabs, Table, TableToolbar, EmptyState, Spinner, Alert, Switch, Modal,
   ConfirmDialog, FormField, TextField, Select, DropdownMenu, IconButton,
-  ActivityItem, Timeline, type Column,
+  ActivityItem, Timeline, Tooltip, type Column,
 } from "@/components/hms";
 import { TransferBedModal } from "@/components/residents/TransferBedModal";
 import { DischargeModal } from "@/components/residents/DischargeModal";
@@ -41,6 +43,8 @@ type AuditLogRow = Tables<"audit_logs"> & {
 };
 type ResidentStatus = Enums<"resident_status">;
 type Gender = Enums<"gender_type">;
+type StaffRole = Enums<"staff_role">;
+type LogActionFn = ReturnType<typeof useAuditLog>["logAction"];
 
 const STATUS_TONE: Record<ResidentStatus, "info" | "neutral" | "warning" | "error"> = {
   ADMITTED: "info",
@@ -53,10 +57,11 @@ const RISK_TONE: Record<"LOW" | "MEDIUM" | "HIGH", "success" | "warning" | "erro
   MEDIUM: "warning",
   HIGH: "error",
 };
-const SEVERITY_TONE: Record<string, "success" | "warning" | "error" | "neutral"> = {
-  MILD: "success",
+const ALLERGY_SEVERITY_TONE: Record<string, "success" | "warning" | "error" | "neutral"> = {
+  MILD: "neutral",
   MODERATE: "warning",
   SEVERE: "error",
+  ANAPHYLAXIS: "error",
 };
 const ACTIVITY_TONE: Record<string, "success" | "neutral" | "info" | "warning"> = {
   RESIDENT_ADMITTED: "success",
@@ -66,6 +71,41 @@ const ACTIVITY_TONE: Record<string, "success" | "neutral" | "info" | "warning"> 
 };
 
 const DOCUMENT_TYPES = ["CONSENT_FORM", "MEDICAL_REFERRAL", "ID_COPY", "ADVANCE_DIRECTIVE", "OTHER"] as const;
+
+type ResusStatus = "FULL_RESUSCITATION" | "DNACPR" | "AD_LIMITED";
+type AllergySeverity = "MILD" | "MODERATE" | "SEVERE" | "ANAPHYLAXIS";
+type AllergySource = "RESIDENT_REPORTED" | "FAMILY_REPORTED" | "MEDICAL_RECORD" | "OBSERVED";
+
+interface AllergyRecord {
+  id: string;
+  drug: string;
+  reaction: string;
+  severity: AllergySeverity;
+  source: AllergySource;
+  is_active: boolean;
+  recorded_at: string;
+}
+
+interface ConsentFlags {
+  family_info_sharing?: boolean;
+  photography_publications?: boolean;
+  telehealth?: boolean;
+  religious_eol_preferences?: string;
+}
+
+const CLINICAL_TABS = ["profile", "vitals", "wounds", "emar", "icp", "tasks", "incidents"] as const;
+const ADMIN_TABS = ["alerts", "contacts", "documents", "bed", "activity"] as const;
+type TabKey = (typeof CLINICAL_TABS)[number] | (typeof ADMIN_TABS)[number];
+const ALL_TABS: readonly TabKey[] = [...CLINICAL_TABS, ...ADMIN_TABS];
+
+const DEFAULT_TAB_BY_ROLE: Record<string, TabKey> = {
+  NURSE: "vitals",
+  CAREGIVER: "tasks",
+  SENIOR_NURSE: "icp",
+  BRANCH_ADMIN: "profile",
+  SYSTEM_ADMIN: "profile",
+  FAMILY: "profile",
+};
 
 function formatDate(d?: string | null): string {
   if (!d) return "—";
@@ -80,6 +120,29 @@ function formatDateTime(d?: string | null): string {
 function calcAge(dob: string): number {
   return Math.floor((Date.now() - new Date(dob).getTime()) / 31557600000);
 }
+function uuid(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+function parseAllergies(raw: unknown): AllergyRecord[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((a, i): AllergyRecord => {
+    const o = (a ?? {}) as Record<string, unknown>;
+    return {
+      id: typeof o.id === "string" ? o.id : `legacy-${i}`,
+      drug: typeof o.drug === "string" ? o.drug : "",
+      reaction: typeof o.reaction === "string" ? o.reaction : "",
+      severity: (typeof o.severity === "string" && ["MILD", "MODERATE", "SEVERE", "ANAPHYLAXIS"].includes(o.severity)
+        ? o.severity
+        : "MODERATE") as AllergySeverity,
+      source: (typeof o.source === "string" && ["RESIDENT_REPORTED", "FAMILY_REPORTED", "MEDICAL_RECORD", "OBSERVED"].includes(o.source)
+        ? o.source
+        : "MEDICAL_RECORD") as AllergySource,
+      is_active: typeof o.is_active === "boolean" ? o.is_active : true,
+      recorded_at: typeof o.recorded_at === "string" ? o.recorded_at : new Date().toISOString().slice(0, 10),
+    };
+  });
+}
 
 /* ──────────────────────────────────────────────────────────
  * Page
@@ -91,7 +154,6 @@ function ResidentDetailPage() {
   const navigate = useNavigate();
   const { staff } = useCurrentStaff();
   const { branches } = useBranches();
-  const branchId = branches[0]?.id ?? null;
   const { logAction } = useAuditLog();
 
   const [resident, setResident] = useState<Resident | null>(null);
@@ -102,9 +164,34 @@ function ResidentDetailPage() {
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [bedHistory, setBedHistory] = useState<BedAssignment[]>([]);
   const [activityLog, setActivityLog] = useState<AuditLogRow[]>([]);
-  const [openAlertCount, setOpenAlertCount] = useState(0);
 
-  const [tab, setTab] = useState<"profile" | "alerts" | "contacts" | "documents" | "bed" | "activity" | "vitals" | "wounds" | "incidents" | "emar" | "icp" | "tasks">("profile");
+  const tabStorageKey = `hms_resident_tab_${id}`;
+  const [tab, setTab] = useState<TabKey>(() => {
+    if (typeof localStorage !== "undefined") {
+      const saved = localStorage.getItem(tabStorageKey);
+      if (saved && (ALL_TABS as readonly string[]).includes(saved)) return saved as TabKey;
+    }
+    return "profile";
+  });
+
+  // Apply role default once staff loads, only if no saved tab
+  useEffect(() => {
+    if (!staff) return;
+    if (typeof localStorage === "undefined") return;
+    const saved = localStorage.getItem(tabStorageKey);
+    if (!saved) {
+      const def = DEFAULT_TAB_BY_ROLE[staff.role] ?? "profile";
+      setTab(def);
+    }
+  }, [staff, tabStorageKey]);
+
+  const handleTabChange = useCallback((next: TabKey) => {
+    setTab(next);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(tabStorageKey, next);
+    }
+  }, [tabStorageKey]);
+
   const [editMode, setEditMode] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [dischargeOpen, setDischargeOpen] = useState(false);
@@ -168,23 +255,12 @@ function ResidentDetailPage() {
     if (!error) setActivityLog((data ?? []) as unknown as AuditLogRow[]);
   };
 
-  const fetchOpenAlertCount = async () => {
-    const { data, error } = await supabase
-      .from("alerts")
-      .select("id")
-      .eq("resident_id", id)
-      .eq("status", "OPEN")
-      .limit(50);
-    if (!error) setOpenAlertCount((data ?? []).length);
-  };
-
   useEffect(() => {
     void fetchResident();
     void fetchContacts();
     void fetchDocuments();
     void fetchBedHistory();
     void fetchActivity();
-    void fetchOpenAlertCount();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -225,10 +301,17 @@ function ResidentDetailPage() {
     );
   }
 
-  const canEdit =
-    staff?.role === "SYSTEM_ADMIN" ||
-    staff?.role === "BRANCH_ADMIN" ||
-    staff?.role === "SENIOR_NURSE";
+  const role = staff?.role ?? null;
+  const canEditProfile = role === "SYSTEM_ADMIN" || role === "BRANCH_ADMIN" || role === "SENIOR_NURSE";
+  const canEditClinical = role === "SYSTEM_ADMIN" || role === "BRANCH_ADMIN" || role === "SENIOR_NURSE";
+  const canEditAdmin = role === "SYSTEM_ADMIN" || role === "BRANCH_ADMIN";
+
+  const lifecycle = {
+    transfer: resident.status === "ADMITTED",
+    discharge: resident.status === "ADMITTED" || resident.status === "LOA",
+  };
+
+  const branchUnused = branches[0]?.id ?? null;
 
   return (
     <ProtectedRoute>
@@ -236,53 +319,60 @@ function ResidentDetailPage() {
         <Stack gap={4}>
           <ProfileHeader
             resident={resident}
-            canEdit={canEdit}
+            canEditProfile={canEditProfile}
+            canEditAdmin={canEditAdmin}
             editMode={editMode}
-            onEdit={() => { setTab("profile"); setEditMode(true); }}
+            lifecycle={lifecycle}
+            onEdit={() => { handleTabChange("profile"); setEditMode(true); }}
             onTransfer={() => setTransferOpen(true)}
             onDischarge={() => setDischargeOpen(true)}
+            onPhotoChanged={fetchResident}
+            onResusChanged={fetchResident}
+            staffId={staff?.id ?? null}
+            staffRole={role}
+            logAction={logAction}
           />
 
-          {openAlertCount > 0 && (
-            <div>
-              <Alert
-                severity="warning"
-                description={t("alerts.residentBanner", { count: openAlertCount })}
-              />
-              <div style={{ marginTop: 8 }}>
-                <Button variant="ghost" size="compact" onClick={() => setTab("alerts")}>
-                  {t("alerts.view")}
-                </Button>
-              </div>
-            </div>
-          )}
+          <CareSummaryPanel
+            residentId={id}
+            branchId={resident.branch_id}
+            allergies={parseAllergies(resident.allergies)}
+            onAlertClick={() => handleTabChange("alerts")}
+          />
 
-          <div>
-            <Tabs
-              style="line"
-              value={tab}
-              onChange={(v) => setTab(v as typeof tab)}
-              items={[
-                { value: "profile", label: t("residents.profile") },
-                { value: "alerts", label: t("alerts.title") },
-                { value: "contacts", label: t("residents.contacts") },
-                { value: "documents", label: t("residents.documents") },
-                { value: "bed", label: t("residents.bedHistory") },
-                { value: "activity", label: t("residents.activity") },
-                { value: "vitals", label: t("vitals.title") },
-                { value: "wounds", label: t("wounds.title") },
-                { value: "incidents", label: t("incidents.title") },
-                { value: "emar", label: t("emar.tab") },
-                { value: "icp", label: t("icp.title") },
-                { value: "tasks", label: t("tasks.title") },
-              ]}
-            />
-          </div>
+          <TabGroup
+            label={t("residents.tabGroups.clinical")}
+            value={(CLINICAL_TABS as readonly string[]).includes(tab) ? tab : null}
+            onChange={(v) => handleTabChange(v as TabKey)}
+            items={[
+              { value: "profile", label: t("residents.profile") },
+              { value: "vitals", label: t("vitals.title") },
+              { value: "wounds", label: t("wounds.title") },
+              { value: "emar", label: t("emar.tab") },
+              { value: "icp", label: t("icp.title") },
+              { value: "tasks", label: t("tasks.title") },
+              { value: "incidents", label: t("incidents.title") },
+            ]}
+          />
+
+          <TabGroup
+            label={t("residents.tabGroups.admin")}
+            value={(ADMIN_TABS as readonly string[]).includes(tab) ? tab : null}
+            onChange={(v) => handleTabChange(v as TabKey)}
+            items={[
+              { value: "alerts", label: t("alerts.title") },
+              { value: "contacts", label: t("residents.contacts") },
+              { value: "documents", label: t("residents.documents") },
+              { value: "bed", label: t("residents.bedHistory") },
+              { value: "activity", label: t("residents.activity") },
+            ]}
+          />
 
           {tab === "profile" && (
             <ProfileTab
               resident={resident}
-              canEdit={canEdit}
+              canEdit={canEditProfile}
+              canEditAdmin={canEditAdmin}
               editMode={editMode}
               setEditMode={setEditMode}
               onSaved={fetchResident}
@@ -385,9 +475,35 @@ function ResidentDetailPage() {
           onDischarged={() => { void fetchResident(); }}
         />
       </AdminDesktopShell>
-      {/* unused branchId reference suppression */}
-      {branchId ? null : null}
+      {branchUnused ? null : null}
     </ProtectedRoute>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+ * TabGroup wrapper
+ * ────────────────────────────────────────────────────────── */
+function TabGroup({
+  label,
+  value,
+  onChange,
+  items,
+}: {
+  label: string;
+  value: string | null;
+  onChange: (v: string) => void;
+  items: { value: string; label: React.ReactNode }[];
+}) {
+  return (
+    <Stack gap={1}>
+      <Text size="label" color="tertiary">{label}</Text>
+      <Tabs
+        style="line"
+        value={value ?? items[0].value}
+        onChange={onChange}
+        items={items}
+      />
+    </Stack>
   );
 }
 
@@ -397,22 +513,36 @@ function ResidentDetailPage() {
 
 function ProfileHeader({
   resident,
-  canEdit,
+  canEditProfile,
+  canEditAdmin,
   editMode,
+  lifecycle,
   onEdit,
   onTransfer,
   onDischarge,
+  onPhotoChanged,
+  onResusChanged,
+  staffId,
+  staffRole,
+  logAction,
 }: {
   resident: Resident;
-  canEdit: boolean;
+  canEditProfile: boolean;
+  canEditAdmin: boolean;
   editMode: boolean;
+  lifecycle: { transfer: boolean; discharge: boolean };
   onEdit: () => void;
   onTransfer: () => void;
   onDischarge: () => void;
+  onPhotoChanged: () => Promise<void> | void;
+  onResusChanged: () => Promise<void> | void;
+  staffId: string | null;
+  staffRole: StaffRole | null;
+  logAction: LogActionFn;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { flatList } = useLocations(resident.branch_id);
+  const [resusOpen, setResusOpen] = useState(false);
 
   const bedPath = useMemo(() => {
     if (!resident.bed_id) return t("residents.noBed");
@@ -428,12 +558,20 @@ function ProfileHeader({
     return parts.length > 0 ? parts.join(" › ") : t("residents.noBed");
   }, [resident.bed_id, resident.locations, flatList, t]);
 
+  const resus = (resident.resuscitation_status as ResusStatus | null) ?? "FULL_RESUSCITATION";
+
   return (
     <Surface padding="none">
       <div style={{ padding: 24, width: "100%" }}>
         <Inline justify="between" align="start" className="w-full">
           <Inline gap={4} align="start">
-            <Avatar size="lg" name={resident.name_zh || resident.name} />
+            <ResidentPhoto
+              resident={resident}
+              canEdit={canEditProfile}
+              staffId={staffId}
+              onChanged={onPhotoChanged}
+              logAction={logAction}
+            />
             <Stack gap={1}>
               <Inline gap={2} wrap>
                 <Heading level={2}>{resident.name_zh}</Heading>
@@ -443,6 +581,7 @@ function ProfileHeader({
                     {t(`residents.riskLevel.${resident.risk_level}`)}
                   </Badge>
                 )}
+                <ResuscitationBadge status={resus} onClick={() => setResusOpen(true)} />
                 {resident.do_not_share_family && (
                   <Badge tone="error" emphasis="strong">
                     <Lock size={12} />
@@ -460,16 +599,34 @@ function ProfileHeader({
                   {calcAge(resident.dob)} {t("residents.ageYears")}
                 </Text>
               </Inline>
+              {resident.lpoa_holder_name && (
+                <button
+                  type="button"
+                  onClick={() => setResusOpen(true)}
+                  style={{
+                    background: "transparent", border: "none", padding: 0, cursor: "pointer", textAlign: "left",
+                    color: "var(--text-tertiary)", fontSize: "var(--font-size-sm, 0.875rem)",
+                    textDecoration: "underline", textDecorationStyle: "dotted",
+                  }}
+                >
+                  {t("residents.resuscitation.guardian")}: {resident.lpoa_holder_name}
+                  {resident.lpoa_holder_relationship ? ` (${resident.lpoa_holder_relationship})` : ""}
+                </button>
+              )}
             </Stack>
           </Inline>
           <Inline gap={2} align="start">
-            <Button variant="soft" onClick={onTransfer}>
-              {t("residents.transfer")}
-            </Button>
-            <Button variant="destructive" onClick={onDischarge}>
-              {t("residents.startDischarge")}
-            </Button>
-            {canEdit && !editMode && (
+            {lifecycle.transfer && (
+              <Button variant="soft" onClick={onTransfer}>
+                {t("residents.transfer")}
+              </Button>
+            )}
+            {lifecycle.discharge && (
+              <Button variant="destructive" onClick={onDischarge}>
+                {t("residents.startDischarge")}
+              </Button>
+            )}
+            {canEditProfile && !editMode && (
               <Button variant="soft" onClick={onEdit}>
                 {t("residents.editProfile")}
               </Button>
@@ -477,6 +634,726 @@ function ProfileHeader({
           </Inline>
         </Inline>
       </div>
+      <ResuscitationEditModal
+        open={resusOpen}
+        onClose={() => setResusOpen(false)}
+        resident={resident}
+        canEdit={canEditAdmin}
+        staffId={staffId}
+        staffRole={staffRole}
+        onSaved={async () => { await onResusChanged(); setResusOpen(false); }}
+        logAction={logAction}
+      />
+    </Surface>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+ * Resident photo with upload
+ * ────────────────────────────────────────────────────────── */
+function ResidentPhoto({
+  resident, canEdit, staffId, onChanged, logAction,
+}: {
+  resident: Resident;
+  canEdit: boolean;
+  staffId: string | null;
+  onChanged: () => Promise<void> | void;
+  logAction: LogActionFn;
+}) {
+  const { t } = useTranslation();
+  const [signed, setSigned] = useState<string | null>(null);
+  const [signedExpiry, setSignedExpiry] = useState<number>(0);
+  const [hover, setHover] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const path = resident.photo_storage_path;
+    if (!path || resident.photo_declined) {
+      setSigned(null);
+      return;
+    }
+    if (signed && Date.now() < signedExpiry) return;
+    void (async () => {
+      const { data, error } = await supabase.storage.from("resident-photos").createSignedUrl(path, 3600);
+      if (!active) return;
+      if (!error && data?.signedUrl) {
+        setSigned(data.signedUrl);
+        setSignedExpiry(Date.now() + 50 * 60 * 1000);
+      }
+    })();
+    return () => { active = false; };
+  }, [resident.photo_storage_path, resident.photo_declined, signed, signedExpiry]);
+
+  const photoOld = resident.photo_updated_at
+    ? Date.now() - new Date(resident.photo_updated_at).getTime() > 365 * 24 * 3600 * 1000
+    : false;
+
+  const initials = (resident.name_zh || resident.name).slice(0, 2);
+
+  let inner: React.ReactNode;
+  if (resident.photo_declined) {
+    inner = (
+      <div style={{
+        width: 56, height: 56, borderRadius: "50%",
+        background: "var(--bg-muted, #f1f5f9)", display: "flex", alignItems: "center",
+        justifyContent: "center", color: "var(--text-tertiary)",
+      }}>
+        <Lock size={20} />
+      </div>
+    );
+  } else if (signed) {
+    inner = (
+      <img
+        src={signed}
+        alt={t("residents.photo.title")}
+        style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", display: "block" }}
+      />
+    );
+  } else {
+    inner = <Avatar size="lg" name={initials} />;
+  }
+
+  return (
+    <div
+      style={{ position: "relative" }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      {inner}
+      {photoOld && !resident.photo_declined && signed && (
+        <Tooltip label={t("residents.photo.needsUpdate")}>
+          <span
+            style={{
+              position: "absolute", top: -2, right: -2, width: 12, height: 12,
+              borderRadius: "50%", background: "var(--color-warning, #f59e0b)",
+              border: "2px solid var(--bg-base, #fff)",
+            }}
+          />
+        </Tooltip>
+      )}
+      {resident.photo_declined && (
+        <Text size="caption" color="tertiary" as="div" style={{ marginTop: 4, textAlign: "center" }}>
+          {t("residents.photo.declined")}
+        </Text>
+      )}
+      {canEdit && (hover || open) && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label={t("residents.photo.upload")}
+          style={{
+            position: "absolute", bottom: -2, right: -2, width: 24, height: 24, borderRadius: "50%",
+            background: "var(--bg-elevated, #fff)", border: "1px solid var(--border-default, #e5e7eb)",
+            display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+          }}
+        >
+          <Camera size={12} />
+        </button>
+      )}
+      <PhotoUploadModal
+        open={open}
+        onClose={() => setOpen(false)}
+        resident={resident}
+        staffId={staffId}
+        onSaved={async () => { setSigned(null); setSignedExpiry(0); await onChanged(); }}
+        logAction={logAction}
+      />
+    </div>
+  );
+}
+
+function PhotoUploadModal({
+  open, onClose, resident, staffId, onSaved, logAction,
+}: {
+  open: boolean;
+  onClose: () => void;
+  resident: Resident;
+  staffId: string | null;
+  onSaved: () => Promise<void> | void;
+  logAction: LogActionFn;
+}) {
+  const { t } = useTranslation();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const camRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const compress = async (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const max = 800;
+        const ratio = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.round(img.width * ratio);
+        const h = Math.round(img.height * ratio);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("Canvas unavailable"));
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob((blob) => {
+          if (!blob) return reject(new Error("Compression failed"));
+          resolve(blob);
+        }, "image/jpeg", 0.85);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Image load failed")); };
+      img.src = url;
+    });
+  };
+
+  const handleFile = async (file: File | null | undefined) => {
+    if (!file) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      const blob = await compress(file);
+      const path = `${resident.branch_id}/${resident.id}/photo.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("resident-photos")
+        .upload(path, blob, { upsert: true, contentType: "image/jpeg" });
+      if (upErr) throw upErr;
+      const before = { photo_storage_path: resident.photo_storage_path, photo_declined: resident.photo_declined };
+      const after = { photo_storage_path: path, photo_declined: false, photo_updated_at: new Date().toISOString() };
+      const { error: updErr } = await supabase.from("residents").update(after).eq("id", resident.id);
+      if (updErr) throw updErr;
+      void logAction({
+        action: "RESIDENT_PHOTO_UPDATED",
+        entity_type: "residents",
+        entity_id: resident.id,
+        branch_id: resident.branch_id,
+        before_state: before,
+        after_state: after,
+      });
+      toast.success(t("common.saved"));
+      await onSaved();
+      onClose();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const markDeclined = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      const before = { photo_storage_path: resident.photo_storage_path, photo_declined: resident.photo_declined };
+      const after = { photo_storage_path: null, photo_declined: true };
+      const { error } = await supabase.from("residents").update(after).eq("id", resident.id);
+      if (error) throw error;
+      void logAction({
+        action: "RESIDENT_PHOTO_DECLINED",
+        entity_type: "residents",
+        entity_id: resident.id,
+        branch_id: resident.branch_id,
+        before_state: before,
+        after_state: after,
+      });
+      toast.success(t("common.saved"));
+      await onSaved();
+      onClose();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  void staffId; // not directly needed for upload but kept for future audit metadata
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={t("residents.photo.upload")}
+      size="sm"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={busy}>{t("actions.cancel")}</Button>
+        </>
+      }
+    >
+      <Stack gap={3}>
+        {err && <Alert severity="error" description={err} />}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          onChange={(e) => { void handleFile(e.target.files?.[0]); e.target.value = ""; }}
+        />
+        <input
+          ref={camRef}
+          type="file"
+          accept="image/*"
+          {...({ capture: "environment" } as Record<string, string>)}
+          hidden
+          onChange={(e) => { void handleFile(e.target.files?.[0]); e.target.value = ""; }}
+        />
+        <Button variant="primary" onClick={() => fileRef.current?.click()} disabled={busy}>
+          {t("residents.photo.choose")}
+        </Button>
+        <Button variant="soft" onClick={() => camRef.current?.click()} disabled={busy}>
+          <Camera size={14} /> {t("residents.photo.take")}
+        </Button>
+        <Divider />
+        <Button variant="ghost" onClick={() => void markDeclined()} disabled={busy}>
+          {t("residents.photo.markDeclined")}
+        </Button>
+        {busy && <Text size="sm" color="tertiary">{t("residents.photo.uploading")}</Text>}
+      </Stack>
+    </Modal>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+ * Resuscitation badge + edit modal
+ * ────────────────────────────────────────────────────────── */
+function ResuscitationBadge({ status, onClick }: { status: ResusStatus; onClick: () => void }) {
+  const { t } = useTranslation();
+  if (status === "FULL_RESUSCITATION") {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer" }}
+        aria-label={t("residents.resuscitation.title")}
+      >
+        <Badge tone="success" emphasis="subtle">
+          <Heart size={12} /> {t("residents.resuscitation.FULL_RESUSCITATION")}
+        </Badge>
+      </button>
+    );
+  }
+  const tone: "error" | "warning" = status === "DNACPR" ? "error" : "warning";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer" }}
+      aria-label={t("residents.resuscitation.title")}
+    >
+      <Badge tone={tone} emphasis="strong">
+        <ShieldAlert size={12} /> {t(`residents.resuscitation.${status}`)}
+      </Badge>
+    </button>
+  );
+}
+
+function ResuscitationEditModal({
+  open, onClose, resident, canEdit, staffId, staffRole, onSaved, logAction,
+}: {
+  open: boolean;
+  onClose: () => void;
+  resident: Resident;
+  canEdit: boolean;
+  staffId: string | null;
+  staffRole: StaffRole | null;
+  onSaved: () => Promise<void> | void;
+  logAction: LogActionFn;
+}) {
+  const { t } = useTranslation();
+  const [status, setStatus] = useState<ResusStatus>(
+    (resident.resuscitation_status as ResusStatus | null) ?? "FULL_RESUSCITATION"
+  );
+  const [adOnFile, setAdOnFile] = useState<boolean>(!!resident.advance_directive_on_file);
+  const [adDate, setAdDate] = useState<string>(
+    resident.advance_directive_uploaded_at ? formatDate(resident.advance_directive_uploaded_at) : ""
+  );
+  const [lpoaName, setLpoaName] = useState(resident.lpoa_holder_name ?? "");
+  const [lpoaRel, setLpoaRel] = useState(resident.lpoa_holder_relationship ?? "");
+  const [lpoaPhone, setLpoaPhone] = useState(resident.lpoa_holder_phone ?? "");
+  const [confirm, setConfirm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setStatus((resident.resuscitation_status as ResusStatus | null) ?? "FULL_RESUSCITATION");
+      setAdOnFile(!!resident.advance_directive_on_file);
+      setAdDate(resident.advance_directive_uploaded_at ? formatDate(resident.advance_directive_uploaded_at) : "");
+      setLpoaName(resident.lpoa_holder_name ?? "");
+      setLpoaRel(resident.lpoa_holder_relationship ?? "");
+      setLpoaPhone(resident.lpoa_holder_phone ?? "");
+      setErr(null);
+    }
+  }, [open, resident]);
+
+  void staffRole;
+  const showLpoa = status === "DNACPR" || status === "AD_LIMITED";
+
+  const doSave = async () => {
+    setSaving(true);
+    setErr(null);
+    try {
+      const before = {
+        resuscitation_status: resident.resuscitation_status,
+        advance_directive_on_file: resident.advance_directive_on_file,
+        advance_directive_uploaded_at: resident.advance_directive_uploaded_at,
+        lpoa_holder_name: resident.lpoa_holder_name,
+        lpoa_holder_relationship: resident.lpoa_holder_relationship,
+        lpoa_holder_phone: resident.lpoa_holder_phone,
+      };
+      const after = {
+        resuscitation_status: status,
+        resuscitation_status_updated_at: new Date().toISOString(),
+        resuscitation_status_updated_by: staffId,
+        advance_directive_on_file: adOnFile,
+        advance_directive_uploaded_at: adOnFile && adDate ? new Date(adDate).toISOString() : null,
+        lpoa_holder_name: lpoaName || null,
+        lpoa_holder_relationship: lpoaRel || null,
+        lpoa_holder_phone: lpoaPhone || null,
+      };
+      const { error } = await supabase.from("residents").update(after).eq("id", resident.id);
+      if (error) throw error;
+      void logAction({
+        action: "RESIDENT_RESUSCITATION_STATUS_CHANGED",
+        entity_type: "residents",
+        entity_id: resident.id,
+        branch_id: resident.branch_id,
+        before_state: before,
+        after_state: after,
+      });
+      toast.success(t("common.saved"));
+      setConfirm(false);
+      await onSaved();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <>
+      <Modal
+        open={open}
+        onClose={onClose}
+        title={t("residents.resuscitation.editTitle")}
+        size="md"
+        footer={
+          canEdit ? (
+            <>
+              <Button variant="ghost" onClick={onClose} disabled={saving}>{t("actions.cancel")}</Button>
+              <Button variant="primary" onClick={() => setConfirm(true)} disabled={saving}>
+                {t("actions.save")}
+              </Button>
+            </>
+          ) : (
+            <Button variant="ghost" onClick={onClose}>{t("actions.close")}</Button>
+          )
+        }
+      >
+        <Stack gap={3}>
+          {err && <Alert severity="error" description={err} />}
+          <FormField label={t("residents.resuscitation.title")} required>
+            <Select
+              value={status}
+              disabled={!canEdit}
+              onChange={(e) => setStatus((e.target as HTMLSelectElement).value as ResusStatus)}
+              options={[
+                { value: "FULL_RESUSCITATION", label: t("residents.resuscitation.FULL_RESUSCITATION") },
+                { value: "DNACPR", label: t("residents.resuscitation.DNACPR") },
+                { value: "AD_LIMITED", label: t("residents.resuscitation.AD_LIMITED") },
+              ]}
+            />
+          </FormField>
+          <Switch
+            checked={adOnFile}
+            onChange={(v) => setAdOnFile(v)}
+            label={t("residents.resuscitation.adOnFile")}
+            disabled={!canEdit}
+          />
+          {adOnFile && (
+            <FormField label={t("residents.resuscitation.adUploadedAt")}>
+              <TextField type="date" value={adDate} disabled={!canEdit}
+                onChange={(e) => setAdDate(e.target.value)} />
+            </FormField>
+          )}
+          {showLpoa && (
+            <>
+              <Divider />
+              <Heading level={3}>{t("residents.resuscitation.lpoa")}</Heading>
+              <FormField label={t("residents.resuscitation.lpoaName")}>
+                <TextField value={lpoaName} disabled={!canEdit}
+                  onChange={(e) => setLpoaName(e.target.value)} />
+              </FormField>
+              <div className="grid grid-cols-2 gap-3">
+                <FormField label={t("residents.resuscitation.lpoaRelationship")}>
+                  <TextField value={lpoaRel} disabled={!canEdit}
+                    onChange={(e) => setLpoaRel(e.target.value)} />
+                </FormField>
+                <FormField label={t("residents.resuscitation.lpoaPhone")}>
+                  <TextField value={lpoaPhone} disabled={!canEdit}
+                    onChange={(e) => setLpoaPhone(e.target.value)} />
+                </FormField>
+              </div>
+            </>
+          )}
+        </Stack>
+      </Modal>
+      <ConfirmDialog
+        open={confirm}
+        onClose={() => setConfirm(false)}
+        onConfirm={doSave}
+        title={t("residents.resuscitation.editTitle")}
+        summary={t("residents.resuscitation.changeWarning")}
+        confirmLabel={t("actions.confirm")}
+        cancelLabel={t("actions.cancel")}
+      />
+    </>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+ * Care summary panel
+ * ────────────────────────────────────────────────────────── */
+interface CareSummaryData {
+  alerts: { count: number; topSeverity: string | null; topType: string | null; topAt: string | null };
+  overdueTasks: number;
+  todayMeds: number;
+  latestVitals: {
+    bp_systolic?: number; bp_diastolic?: number; spo2?: number; pulse?: number;
+    recorded_at?: string;
+  } | null;
+  prevVitals: { bp_systolic?: number; spo2?: number } | null;
+  icp: { status: string; version: number; review_due_date?: string | null } | null;
+}
+
+function CareSummaryPanel({
+  residentId, branchId, allergies, onAlertClick,
+}: {
+  residentId: string;
+  branchId: string;
+  allergies: AllergyRecord[];
+  onAlertClick: () => void;
+}) {
+  const { t } = useTranslation();
+  const [data, setData] = useState<CareSummaryData | null>(null);
+  const [loading, setLoading] = useState(true);
+  void branchId;
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const [alertsRes, tasksRes, medsRes, vitalsRes, icpsRes] = await Promise.all([
+        supabase.from("alerts").select("severity,type,triggered_at").eq("resident_id", residentId).eq("status", "OPEN").order("triggered_at", { ascending: false }),
+        supabase.from("tasks").select("id").eq("resident_id", residentId).lt("due_at", new Date().toISOString()).in("status", ["PENDING", "IN_PROGRESS"]),
+        supabase.from("medication_orders").select("id").eq("resident_id", residentId).eq("status", "ACTIVE").lte("start_date", today),
+        supabase.from("vitals").select("readings,recorded_at").eq("resident_id", residentId).order("recorded_at", { ascending: false }).limit(2),
+        supabase.from("icps").select("status,version,content").eq("resident_id", residentId).in("status", ["ACTIVE", "PENDING_APPROVAL"]).order("created_at", { ascending: false }).limit(1),
+      ]);
+
+      const alerts = (alertsRes.data ?? []) as Array<{ severity: string; type: string; triggered_at: string }>;
+      const sevRank: Record<string, number> = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+      const top = alerts.slice().sort((a, b) => (sevRank[b.severity] ?? 0) - (sevRank[a.severity] ?? 0))[0];
+
+      const vitals = (vitalsRes.data ?? []) as Array<{ readings: Record<string, number>; recorded_at: string }>;
+      const latest = vitals[0]
+        ? { ...vitals[0].readings, recorded_at: vitals[0].recorded_at } as CareSummaryData["latestVitals"]
+        : null;
+      const prev = vitals[1] ? { bp_systolic: vitals[1].readings?.bp_systolic, spo2: vitals[1].readings?.spo2 } : null;
+
+      const icpRow = (icpsRes.data ?? [])[0] as { status: string; version: number; content?: Record<string, unknown> } | undefined;
+      const reviewDue = icpRow && icpRow.content && typeof icpRow.content === "object"
+        ? (icpRow.content["review_due_date"] as string | undefined) ?? null
+        : null;
+
+      setData({
+        alerts: {
+          count: alerts.length,
+          topSeverity: top?.severity ?? null,
+          topType: top?.type ?? null,
+          topAt: top?.triggered_at ?? null,
+        },
+        overdueTasks: (tasksRes.data ?? []).length,
+        todayMeds: (medsRes.data ?? []).length,
+        latestVitals: latest,
+        prevVitals: prev,
+        icp: icpRow ? { status: icpRow.status, version: icpRow.version, review_due_date: reviewDue } : null,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [residentId]);
+
+  useEffect(() => {
+    void refresh();
+    const t = setInterval(() => void refresh(), 60_000);
+    return () => clearInterval(t);
+  }, [refresh]);
+
+  const empty = data && data.alerts.count === 0 && data.overdueTasks === 0 && data.todayMeds === 0 && !data.latestVitals;
+
+  const trend = (() => {
+    const a = data?.latestVitals?.bp_systolic;
+    const b = data?.prevVitals?.bp_systolic;
+    if (a == null || b == null) return "→";
+    if (a - b > 10) return "↑";
+    if (b - a > 10) return "↓";
+    return "→";
+  })();
+  const bpTone: "neutral" | "warning" | "error" = (() => {
+    const s = data?.latestVitals?.bp_systolic;
+    if (s == null) return "neutral";
+    if (s > 160 || s < 90) return "error";
+    if (s > 140) return "warning";
+    return "neutral";
+  })();
+  const spo2Tone: "neutral" | "warning" | "error" = (() => {
+    const v = data?.latestVitals?.spo2;
+    if (v == null) return "neutral";
+    if (v < 90) return "error";
+    if (v < 94) return "warning";
+    return "neutral";
+  })();
+
+  const lastVitalsAge = (() => {
+    if (!data?.latestVitals?.recorded_at) return null;
+    const ms = Date.now() - new Date(data.latestVitals.recorded_at).getTime();
+    const hr = ms / 3600000;
+    return hr;
+  })();
+  const vitalsTone: "neutral" | "warning" | "error" = (() => {
+    if (lastVitalsAge == null) return "neutral";
+    if (lastVitalsAge > 8) return "error";
+    if (lastVitalsAge > 4) return "warning";
+    return "neutral";
+  })();
+
+  const activeAnaphylaxis = allergies.filter((a) => a.is_active && a.severity === "ANAPHYLAXIS");
+  const activeSevere = allergies.filter((a) => a.is_active && (a.severity === "SEVERE" || a.severity === "ANAPHYLAXIS"));
+  const allergyTone: "neutral" | "warning" | "error" = activeAnaphylaxis.length > 0
+    ? "error"
+    : activeSevere.length > 0
+      ? "error"
+      : allergies.some((a) => a.is_active && a.severity === "MODERATE") ? "warning" : "neutral";
+
+  const reviewDays = (() => {
+    if (!data?.icp?.review_due_date) return null;
+    const d = (new Date(data.icp.review_due_date).getTime() - Date.now()) / 86400000;
+    return Math.round(d);
+  })();
+
+  return (
+    <Card padding="md">
+      <Inline justify="between" align="center" className="mb-3">
+        <Heading level={3}>{t("residents.careSummary.title")}</Heading>
+        <IconButton aria-label={t("residents.careSummary.refresh")} icon={<RefreshCw size={14} />} variant="ghost" size="compact" onClick={() => void refresh()} />
+      </Inline>
+      {loading && !data ? (
+        <Spinner size="sm" />
+      ) : empty ? (
+        <Text size="sm" color="tertiary">{t("residents.careSummary.noPendingItems")}</Text>
+      ) : (
+        <Stack gap={3}>
+          <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
+            <SummaryTile
+              label={t("residents.careSummary.openAlerts")}
+              value={String(data?.alerts.count ?? 0)}
+              tone={data && data.alerts.count > 0 ? "warning" : "neutral"}
+              icon={<AlertTriangle size={14} />}
+            />
+            <SummaryTile
+              label={t("residents.careSummary.overdueTasks")}
+              value={String(data?.overdueTasks ?? 0)}
+              tone={data && data.overdueTasks > 0 ? "warning" : "neutral"}
+            />
+            <SummaryTile
+              label={t("residents.careSummary.todayMeds")}
+              value={String(data?.todayMeds ?? 0)}
+            />
+            <SummaryTile
+              label={t("residents.careSummary.latestBp")}
+              value={data?.latestVitals?.bp_systolic && data?.latestVitals?.bp_diastolic
+                ? `${data.latestVitals.bp_systolic}/${data.latestVitals.bp_diastolic} ${trend}`
+                : "—"}
+              tone={bpTone}
+            />
+            <SummaryTile
+              label={t("residents.careSummary.spo2")}
+              value={data?.latestVitals?.spo2 != null ? `${data.latestVitals.spo2}%` : "—"}
+              tone={spo2Tone}
+              icon={spo2Tone === "neutral" && data?.latestVitals?.spo2 != null ? <CheckCircle2 size={14} /> : undefined}
+            />
+          </div>
+
+          <Inline gap={3} wrap>
+            {data?.icp ? (
+              <Inline gap={1} align="center">
+                <Activity size={14} style={{ color: "var(--text-tertiary)" }} />
+                <Text size="sm">
+                  {t("residents.careSummary.icpStatus")}: {data.icp.status === "ACTIVE" ? t("residents.careSummary.activeIcp") : t("residents.careSummary.pendingIcp")} v{data.icp.version}
+                </Text>
+                {reviewDays != null && reviewDays <= 30 && (
+                  <Badge tone="warning" emphasis="subtle">
+                    {t("residents.careSummary.icpReviewDue")}: {reviewDays} {t("residents.careSummary.daysAway")}
+                  </Badge>
+                )}
+              </Inline>
+            ) : null}
+            {allergies.filter((a) => a.is_active).length > 0 && (
+              <Inline gap={1} align="center">
+                <Badge tone={allergyTone} emphasis={allergyTone === "error" ? "strong" : "subtle"}>
+                  {t("residents.allergies")}: {allergies.filter((a) => a.is_active).map((a) => a.drug).join(", ")}
+                </Badge>
+              </Inline>
+            )}
+            {lastVitalsAge != null && (
+              <Inline gap={1} align="center">
+                <Badge tone={vitalsTone} emphasis="subtle">
+                  {t("residents.careSummary.lastVitals")}: {lastVitalsAge < 1
+                    ? `${Math.round(lastVitalsAge * 60)} ${t("residents.careSummary.minutesAgo")}`
+                    : `${lastVitalsAge.toFixed(1)} ${t("residents.careSummary.hoursAgo")}`}
+                </Badge>
+              </Inline>
+            )}
+          </Inline>
+
+          {data && data.alerts.count > 0 && data.alerts.topSeverity && (
+            <button
+              type="button"
+              onClick={onAlertClick}
+              style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer", textAlign: "left", width: "100%" }}
+            >
+              <Alert
+                severity={data.alerts.topSeverity === "CRITICAL" || data.alerts.topSeverity === "HIGH" ? "error" : "warning"}
+                title={`${t("residents.careSummary.alertBanner")}: ${data.alerts.topSeverity} — ${data.alerts.topType ?? ""}`}
+                description={data.alerts.topAt ? formatDateTime(data.alerts.topAt) : undefined}
+              />
+            </button>
+          )}
+        </Stack>
+      )}
+    </Card>
+  );
+}
+
+function SummaryTile({
+  label, value, tone = "neutral", icon,
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "warning" | "error";
+  icon?: React.ReactNode;
+}) {
+  const color = tone === "error" ? "var(--color-error, #dc2626)" : tone === "warning" ? "var(--color-warning, #f59e0b)" : "var(--text-primary)";
+  return (
+    <Surface padding="sm">
+      <Stack gap={1}>
+        <Text size="caption" color="tertiary">{label}</Text>
+        <Inline gap={1} align="center">
+          <span style={{ fontSize: 20, fontWeight: 600, color }}>{value}</span>
+          {icon}
+        </Inline>
+      </Stack>
     </Surface>
   );
 }
@@ -488,10 +1365,11 @@ function ProfileHeader({
 interface ProfileTabProps {
   resident: Resident;
   canEdit: boolean;
+  canEditAdmin: boolean;
   editMode: boolean;
   setEditMode: (v: boolean) => void;
   onSaved: () => Promise<void> | void;
-  logAction: ReturnType<typeof useAuditLog>["logAction"];
+  logAction: LogActionFn;
 }
 
 interface EditForm {
@@ -503,7 +1381,7 @@ interface EditForm {
   language_preference: string;
 }
 
-function ProfileTab({ resident, canEdit, editMode, setEditMode, onSaved, logAction }: ProfileTabProps) {
+function ProfileTab({ resident, canEdit, canEditAdmin, editMode, setEditMode, onSaved, logAction }: ProfileTabProps) {
   const { t } = useTranslation();
   const [form, setForm] = useState<EditForm>({
     name_zh: resident.name_zh,
@@ -516,7 +1394,6 @@ function ProfileTab({ resident, canEdit, editMode, setEditMode, onSaved, logActi
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reset form when entering edit mode
   useEffect(() => {
     if (editMode) {
       setForm({
@@ -568,14 +1445,13 @@ function ProfileTab({ resident, canEdit, editMode, setEditMode, onSaved, logActi
       toast.success(t("common.saved"));
       setEditMode(false);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Save failed";
-      setError(msg);
+      setError(err instanceof Error ? err.message : "Save failed");
     } finally {
       setSaving(false);
     }
   };
 
-  const allergies = Array.isArray(resident.allergies) ? (resident.allergies as Array<{ drug?: string; reaction?: string; severity?: string }>) : [];
+  const allergies = parseAllergies(resident.allergies);
   const medical = (resident.medical_history as Record<string, unknown> | null) ?? null;
   const diagnoses = medical && typeof medical === "object" && "diagnoses" in medical ? String(medical.diagnoses) : null;
 
@@ -639,44 +1515,34 @@ function ProfileTab({ resident, canEdit, editMode, setEditMode, onSaved, logActi
         )}
       </Card>
 
-      {/* Card 2 — Allergies & Medical */}
+      {/* Card 2 — Allergies (structured) */}
+      <AllergyCard
+        resident={resident}
+        canEdit={canEdit}
+        onSaved={onSaved}
+        logAction={logAction}
+      />
+
+      {/* Card 3 — Diagnoses & notes */}
       <Card padding="md">
-        <Heading level={3} className="mb-3">{t("residents.allergiesSection.title")}</Heading>
-        <Stack gap={3}>
-          <Stack gap={2}>
-            <Text size="label" color="tertiary">{t("residents.allergies")}</Text>
-            {allergies.length === 0 ? (
-              <Text size="sm" color="secondary">{t("residents.noneRecorded")}</Text>
-            ) : (
-              <Stack gap={1}>
-                {allergies.map((a, i) => (
-                  <Inline key={i} gap={2}>
-                    <Text size="md" className="font-semibold">{a.drug ?? "—"}</Text>
-                    <Text size="sm" color="secondary">{a.reaction ?? ""}</Text>
-                    {a.severity && (
-                      <Badge tone={SEVERITY_TONE[a.severity] ?? "neutral"}>
-                        {t(`residents.allergiesSection.severity.${a.severity}`, { defaultValue: a.severity })}
-                      </Badge>
-                    )}
-                  </Inline>
-                ))}
-              </Stack>
-            )}
-          </Stack>
+        <Heading level={3} className="mb-3">{t("residents.allergiesSection.diagnoses")}</Heading>
+        <Stack gap={2}>
+          <Text size="sm">{diagnoses ?? t("residents.noneRecorded")}</Text>
           <Divider />
-          <Stack gap={2}>
-            <Text size="label" color="tertiary">{t("residents.allergiesSection.diagnoses")}</Text>
-            <Text size="sm">{diagnoses ?? t("residents.noneRecorded")}</Text>
-          </Stack>
-          <Divider />
-          <Stack gap={2}>
-            <Text size="label" color="tertiary">{t("residents.allergiesSection.specialInstructions")}</Text>
-            <Text size="sm">{resident.notes ?? t("residents.noneRecorded")}</Text>
-          </Stack>
+          <Text size="label" color="tertiary">{t("residents.allergiesSection.specialInstructions")}</Text>
+          <Text size="sm">{resident.notes ?? t("residents.noneRecorded")}</Text>
         </Stack>
       </Card>
 
-      {/* Card 3 — Dietary */}
+      {/* Card 4 — Consents & Legal */}
+      <ConsentsCard
+        resident={resident}
+        canEdit={canEditAdmin}
+        onSaved={onSaved}
+        logAction={logAction}
+      />
+
+      {/* Card 5 — Dietary */}
       <Card padding="md">
         <Heading level={3} className="mb-3">{t("residents.diet.title")}</Heading>
         <Text size="sm" as="div">
@@ -685,6 +1551,9 @@ function ProfileTab({ resident, canEdit, editMode, setEditMode, onSaved, logActi
             : t("residents.noneRecorded")}
         </Text>
       </Card>
+
+      {/* unused suppression */}
+      {allergies.length >= 0 ? null : null}
     </Stack>
   );
 }
@@ -699,6 +1568,387 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 /* ──────────────────────────────────────────────────────────
+ * Allergy card (structured)
+ * ────────────────────────────────────────────────────────── */
+function AllergyCard({
+  resident, canEdit, onSaved, logAction,
+}: {
+  resident: Resident;
+  canEdit: boolean;
+  onSaved: () => Promise<void> | void;
+  logAction: LogActionFn;
+}) {
+  const { t } = useTranslation();
+  const allergies = parseAllergies(resident.allergies);
+  const [showHist, setShowHist] = useState(false);
+  const [editing, setEditing] = useState<AllergyRecord | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  const visible = showHist ? allergies : allergies.filter((a) => a.is_active);
+  const anaphylaxis = allergies.filter((a) => a.is_active && a.severity === "ANAPHYLAXIS");
+
+  const persist = async (next: AllergyRecord[], action: string) => {
+    const before = { allergies: resident.allergies };
+    const after = { allergies: next as unknown as Tables<"residents">["allergies"] };
+    const { error } = await supabase.from("residents").update(after).eq("id", resident.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    void logAction({
+      action,
+      entity_type: "residents",
+      entity_id: resident.id,
+      branch_id: resident.branch_id,
+      before_state: before as unknown as Record<string, unknown>,
+      after_state: after as unknown as Record<string, unknown>,
+    });
+    toast.success(t("common.saved"));
+    await onSaved();
+  };
+
+  const onSaveAllergy = async (rec: AllergyRecord) => {
+    const exists = allergies.find((a) => a.id === rec.id);
+    const next = exists
+      ? allergies.map((a) => (a.id === rec.id ? rec : a))
+      : [...allergies, rec];
+    await persist(next, "RESIDENT_ALLERGY_UPDATED");
+    setEditing(null);
+    setAdding(false);
+  };
+
+  const onRemove = async (rec: AllergyRecord) => {
+    const next = allergies.map((a) => (a.id === rec.id ? { ...a, is_active: false } : a));
+    await persist(next, "RESIDENT_ALLERGY_UPDATED");
+  };
+
+  const cols: Column<AllergyRecord>[] = [
+    { key: "drug", header: t("residents.allergiesSection.drug"), cell: (r) => <Text size="sm" className="font-semibold">{r.drug || "—"}</Text> },
+    { key: "reaction", header: t("residents.allergiesSection.reaction"), cell: (r) => r.reaction || "—" },
+    {
+      key: "severity",
+      header: t("residents.allergiesSection.severity"),
+      width: 130,
+      cell: (r) => (
+        <Badge
+          tone={ALLERGY_SEVERITY_TONE[r.severity] ?? "neutral"}
+          emphasis={r.severity === "ANAPHYLAXIS" ? "strong" : "subtle"}
+        >
+          {r.severity === "ANAPHYLAXIS" && <AlertTriangle size={12} />}
+          {t(`residents.allergiesSection.severities.${r.severity}`)}
+        </Badge>
+      ),
+    },
+    {
+      key: "source",
+      header: t("residents.allergiesSection.source"),
+      width: 130,
+      cell: (r) => t(`residents.allergiesSection.sources.${r.source}`),
+    },
+    {
+      key: "active",
+      header: t("residents.allergiesSection.isActive"),
+      width: 80,
+      cell: (r) => (r.is_active ? <Badge tone="success">●</Badge> : <Badge tone="neutral">—</Badge>),
+    },
+    {
+      key: "actions",
+      header: "",
+      width: 80,
+      cell: (r) => canEdit ? (
+        <DropdownMenu
+          trigger={<IconButton aria-label="row" icon={<MoreHorizontal size={16} />} variant="ghost" size="compact" />}
+          items={[
+            { label: t("actions.edit"), onSelect: () => setEditing(r) },
+            ...(r.is_active ? [{ label: t("actions.remove"), tone: "destructive" as const, onSelect: () => void onRemove(r) }] : []),
+          ]}
+        />
+      ) : null,
+    },
+  ];
+
+  return (
+    <Card padding="md">
+      <Stack gap={3}>
+        {anaphylaxis.length > 0 && (
+          <Alert
+            severity="error"
+            title={`⚠ ${t("residents.allergiesSection.anaphylaxisBanner")}: ${anaphylaxis.map((a) => a.drug).join(", ")}`}
+            description={t("residents.allergiesSection.anaphylaxisDetail")}
+          />
+        )}
+        <Inline justify="between" align="center">
+          <Heading level={3}>{t("residents.allergiesSection.title")}</Heading>
+          {canEdit && (
+            <Button variant="primary" size="compact" onClick={() => setAdding(true)}>
+              {t("residents.allergiesSection.add")}
+            </Button>
+          )}
+        </Inline>
+        {visible.length === 0 ? (
+          <Text size="sm" color="tertiary">{t("residents.allergiesSection.empty")}</Text>
+        ) : (
+          <Table<AllergyRecord> columns={cols} rows={visible} rowKey={(r) => r.id} />
+        )}
+        {allergies.some((a) => !a.is_active) && (
+          <Switch
+            checked={showHist}
+            onChange={setShowHist}
+            label={t("residents.allergiesSection.showHistorical")}
+          />
+        )}
+      </Stack>
+      <AllergyEditModal
+        open={adding || !!editing}
+        initial={editing}
+        onClose={() => { setAdding(false); setEditing(null); }}
+        onSave={onSaveAllergy}
+      />
+    </Card>
+  );
+}
+
+function AllergyEditModal({
+  open, initial, onClose, onSave,
+}: {
+  open: boolean;
+  initial: AllergyRecord | null;
+  onClose: () => void;
+  onSave: (rec: AllergyRecord) => Promise<void> | void;
+}) {
+  const { t } = useTranslation();
+  const today = new Date().toISOString().slice(0, 10);
+  const [drug, setDrug] = useState("");
+  const [reaction, setReaction] = useState("");
+  const [severity, setSeverity] = useState<AllergySeverity>("MODERATE");
+  const [source, setSource] = useState<AllergySource>("MEDICAL_RECORD");
+  const [active, setActive] = useState(true);
+  const [recordedAt, setRecordedAt] = useState(today);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setDrug(initial?.drug ?? "");
+      setReaction(initial?.reaction ?? "");
+      setSeverity(initial?.severity ?? "MODERATE");
+      setSource(initial?.source ?? "MEDICAL_RECORD");
+      setActive(initial?.is_active ?? true);
+      setRecordedAt(initial?.recorded_at ?? today);
+    }
+  }, [open, initial, today]);
+
+  const submit = async () => {
+    if (!drug || !reaction) return;
+    setBusy(true);
+    try {
+      await onSave({
+        id: initial?.id ?? uuid(),
+        drug, reaction, severity, source,
+        is_active: active,
+        recorded_at: recordedAt,
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={initial ? t("residents.allergiesSection.edit") : t("residents.allergiesSection.add")}
+      size="md"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={busy}>{t("actions.cancel")}</Button>
+          <Button variant="primary" loading={busy} onClick={submit}>{t("actions.save")}</Button>
+        </>
+      }
+    >
+      <Stack gap={3}>
+        <FormField label={t("residents.allergiesSection.drug")} required>
+          <TextField value={drug} onChange={(e) => setDrug(e.target.value)} />
+        </FormField>
+        <FormField label={t("residents.allergiesSection.reaction")} required>
+          <TextField value={reaction} onChange={(e) => setReaction(e.target.value)} />
+        </FormField>
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label={t("residents.allergiesSection.severity")} required>
+            <Select
+              value={severity}
+              onChange={(e) => setSeverity((e.target as HTMLSelectElement).value as AllergySeverity)}
+              options={(["MILD", "MODERATE", "SEVERE", "ANAPHYLAXIS"] as AllergySeverity[]).map((v) => ({
+                value: v, label: t(`residents.allergiesSection.severities.${v}`),
+              }))}
+            />
+          </FormField>
+          <FormField label={t("residents.allergiesSection.source")} required>
+            <Select
+              value={source}
+              onChange={(e) => setSource((e.target as HTMLSelectElement).value as AllergySource)}
+              options={(["RESIDENT_REPORTED", "FAMILY_REPORTED", "MEDICAL_RECORD", "OBSERVED"] as AllergySource[]).map((v) => ({
+                value: v, label: t(`residents.allergiesSection.sources.${v}`),
+              }))}
+            />
+          </FormField>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label={t("residents.allergiesSection.recordedAt")}>
+            <TextField type="date" value={recordedAt} onChange={(e) => setRecordedAt(e.target.value)} />
+          </FormField>
+          <FormField label={t("residents.allergiesSection.isActive")}>
+            <Switch checked={active} onChange={setActive} />
+          </FormField>
+        </div>
+      </Stack>
+    </Modal>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+ * Consents & Legal card
+ * ────────────────────────────────────────────────────────── */
+function ConsentsCard({
+  resident, canEdit, onSaved, logAction,
+}: {
+  resident: Resident;
+  canEdit: boolean;
+  onSaved: () => Promise<void> | void;
+  logAction: LogActionFn;
+}) {
+  const { t } = useTranslation();
+  const consents = (resident.consents as ConsentFlags | null) ?? {};
+  const resus = (resident.resuscitation_status as ResusStatus | null) ?? "FULL_RESUSCITATION";
+
+  const [editing, setEditing] = useState(false);
+  const [familyShare, setFamilyShare] = useState(!!consents.family_info_sharing);
+  const [photoPub, setPhotoPub] = useState(!!consents.photography_publications);
+  const [tele, setTele] = useState(!!consents.telehealth);
+  const [eol, setEol] = useState(consents.religious_eol_preferences ?? "");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (editing) {
+      setFamilyShare(!!consents.family_info_sharing);
+      setPhotoPub(!!consents.photography_publications);
+      setTele(!!consents.telehealth);
+      setEol(consents.religious_eol_preferences ?? "");
+    }
+  }, [editing, consents.family_info_sharing, consents.photography_publications, consents.telehealth, consents.religious_eol_preferences]);
+
+  const save = async () => {
+    setBusy(true);
+    try {
+      const before = { consents: resident.consents, do_not_share_family: resident.do_not_share_family };
+      const newConsents: ConsentFlags = {
+        family_info_sharing: familyShare,
+        photography_publications: photoPub,
+        telehealth: tele,
+        religious_eol_preferences: eol || undefined,
+      };
+      const after = {
+        consents: newConsents as unknown as Tables<"residents">["consents"],
+        do_not_share_family: !familyShare,
+      };
+      const { error } = await supabase.from("residents").update(after).eq("id", resident.id);
+      if (error) throw error;
+      void logAction({
+        action: "RESIDENT_CONSENTS_UPDATED",
+        entity_type: "residents",
+        entity_id: resident.id,
+        branch_id: resident.branch_id,
+        before_state: before as unknown as Record<string, unknown>,
+        after_state: after as unknown as Record<string, unknown>,
+      });
+      toast.success(t("common.saved"));
+      setEditing(false);
+      await onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Card padding="md">
+      <Inline justify="between" className="mb-3">
+        <Heading level={3}>{t("residents.consents.title")}</Heading>
+        {canEdit && !editing && (
+          <Button variant="ghost" size="compact" onClick={() => setEditing(true)}>{t("actions.edit")}</Button>
+        )}
+      </Inline>
+      <Stack gap={3}>
+        {/* Resuscitation read-only */}
+        <Stack gap={2}>
+          <Text size="label" color="tertiary">{t("residents.resuscitation.title")}</Text>
+          <Inline gap={2} align="center" wrap>
+            <Badge tone={resus === "FULL_RESUSCITATION" ? "success" : resus === "DNACPR" ? "error" : "warning"} emphasis={resus === "FULL_RESUSCITATION" ? "subtle" : "strong"}>
+              {t(`residents.resuscitation.${resus}`)}
+            </Badge>
+            {resident.advance_directive_on_file ? (
+              <Badge tone="success" emphasis="subtle">
+                <CheckCircle2 size={12} /> {t("residents.resuscitation.adOnFile")}
+                {resident.advance_directive_uploaded_at ? ` (${formatDate(resident.advance_directive_uploaded_at)})` : ""}
+              </Badge>
+            ) : (
+              <Badge tone="warning" emphasis="subtle">{t("residents.resuscitation.adNotOnFile")}</Badge>
+            )}
+            <Text size="caption" color="tertiary">{t("residents.consents.changeFromHeader")}</Text>
+          </Inline>
+        </Stack>
+
+        <Divider />
+        {/* LPOA */}
+        <Stack gap={2}>
+          <Text size="label" color="tertiary">{t("residents.resuscitation.lpoa")}</Text>
+          {resident.lpoa_holder_name ? (
+            <Text size="sm">
+              {resident.lpoa_holder_name}
+              {resident.lpoa_holder_relationship ? ` — ${resident.lpoa_holder_relationship}` : ""}
+              {resident.lpoa_holder_phone ? ` · ${resident.lpoa_holder_phone}` : ""}
+            </Text>
+          ) : (
+            <Text size="sm" color="tertiary">{t("residents.consents.noGuardian")}</Text>
+          )}
+        </Stack>
+
+        <Divider />
+        {/* Consent toggles */}
+        {!editing ? (
+          <Stack gap={2}>
+            <Inline justify="between"><Text size="sm">{t("residents.consents.familyInfoSharing")}</Text><Badge tone={familyShare ? "success" : "neutral"}>{familyShare ? "ON" : "OFF"}</Badge></Inline>
+            <Inline justify="between"><Text size="sm">{t("residents.consents.photographyPublications")}</Text><Badge tone={photoPub ? "success" : "neutral"}>{photoPub ? "ON" : "OFF"}</Badge></Inline>
+            <Inline justify="between"><Text size="sm">{t("residents.consents.telehealth")}</Text><Badge tone={tele ? "success" : "neutral"}>{tele ? "ON" : "OFF"}</Badge></Inline>
+            <Stack gap={1}>
+              <Text size="label" color="tertiary">{t("residents.consents.religiousEol")}</Text>
+              <Text size="sm">{eol || t("residents.noneRecorded")}</Text>
+            </Stack>
+          </Stack>
+        ) : (
+          <Stack gap={3}>
+            <Switch checked={familyShare} onChange={setFamilyShare} label={t("residents.consents.familyInfoSharing")} />
+            <Switch checked={photoPub} onChange={setPhotoPub} label={t("residents.consents.photographyPublications")} />
+            <Switch checked={tele} onChange={setTele} label={t("residents.consents.telehealth")} />
+            <FormField label={t("residents.consents.religiousEol")}>
+              <TextField value={eol} onChange={(e) => setEol(e.target.value)} />
+            </FormField>
+            <Inline justify="end" gap={2}>
+              <Button variant="ghost" onClick={() => setEditing(false)} disabled={busy}>{t("actions.cancel")}</Button>
+              <Button variant="primary" loading={busy} onClick={save}>{t("actions.save")}</Button>
+            </Inline>
+          </Stack>
+        )}
+
+        <Text size="caption" color="tertiary">
+          {t("residents.consents.lastUpdated")}: {formatDateTime(resident.updated_at)}
+        </Text>
+      </Stack>
+    </Card>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
  * Tab 2 — Contacts
  * ────────────────────────────────────────────────────────── */
 
@@ -708,7 +1958,7 @@ interface ContactsTabProps {
   doNotShareFamily: boolean;
   contacts: Contact[];
   refetch: () => Promise<void> | void;
-  logAction: ReturnType<typeof useAuditLog>["logAction"];
+  logAction: LogActionFn;
 }
 
 function ContactsTab({ residentId, branchId, doNotShareFamily, contacts, refetch, logAction }: ContactsTabProps) {
@@ -821,6 +2071,13 @@ function ContactsTab({ residentId, branchId, doNotShareFamily, contacts, refetch
 
   return (
     <Stack gap={3}>
+      {doNotShareFamily && (
+        <Alert
+          severity="error"
+          title={t("residents.doNotShareFamily")}
+          description={t("residents.doNotShareWarning")}
+        />
+      )}
       {conflict && (
         <Alert severity="warning" description={t("residents.doNotShareConflictWarning")} />
       )}
@@ -861,7 +2118,7 @@ interface AddContactModalProps {
   residentId: string;
   branchId: string;
   onCreated: () => Promise<void> | void;
-  logAction: ReturnType<typeof useAuditLog>["logAction"];
+  logAction: LogActionFn;
 }
 
 function AddContactModal({ open, onClose, residentId, branchId, onCreated, logAction }: AddContactModalProps) {
@@ -987,7 +2244,7 @@ interface DocumentsTabProps {
   staffId: string | null;
   documents: DocumentRow[];
   refetch: () => Promise<void> | void;
-  logAction: ReturnType<typeof useAuditLog>["logAction"];
+  logAction: LogActionFn;
 }
 
 function DocumentsTab({ residentId, branchId, staffId, documents, refetch, logAction }: DocumentsTabProps) {

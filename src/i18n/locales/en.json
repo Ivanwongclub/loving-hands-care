@@ -28,36 +28,78 @@
     "settings": "Settings"
   },
   "actions": {
-    "save": "Save", "cancel": "Cancel", "confirm": "Confirm", "delete": "Delete",
-    "edit": "Edit", "view": "View", "export": "Export", "import": "Import",
-    "approve": "Approve", "reject": "Reject", "submit": "Submit", "reset": "Reset",
-    "search": "Search", "filter": "Filter", "back": "Back", "next": "Next",
-    "done": "Done", "close": "Close", "add": "Add", "remove": "Remove",
-    "deactivate": "Deactivate", "activate": "Activate", "unlock": "Unlock", "override": "Override",
-    "signIn": "Sign In", "signOut": "Sign Out", "rescan": "Rescan", "retry": "Retry",
-    "print": "Print", "copy": "Copy", "regenerate": "Regenerate"
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "export": "Export",
+    "import": "Import",
+    "approve": "Approve",
+    "reject": "Reject",
+    "submit": "Submit",
+    "reset": "Reset",
+    "search": "Search",
+    "filter": "Filter",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "close": "Close",
+    "add": "Add",
+    "remove": "Remove",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "unlock": "Unlock",
+    "override": "Override",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "rescan": "Rescan",
+    "retry": "Retry",
+    "print": "Print",
+    "copy": "Copy",
+    "regenerate": "Regenerate"
   },
   "alertStatus": {
-    "open": "Open", "acknowledged": "Acknowledged", "assigned": "Assigned",
-    "resolved": "Resolved", "escalated": "Escalated"
+    "open": "Open",
+    "acknowledged": "Acknowledged",
+    "assigned": "Assigned",
+    "resolved": "Resolved",
+    "escalated": "Escalated"
   },
   "taskStatus": {
-    "pending": "Pending", "inProgress": "In Progress", "completed": "Completed",
-    "overdue": "Overdue", "cancelled": "Cancelled"
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "overdue": "Overdue",
+    "cancelled": "Cancelled"
   },
   "emarStatus": {
-    "due": "Due", "administered": "Administered", "refused": "Refused",
-    "held": "Held", "late": "Late", "missed": "Missed"
+    "due": "Due",
+    "administered": "Administered",
+    "refused": "Refused",
+    "held": "Held",
+    "late": "Late",
+    "missed": "Missed"
   },
   "icpStatus": {
-    "draft": "Draft", "pendingApproval": "Pending Approval", "active": "Active",
-    "superseded": "Superseded", "rejected": "Rejected"
+    "draft": "Draft",
+    "pendingApproval": "Pending Approval",
+    "active": "Active",
+    "superseded": "Superseded",
+    "rejected": "Rejected"
   },
   "bedStatus": {
-    "available": "Available", "occupied": "Occupied", "reserved": "Reserved", "outOfService": "Out of Service"
+    "available": "Available",
+    "occupied": "Occupied",
+    "reserved": "Reserved",
+    "outOfService": "Out of Service"
   },
   "incidentSeverity": {
-    "low": "Low", "medium": "Medium", "high": "High", "critical": "Critical"
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
   },
   "auth": {
     "signInTitle": "Sign In",
@@ -70,7 +112,8 @@
     "familyPortalHelp": "Use your registered email and we'll send you a sign-in link.",
     "pinSetTitle": "Set Your Shift PIN",
     "pinSetHelp": "Set a 4-digit PIN used for medication administration verification.",
-    "pinNew": "New PIN", "pinConfirm": "Confirm PIN",
+    "pinNew": "New PIN",
+    "pinConfirm": "Confirm PIN",
     "pinMismatch": "PINs do not match",
     "pinAttemptsRemaining": "{{count}} attempts remaining",
     "pinConfirmIdentity": "Confirm Identity"
@@ -89,7 +132,10 @@
   },
   "common": {
     "comingSoon": "Coming in next sprint",
-    "branch": "Branch", "branches": "Branches", "ward": "Ward", "shift": "Shift",
+    "branch": "Branch",
+    "branches": "Branches",
+    "ward": "Ward",
+    "shift": "Shift",
     "morningShift": "Morning Shift",
     "language": "Language",
     "retry": "Retry",
@@ -252,8 +298,12 @@
     }
   },
   "branches": {
-    "title": "Branch Management", "list": "Branch List", "detail": "Branch Detail",
-    "settings": "Branch Settings", "bedBoard": "Bed Board", "occupancy": "Occupancy",
+    "title": "Branch Management",
+    "list": "Branch List",
+    "detail": "Branch Detail",
+    "settings": "Branch Settings",
+    "bedBoard": "Bed Board",
+    "occupancy": "Occupancy",
     "addBranch": "Add Branch",
     "allTypes": "All Types",
     "statusActive": "Active",
@@ -286,61 +336,135 @@
       "isActive": "Active"
     },
     "branchType": {
-      "CARE_HOME": "Care Home", "DCU": "Day Care Unit",
-      "HOUSING": "Housing", "REHABILITATION": "Rehabilitation"
+      "CARE_HOME": "Care Home",
+      "DCU": "Day Care Unit",
+      "HOUSING": "Housing",
+      "REHABILITATION": "Rehabilitation"
     }
   },
   "locations": {
-    "building": "Building", "floor": "Floor", "room": "Room", "bed": "Bed", "zone": "Zone",
-    "addLocation": "Add Location", "editLocation": "Edit Location",
-    "outOfService": "Out of Service", "markOOS": "Mark as Out of Service", "markAvailable": "Mark as Available"
+    "building": "Building",
+    "floor": "Floor",
+    "room": "Room",
+    "bed": "Bed",
+    "zone": "Zone",
+    "addLocation": "Add Location",
+    "editLocation": "Edit Location",
+    "outOfService": "Out of Service",
+    "markOOS": "Mark as Out of Service",
+    "markAvailable": "Mark as Available"
   },
   "residents": {
-    "title": "Residents", "list": "Residents List", "detail": "Resident Profile",
-    "newAdmission": "New Admission", "transfer": "Transfer Bed", "discharge": "Discharge",
+    "title": "Residents",
+    "list": "Residents List",
+    "detail": "Resident Profile",
+    "newAdmission": "New Admission",
+    "transfer": "Transfer Bed",
+    "discharge": "Discharge",
     "startDischarge": "Start Discharge",
     "editProfile": "Edit Profile",
     "viewProfile": "View Profile",
-    "profile": "Profile", "contacts": "Contacts", "documents": "Documents",
-    "bedHistory": "Bed History", "activity": "Activity",
-    "medicalHistory": "Medical History", "allergies": "Allergies",
+    "profile": "Profile",
+    "contacts": "Contacts",
+    "documents": "Documents",
+    "bedHistory": "Bed History",
+    "activity": "Activity",
+    "medicalHistory": "Medical History",
+    "allergies": "Allergies",
     "doNotShareFamily": "Do Not Share with Family",
     "doNotShareWarning": "This resident's information is marked as not to be shared with family",
     "doNotShareConflictWarning": "This resident is marked Do Not Share, but contacts still have notifications enabled",
-    "admissionDate": "Admission Date", "dischargeDate": "Discharge Date",
-    "bedAssignment": "Bed Assignment", "currentBed": "Current Bed",
-    "bedBoard": "Bed Board", "residentsList": "Residents List",
+    "admissionDate": "Admission Date",
+    "dischargeDate": "Discharge Date",
+    "bedAssignment": "Bed Assignment",
+    "currentBed": "Current Bed",
+    "bedBoard": "Bed Board",
+    "residentsList": "Residents List",
     "noBed": "—",
     "ageYears": "yrs",
     "notFound": "Resident not found",
     "comingSoon": "Coming soon",
     "noneRecorded": "None recorded",
     "private": "Private",
-    "riskLevel": { "LOW": "Low Risk", "MEDIUM": "Medium Risk", "HIGH": "High Risk" },
-    "gender": { "M": "Male", "F": "Female", "OTHER": "Other" },
-    "status": {
-      "ADMITTED": "Admitted", "DISCHARGED": "Discharged", "LOA": "Leave of Absence", "DECEASED": "Deceased"
+    "riskLevel": {
+      "LOW": "Low Risk",
+      "MEDIUM": "Medium Risk",
+      "HIGH": "High Risk"
     },
-    "filters": { "allStatus": "All statuses", "allRisk": "All risk levels" },
+    "gender": {
+      "M": "Male",
+      "F": "Female",
+      "OTHER": "Other"
+    },
+    "status": {
+      "ADMITTED": "Admitted",
+      "DISCHARGED": "Discharged",
+      "LOA": "Leave of Absence",
+      "DECEASED": "Deceased"
+    },
+    "filters": {
+      "allStatus": "All statuses",
+      "allRisk": "All risk levels"
+    },
     "columns": {
-      "photo": "Photo", "name": "Name", "bed": "Bed", "admission": "Admission",
-      "risk": "Risk", "status": "Status", "private": "Private"
+      "photo": "Photo",
+      "name": "Name",
+      "bed": "Bed",
+      "admission": "Admission",
+      "risk": "Risk",
+      "status": "Status",
+      "private": "Private"
     },
     "demographics": {
       "title": "Demographics",
-      "dob": "Date of Birth", "gender": "Gender", "language": "Language", "preferredName": "Preferred Name"
+      "dob": "Date of Birth",
+      "gender": "Gender",
+      "language": "Language",
+      "preferredName": "Preferred Name"
     },
     "allergiesSection": {
       "title": "Allergies & Medical",
-      "diagnoses": "Diagnoses", "specialInstructions": "Special Instructions",
-      "severity": { "MILD": "Mild", "MODERATE": "Moderate", "SEVERE": "Severe" }
+      "diagnoses": "Diagnoses",
+      "specialInstructions": "Special Instructions",
+      "severity": "Severity",
+      "add": "Add allergy record",
+      "edit": "Edit allergy record",
+      "drug": "Drug / Allergen",
+      "reaction": "Reaction",
+      "source": "Source",
+      "isActive": "Active",
+      "recordedAt": "Recorded date",
+      "showHistorical": "Show historical",
+      "anaphylaxisBanner": "Severe allergy history",
+      "anaphylaxisDetail": "History of anaphylaxis",
+      "empty": "No allergies recorded",
+      "sources": {
+        "RESIDENT_REPORTED": "Resident reported",
+        "FAMILY_REPORTED": "Family reported",
+        "MEDICAL_RECORD": "Medical record",
+        "OBSERVED": "Observed"
+      },
+      "severities": {
+        "MILD": "Mild",
+        "MODERATE": "Moderate",
+        "SEVERE": "Severe",
+        "ANAPHYLAXIS": "Anaphylaxis"
+      }
     },
-    "diet": { "title": "Dietary Requirements" },
+    "diet": {
+      "title": "Dietary Requirements"
+    },
     "admissionWizard": {
-      "step1": "Personal Details", "step2": "Medical History", "step3": "Emergency Contacts",
-      "step4": "Upload Documents", "step5": "Bed Assignment", "step6": "Consent", "step7": "Review & Confirm"
+      "step1": "Personal Details",
+      "step2": "Medical History",
+      "step3": "Emergency Contacts",
+      "step4": "Upload Documents",
+      "step5": "Bed Assignment",
+      "step6": "Consent",
+      "step7": "Review & Confirm"
     },
-    "hkid": "HKID", "hkidHint": "Only a hash is stored; the original number is not retained",
+    "hkid": "HKID",
+    "hkidHint": "Only a hash is stored; the original number is not retained",
     "dischargeChecklist": "Discharge Checklist",
     "transferReason": "Transfer Reason",
     "searchPlaceholder": "Search resident name or room...",
@@ -348,6 +472,66 @@
     "bedDrawer": {
       "viewResident": "View Resident",
       "availableInfo": "This bed is currently available"
+    },
+    "photo": {
+      "upload": "Upload photo",
+      "take": "Take photo",
+      "choose": "Choose file",
+      "declined": "Photo declined",
+      "markDeclined": "Mark as photo declined",
+      "needsUpdate": "Photo needs updating",
+      "uploading": "Uploading...",
+      "title": "Resident photo"
+    },
+    "resuscitation": {
+      "title": "Resuscitation status",
+      "FULL_RESUSCITATION": "Full resuscitation",
+      "DNACPR": "DNACPR",
+      "AD_LIMITED": "Advance directive",
+      "adOnFile": "Advance directive on file",
+      "adNotOnFile": "Not on file",
+      "adUploadedAt": "Uploaded date",
+      "lpoa": "LPOA holder",
+      "lpoaName": "Holder name",
+      "lpoaRelationship": "Relationship",
+      "lpoaPhone": "Contact phone",
+      "changeWarning": "Changing resuscitation status is a critical clinical decision. Confirm change?",
+      "editTitle": "Change resuscitation status",
+      "guardian": "Guardian"
+    },
+    "consents": {
+      "title": "Consents & Legal",
+      "familyInfoSharing": "Family information sharing",
+      "photographyPublications": "Photography for publications",
+      "telehealth": "Telehealth consent",
+      "religiousEol": "Religious end-of-life preferences",
+      "noGuardian": "No guardian on record",
+      "changeFromHeader": "Change from header",
+      "lastUpdated": "Last updated"
+    },
+    "careSummary": {
+      "title": "Live care summary",
+      "openAlerts": "Open alerts",
+      "overdueTasks": "Overdue tasks",
+      "todayMeds": "Today's meds",
+      "latestBp": "Latest BP",
+      "spo2": "SpO₂",
+      "icpStatus": "Care plan",
+      "lastVitals": "Last vitals",
+      "noPendingItems": "No pending items today",
+      "alertBanner": "Top alert",
+      "icpReviewDue": "Review due",
+      "daysAway": "days",
+      "hoursAgo": "hours ago",
+      "minutesAgo": "min ago",
+      "refresh": "Refresh",
+      "none": "—",
+      "activeIcp": "Active",
+      "pendingIcp": "Pending"
+    },
+    "tabGroups": {
+      "clinical": "Clinical records",
+      "admin": "Administrative records"
     }
   },
   "contacts": {
@@ -361,16 +545,24 @@
     "notifications": "Notifications",
     "empty": "No contacts on file",
     "fields": {
-      "nameZh": "Chinese Name", "name": "English Name",
+      "nameZh": "Chinese Name",
+      "name": "English Name",
       "relationship": "Relationship",
-      "whatsapp": "WhatsApp", "sms": "SMS", "email": "Email",
-      "isPrimary": "Primary contact", "isEmergency": "Emergency contact",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "email": "Email",
+      "isPrimary": "Primary contact",
+      "isEmergency": "Emergency contact",
       "consentNotifications": "Receive notifications"
     },
     "columns": {
-      "name": "Name", "relationship": "Relationship",
-      "whatsapp": "WhatsApp", "sms": "SMS",
-      "primary": "Primary", "emergency": "Emergency", "notifications": "Notifications"
+      "name": "Name",
+      "relationship": "Relationship",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "primary": "Primary",
+      "emergency": "Emergency",
+      "notifications": "Notifications"
     }
   },
   "documents": {
@@ -396,7 +588,11 @@
   },
   "bedHistory": {
     "columns": {
-      "bed": "Bed", "from": "From", "to": "To", "reason": "Reason", "by": "By"
+      "bed": "Bed",
+      "from": "From",
+      "to": "To",
+      "reason": "Reason",
+      "by": "By"
     },
     "current": "Current",
     "empty": "No bed transfer history"
@@ -406,7 +602,10 @@
     "empty": "No activity"
   },
   "audit": {
-    "by": "Actor", "at": "Time", "action": "Action", "entity": "Entity",
+    "by": "Actor",
+    "at": "Time",
+    "action": "Action",
+    "entity": "Entity",
     "title": "System Audit Logs",
     "viewerTitle": "Audit Log Viewer",
     "actor": "Actor",
@@ -533,14 +732,25 @@
   },
   "admission": {
     "title": "New Admission",
-    "step1": "Personal Details", "step2": "Medical History", "step3": "Emergency Contacts",
-    "step4": "Upload Documents", "step5": "Bed Assignment", "step6": "Consent", "step7": "Review & Confirm",
+    "step1": "Personal Details",
+    "step2": "Medical History",
+    "step3": "Emergency Contacts",
+    "step4": "Upload Documents",
+    "step5": "Bed Assignment",
+    "step6": "Consent",
+    "step7": "Review & Confirm",
     "hkidLabel": "HKID Number",
     "hkidHint": "Only a hash is stored; the original number is not retained",
     "hkidPlaceholder": "A123456(7)",
     "addAllergy": "Add Allergy",
-    "allergyDrug": "Drug Name", "allergyReaction": "Reaction", "allergySeverity": "Severity",
-    "severity": { "MILD": "Mild", "MODERATE": "Moderate", "SEVERE": "Severe" },
+    "allergyDrug": "Drug Name",
+    "allergyReaction": "Reaction",
+    "allergySeverity": "Severity",
+    "severity": {
+      "MILD": "Mild",
+      "MODERATE": "Moderate",
+      "SEVERE": "Severe"
+    },
     "addContact": "Add Contact",
     "minOneContact": "At least one contact is required",
     "documentOptional": "Documents are optional and may be added later",
@@ -620,7 +830,9 @@
     "qrRegenerateConfirm": "Regenerating the QR will immediately invalidate the old card. Continue?",
     "qrRegenerateSuccess": "QR regenerated. Please reprint the card.",
     "qrActive": "Active",
-    "filters": { "allStatus": "All statuses" },
+    "filters": {
+      "allStatus": "All statuses"
+    },
     "searchPlaceholder": "Search resident name...",
     "emptyList": "No enrollments yet",
     "noResidents": "No eligible residents",
@@ -1091,7 +1303,6 @@
     "escalationWorkerTitle": "Auto-Escalation Engine",
     "lastRun": "Last run",
     "nextRun": "Next run",
-    "view": "View",
     "assignedTo": "Assigned to",
     "assign": "Assign",
     "assignToSelf": "Myself",
@@ -1139,7 +1350,8 @@
     "manualEscalatedToday": "👤 Manually escalated",
     "timesUnit": "times",
     "cronScheduleNote": "pg_cron schedule: runs every 15 minutes automatically",
-    "cronScheduleHint": "Requires pg_cron extension enabled in Lovable Cloud"
+    "cronScheduleHint": "Requires pg_cron extension enabled in Lovable Cloud",
+    "residentBanner": "This resident has {{count}} open alert(s)"
   },
   "emar": {
     "title": "eMAR",
@@ -1279,11 +1491,14 @@
     "emptyTitle": "No staff yet",
     "emptyDescription": "Invite staff to get started.",
     "columns": {
-      "name": "Name",
-      "role": "Role",
+      "resident": "Resident",
+      "task": "Task",
+      "due": "Due",
+      "drug": "Drug",
+      "time": "Time",
+      "incidentRef": "Incident Ref",
       "type": "Type",
-      "branches": "Branches",
-      "status": "Status"
+      "severity": "Severity"
     },
     "fields": {
       "nameZh": "Chinese name",
@@ -1367,16 +1582,6 @@
     "auditActivity": "System Activity",
     "noWorkload": "No workload activity in the last 7 days",
     "viewDetail": "View Detail",
-    "workloadDrawerHint": "View full workload on the staff detail page",
-    "columns": {
-      "resident": "Resident",
-      "task": "Task",
-      "due": "Due",
-      "drug": "Drug",
-      "time": "Time",
-      "incidentRef": "Incident Ref",
-      "type": "Type",
-      "severity": "Severity"
-    }
+    "workloadDrawerHint": "View full workload on the staff detail page"
   }
 }
