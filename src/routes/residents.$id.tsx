@@ -1580,7 +1580,7 @@ function ProfileTab({ resident, canEdit, canEditAdmin, canEditClinical, editMode
       <Card padding="md">
         <Stack gap={3}>
           <Inline justify="between" align="center">
-            <Heading level={4}>{t("wandering.title")}</Heading>
+            <Heading level={3}>{t("wandering.title")}</Heading>
             {canEditClinical && (
               <Button variant="ghost" size="compact" onClick={() => setWanderingModalOpen(true)}>
                 {wanderingLevel === "NONE" ? t("wandering.assess") : t("wandering.reassess")}
