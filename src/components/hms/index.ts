@@ -5,3 +5,4 @@ export * from "./Feedback";
 export * from "./Data";
 export * from "./Overlays";
 export * from "./Patterns";
+export { FacilityTree } from "./FacilityTree";

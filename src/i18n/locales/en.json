@@ -1491,6 +1491,11 @@
     "emptyTitle": "No staff yet",
     "emptyDescription": "Invite staff to get started.",
     "columns": {
+      "name": "Name",
+      "role": "Role",
+      "branches": "Branches",
+      "status": "Status",
+      "deviceType": "Category",
       "resident": "Resident",
       "task": "Task",
       "due": "Due",

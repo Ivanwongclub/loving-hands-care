@@ -1502,7 +1502,7 @@
       "drug": "藥物",
       "time": "時間",
       "incidentRef": "事故編號",
-      "type2": "類別",
+      "deviceType": "類別",
       "severity": "嚴重程度"
     },
     "fields": {

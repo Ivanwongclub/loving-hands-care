@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Card, Stack, FormField, NumberField, Switch, Button, Text, Skeleton } from "@/components/hms";
+import { Card, Stack, FormField, NumberField, Switch, Button, Text, Skeleton, Select } from "@/components/hms";
 import { supabase } from "@/integrations/supabase/client";
 import { useBranches } from "@/hooks/useBranches";
 import { useAuditLog } from "@/hooks/useAuditLog";
@@ -21,7 +21,14 @@ export function EmarConfigSection() {
   const qc = useQueryClient();
   const { logAction } = useAuditLog();
   const { branches, isLoading } = useBranches();
-  const branch = branches[0] ?? null;
+  const [selectedBranchId, setSelectedBranchId] = useState<string>("");
+  const branch = branches.find((b) => b.id === selectedBranchId) ?? branches[0] ?? null;
+
+  useEffect(() => {
+    if (!selectedBranchId && branches.length > 0) {
+      setSelectedBranchId(branches[0].id);
+    }
+  }, [branches, selectedBranchId]);
 
   const [before, setBefore] = useState(60);
   const [after, setAfter] = useState(60);
@@ -70,6 +77,15 @@ export function EmarConfigSection() {
     <Card padding="md">
       <Stack gap={4}>
         <Text size="md" className="font-semibold">{t("settings.emar.title")}</Text>
+        {branches.length > 1 && (
+          <FormField label="設定分院 / Configure branch:">
+            <Select
+              value={selectedBranchId}
+              onChange={(e) => setSelectedBranchId((e.target as HTMLSelectElement).value)}
+              options={branches.map((b) => ({ value: b.id, label: b.name_zh ? `${b.name_zh} (${b.name})` : b.name }))}
+            />
+          </FormField>
+        )}
         <FormField label={t("settings.emar.passWindowBefore")}>
           <NumberField numericValue={before} onValueChange={setBefore} unit="min" step={5} min={0} />
         </FormField>
