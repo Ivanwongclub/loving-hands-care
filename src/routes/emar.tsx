@@ -166,7 +166,7 @@ function DashboardBody({ branchId, staffId }: { branchId: string; staffId: strin
       const { data, error } = await supabase
         .from("emar_records")
         .select(
-          "*, order:order_id(drug_name, drug_name_zh, dose, is_prn), residents:resident_id(id, name, name_zh)",
+          "*, order:order_id(drug_name, drug_name_zh, dose, route, is_prn, barcode), residents:resident_id(id, name, name_zh, photo_storage_path, photo_declined, resuscitation_status, allergies)",
         )
         .eq("branch_id", branchId)
         .gte("due_at", `${date}T00:00:00`)
@@ -176,6 +176,46 @@ function DashboardBody({ branchId, staffId }: { branchId: string; staffId: strin
       return (data ?? []) as unknown as EMARDashboardRow[];
     },
   });
+
+  // Detect newly-administered records during pass-mode session
+  // Heuristic: ADMINISTERED with administered_at within last 5 minutes
+  useEffect(() => {
+    if (!passMode) return;
+    const fiveMin = 5 * 60_000;
+    const now = Date.now();
+    let next: Set<string> | null = null;
+    for (const r of rows) {
+      if (
+        r.status === "ADMINISTERED" &&
+        r.administered_at &&
+        now - new Date(r.administered_at).getTime() < fiveMin &&
+        !sessionCompleted.has(r.id)
+      ) {
+        if (!next) next = new Set(sessionCompleted);
+        next.add(r.id);
+      }
+    }
+    if (next) setSessionCompleted(next);
+  }, [rows, passMode, sessionCompleted]);
+
+  const dueRecordCount = useMemo(
+    () => rows.filter((r) => r.status === "DUE" || r.status === "LATE").length,
+    [rows],
+  );
+
+  const passRecords = useMemo<PassModeRecord[]>(
+    () => rows as unknown as PassModeRecord[],
+    [rows],
+  );
+
+  const handleEndSession = () => {
+    setPassMode(false);
+    setSessionCompleted(new Set());
+  };
+
+  const handleClearCompleted = () => {
+    setSessionCompleted(new Set());
+  };
 
   const counts = useMemo(() => {
     const c = { DUE: 0, ADMINISTERED: 0, REFUSED: 0, HELD: 0, LATE: 0, MISSED: 0 };
