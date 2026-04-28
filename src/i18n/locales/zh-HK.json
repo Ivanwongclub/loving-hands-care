@@ -1096,7 +1096,30 @@
     "viewResident": "查看院友",
     "unassigned": "未指派",
     "allTypes": "所有類型",
-    "searchPlaceholder": "搜尋院友或任務..."
+    "searchPlaceholder": "搜尋院友或任務...",
+    "round": {
+      "title": "工作",
+      "viewHistory": "歷史記錄",
+      "backToRound": "返回工作",
+      "history": "歷史記錄",
+      "myTasks": "我的任務",
+      "allTasks": "全部任務",
+      "endRound": "結束工作",
+      "clearCompleted": "清除已完成",
+      "pending": "待處理",
+      "overdue": "已逾期",
+      "completed": "已完成",
+      "lateMinutes": "逾期 {{count}} 分鐘",
+      "assignedTo": "指派給",
+      "unassigned": "未指派",
+      "fromIcp": "來自照顧計劃",
+      "noTasks": "目前無待處理任務",
+      "noMyTasks": "你目前無待處理任務",
+      "allCaughtUp": "所有任務已完成",
+      "roundComplete": "本次工作完成",
+      "allTasksCompleted": "本次已完成 {{count}} 項任務",
+      "unknownResident": "未知院友"
+    }
   },
   "vitals": {
     "title": "生命體徵",
