@@ -1257,16 +1257,6 @@
     "auditActivity": "系統活動",
     "noWorkload": "最近 7 天沒有工作記錄",
     "viewDetail": "查看詳情",
-    "workloadDrawerHint": "此功能完整版請在員工詳情頁查看",
-    "columns": {
-      "resident": "院友",
-      "task": "任務",
-      "due": "到期",
-      "drug": "藥物",
-      "time": "時間",
-      "incidentRef": "事故編號",
-      "type": "類別",
-      "severity": "嚴重程度"
-    }
+    "workloadDrawerHint": "此功能完整版請在員工詳情頁查看"
   }
 }
