@@ -76,6 +76,19 @@ function TasksDashboardPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  // Round mode state
+  const [roundMode, setRoundMode] = useState(true);
+  const [scopeFilter, setScopeFilter] = useState<"me" | "all">("all");
+  const [scopeInitialised, setScopeInitialised] = useState(false);
+  const [sessionCompleted, setSessionCompleted] = useState<Set<string>>(new Set());
+
+  // Initialise default scope based on current staff role
+  useEffect(() => {
+    if (scopeInitialised || !staff) return;
+    setScopeFilter(staff.role === "NURSE" || staff.role === "CAREGIVER" ? "me" : "all");
+    setScopeInitialised(true);
+  }, [staff, scopeInitialised]);
+
   const { tasks, isLoading } = useTasks({ branchId, status: statusFilter, pageSize: 200 });
 
   // Auto-flag overdue (silent system maintenance — no audit)
