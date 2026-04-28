@@ -56,12 +56,9 @@ export function AddVaccinationModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { staffList: allStaff } = (() => {
-    const { data } = useStaff({ branchId, status: "ACTIVE" });
-    return { staffList: data };
-  })();
+  const { staff: allStaff } = useStaff({ branchId, status: "ACTIVE" });
   const eligibleStaff = useMemo(
-    () => (allStaff ?? []).filter((s) => s.role === "NURSE" || s.role === "SENIOR_NURSE"),
+    () => allStaff.filter((s) => s.role === "NURSE" || s.role === "SENIOR_NURSE"),
     [allStaff],
   );
 
