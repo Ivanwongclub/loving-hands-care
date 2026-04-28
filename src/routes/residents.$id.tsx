@@ -353,6 +353,7 @@ function ResidentDetailPage() {
               { value: "icp", label: t("icp.title") },
               { value: "tasks", label: t("tasks.title") },
               { value: "incidents", label: t("incidents.title") },
+              { value: "restraints", label: t("restraints.title") },
             ]}
           />
 
