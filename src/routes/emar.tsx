@@ -26,8 +26,23 @@ export const Route = createFileRoute("/emar")({
 type EMARStatus = Enums<"emar_status">;
 
 type EMARDashboardRow = Tables<"emar_records"> & {
-  order: { drug_name: string; drug_name_zh: string | null; dose: string; is_prn: boolean } | null;
-  residents: { id: string; name: string; name_zh: string } | null;
+  order: {
+    drug_name: string;
+    drug_name_zh: string | null;
+    dose: string;
+    route: string;
+    is_prn: boolean;
+    barcode: string | null;
+  } | null;
+  residents: {
+    id: string;
+    name: string;
+    name_zh: string | null;
+    photo_storage_path: string | null;
+    photo_declined: boolean;
+    resuscitation_status: string | null;
+    allergies: unknown;
+  } | null;
 };
 
 const STATUS_TONE: Record<EMARStatus, "warning" | "success" | "error" | "neutral"> = {
