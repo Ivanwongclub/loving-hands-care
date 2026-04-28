@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { MoreHorizontal } from "lucide-react";
+import { ClipboardList, List, MoreHorizontal } from "lucide-react";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
@@ -36,6 +36,7 @@ import { useTasks, type TaskRow, type TaskStatus, type TaskType } from "@/hooks/
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { RoundModeView } from "@/components/tasks/RoundModeView";
 
 const STATUS_TONE: Record<TaskStatus, "neutral" | "warning" | "success" | "error" | "info"> = {
   PENDING: "neutral",
