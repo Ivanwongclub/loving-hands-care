@@ -207,6 +207,47 @@
         "noBackup": "Off-site backup not configured",
         "refresh": "Refresh",
         "deliveryRate": "Delivery rate (last 7 days)"
+      },
+      "backup": {
+        "title": "Offsite Backup Configuration",
+        "provider": "Storage provider",
+        "bucket": "Bucket name",
+        "regionEndpoint": "Region / endpoint",
+        "credentials": "Credentials",
+        "encryptionKey": "Encryption key",
+        "notConfigured": "Not configured",
+        "configure": "Configure",
+        "phase2Coming": "Phase 2 — coming soon",
+        "retentionMonths": "Backup retention",
+        "retentionMin": "SWD minimum: 84 months",
+        "rpoHours": "RPO target (hours)",
+        "rtoHours": "RTO target (hours)",
+        "alertEmail": "Failure alert email",
+        "storageWarnPct": "Storage warning threshold (%)",
+        "runNow": "Run backup now",
+        "runStarted": "Backup started",
+        "providers": {
+          "B2": "Backblaze B2",
+          "S3": "AWS S3",
+          "GCS": "Google Cloud Storage"
+        }
+      },
+      "retention": {
+        "title": "Data Retention Policy",
+        "legalNote": "Per Residential Care Homes Ordinance (Cap. 459) and Personal Data (Privacy) Ordinance (Cap. 486)",
+        "category": "Data category",
+        "period": "Retention period",
+        "legalMinimum": "Legal minimum",
+        "notEditable": "Not editable",
+        "clinicalRecords": "Resident clinical records",
+        "emar": "Medication records",
+        "incidents": "Incident records",
+        "auditLogs": "Audit logs",
+        "notificationLogs": "Notification logs",
+        "systemLogs": "System logs",
+        "sevenYears": "7 years",
+        "days": "days",
+        "saveConfigurable": "Save configurable items"
       }
     }
   },

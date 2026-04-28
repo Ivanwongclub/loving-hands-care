@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { RefreshCw, Pencil, Play } from "lucide-react";
+import { RefreshCw, Pencil, Play, Lock } from "lucide-react";
 import {
   Card, Stack, Inline, Text, Badge, Button, Switch, NumberField, FormField,
   Skeleton, ConfirmDialog, Modal, Select, TextField, EmptyState,
