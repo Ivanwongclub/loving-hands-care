@@ -22,6 +22,7 @@ import { WoundsTab } from "@/components/wounds/WoundsTab";
 import { IncidentsTab } from "@/components/incidents/IncidentsTab";
 import { AlertsTab } from "@/components/alerts/AlertsTab";
 import { MedicationTab } from "@/components/emar/MedicationTab";
+import { RestraintsTab } from "@/components/restraints/RestraintsTab";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
@@ -93,7 +94,7 @@ interface ConsentFlags {
   religious_eol_preferences?: string;
 }
 
-const CLINICAL_TABS = ["profile", "vitals", "wounds", "emar", "icp", "tasks", "incidents"] as const;
+const CLINICAL_TABS = ["profile", "vitals", "wounds", "emar", "icp", "tasks", "incidents", "restraints"] as const;
 const ADMIN_TABS = ["alerts", "contacts", "documents", "bed", "activity"] as const;
 type TabKey = (typeof CLINICAL_TABS)[number] | (typeof ADMIN_TABS)[number];
 const ALL_TABS: readonly TabKey[] = [...CLINICAL_TABS, ...ADMIN_TABS];
@@ -352,6 +353,7 @@ function ResidentDetailPage() {
               { value: "icp", label: t("icp.title") },
               { value: "tasks", label: t("tasks.title") },
               { value: "incidents", label: t("incidents.title") },
+              { value: "restraints", label: t("restraints.title") },
             ]}
           />
 
@@ -460,6 +462,15 @@ function ResidentDetailPage() {
               residentId={id}
               branchId={resident.branch_id}
               staffId={staff?.id ?? null}
+              logAction={logAction}
+            />
+          )}
+          {tab === "restraints" && (
+            <RestraintsTab
+              residentId={id}
+              branchId={resident.branch_id}
+              staffId={staff?.id ?? null}
+              staffRole={staff?.role ?? null}
               logAction={logAction}
             />
           )}

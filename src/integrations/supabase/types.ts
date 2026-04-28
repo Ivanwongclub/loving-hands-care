@@ -1928,6 +1928,13 @@ export type Database = {
             referencedRelation: "staff"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "residents_wandering_risk_assessed_by_fkey"
+            columns: ["wandering_risk_assessed_by"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
         ]
       }
       restraint_observations: {
