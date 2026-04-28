@@ -378,10 +378,12 @@ function ResidentDetailPage() {
               resident={resident}
               canEdit={canEditProfile}
               canEditAdmin={canEditAdmin}
+              canEditClinical={canEditClinical}
               editMode={editMode}
               setEditMode={setEditMode}
               onSaved={fetchResident}
               logAction={logAction}
+              staffId={staff?.id ?? null}
             />
           )}
           {tab === "alerts" && (
