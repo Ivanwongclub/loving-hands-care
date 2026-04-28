@@ -23,6 +23,8 @@ import { IncidentsTab } from "@/components/incidents/IncidentsTab";
 import { AlertsTab } from "@/components/alerts/AlertsTab";
 import { MedicationTab } from "@/components/emar/MedicationTab";
 import { RestraintsTab } from "@/components/restraints/RestraintsTab";
+import { VaccinationsTab } from "@/components/vaccinations/VaccinationsTab";
+import { WanderingAssessmentModal } from "@/components/wandering/WanderingAssessmentModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
