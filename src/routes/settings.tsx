@@ -12,6 +12,9 @@ import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { AddBranchModal } from "@/components/settings/AddBranchModal";
 import { BranchEditDrawer } from "@/components/settings/BranchEditDrawer";
 import { StaffSection } from "@/components/settings/StaffSection";
+import { NotificationsSection } from "@/components/settings/NotificationsSection";
+import { EmarConfigSection } from "@/components/settings/EmarConfigSection";
+import { SystemSection } from "@/components/settings/SystemSection";
 import { AlertSLASection } from "@/components/alerts/AlertSLASection";
 import { EscalationEngineCard } from "@/components/alerts/EscalationEngineCard";
 import type { Enums } from "@/integrations/supabase/types";
@@ -57,7 +60,9 @@ function SettingsPage() {
             {section === "branches" && isSysAdmin && <BranchesSection />}
             {section === "staff" && canManageStaff && <StaffSection />}
             {section === "alerts" && <AlertsSettingsSection />}
-            {section !== "branches" && section !== "alerts" && section !== "staff" && <ComingSoonSection labelKey={`settings.sections.${section}`} />}
+            {section === "notifications" && <NotificationsSection />}
+            {section === "emar" && <EmarConfigSection />}
+            {section === "system" && <SystemSection />}
           </div>
         </div>
       </AdminDesktopShell>
