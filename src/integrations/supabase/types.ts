@@ -1788,9 +1788,12 @@ export type Database = {
       residents: {
         Row: {
           admission_date: string
+          advance_directive_on_file: boolean
+          advance_directive_uploaded_at: string | null
           allergies: Json | null
           bed_id: string | null
           branch_id: string
+          consents: Json
           created_at: string
           deleted_at: string | null
           dietary_requirements: Json | null
@@ -1801,21 +1804,32 @@ export type Database = {
           hkid_hash: string
           id: string
           language_preference: string | null
+          lpoa_holder_name: string | null
+          lpoa_holder_phone: string | null
+          lpoa_holder_relationship: string | null
           medical_history: Json | null
           name: string
           name_zh: string
           notes: string | null
+          photo_declined: boolean
           photo_storage_path: string | null
+          photo_updated_at: string | null
           preferred_name: string | null
+          resuscitation_status: Database["public"]["Enums"]["resuscitation_status"]
+          resuscitation_status_updated_at: string | null
+          resuscitation_status_updated_by: string | null
           risk_level: Database["public"]["Enums"]["risk_level"] | null
           status: Database["public"]["Enums"]["resident_status"]
           updated_at: string
         }
         Insert: {
           admission_date: string
+          advance_directive_on_file?: boolean
+          advance_directive_uploaded_at?: string | null
           allergies?: Json | null
           bed_id?: string | null
           branch_id: string
+          consents?: Json
           created_at?: string
           deleted_at?: string | null
           dietary_requirements?: Json | null
@@ -1826,21 +1840,32 @@ export type Database = {
           hkid_hash: string
           id?: string
           language_preference?: string | null
+          lpoa_holder_name?: string | null
+          lpoa_holder_phone?: string | null
+          lpoa_holder_relationship?: string | null
           medical_history?: Json | null
           name: string
           name_zh: string
           notes?: string | null
+          photo_declined?: boolean
           photo_storage_path?: string | null
+          photo_updated_at?: string | null
           preferred_name?: string | null
+          resuscitation_status?: Database["public"]["Enums"]["resuscitation_status"]
+          resuscitation_status_updated_at?: string | null
+          resuscitation_status_updated_by?: string | null
           risk_level?: Database["public"]["Enums"]["risk_level"] | null
           status?: Database["public"]["Enums"]["resident_status"]
           updated_at?: string
         }
         Update: {
           admission_date?: string
+          advance_directive_on_file?: boolean
+          advance_directive_uploaded_at?: string | null
           allergies?: Json | null
           bed_id?: string | null
           branch_id?: string
+          consents?: Json
           created_at?: string
           deleted_at?: string | null
           dietary_requirements?: Json | null
@@ -1851,12 +1876,20 @@ export type Database = {
           hkid_hash?: string
           id?: string
           language_preference?: string | null
+          lpoa_holder_name?: string | null
+          lpoa_holder_phone?: string | null
+          lpoa_holder_relationship?: string | null
           medical_history?: Json | null
           name?: string
           name_zh?: string
           notes?: string | null
+          photo_declined?: boolean
           photo_storage_path?: string | null
+          photo_updated_at?: string | null
           preferred_name?: string | null
+          resuscitation_status?: Database["public"]["Enums"]["resuscitation_status"]
+          resuscitation_status_updated_at?: string | null
+          resuscitation_status_updated_by?: string | null
           risk_level?: Database["public"]["Enums"]["risk_level"] | null
           status?: Database["public"]["Enums"]["resident_status"]
           updated_at?: string
@@ -2530,6 +2563,10 @@ export type Database = {
         | "FAILED"
         | "RETRYING"
       resident_status: "ADMITTED" | "DISCHARGED" | "LOA" | "DECEASED"
+      resuscitation_status:
+        | "FULL_RESUSCITATION"
+        | "DNACPR"
+        | "AD_LIMITED"
       risk_level: "LOW" | "MEDIUM" | "HIGH"
       staff_role:
         | "SYSTEM_ADMIN"
