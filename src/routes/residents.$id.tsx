@@ -93,7 +93,7 @@ interface ConsentFlags {
   religious_eol_preferences?: string;
 }
 
-const CLINICAL_TABS = ["profile", "vitals", "wounds", "emar", "icp", "tasks", "incidents"] as const;
+const CLINICAL_TABS = ["profile", "vitals", "wounds", "emar", "icp", "tasks", "incidents", "restraints"] as const;
 const ADMIN_TABS = ["alerts", "contacts", "documents", "bed", "activity"] as const;
 type TabKey = (typeof CLINICAL_TABS)[number] | (typeof ADMIN_TABS)[number];
 const ALL_TABS: readonly TabKey[] = [...CLINICAL_TABS, ...ADMIN_TABS];
