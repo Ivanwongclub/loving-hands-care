@@ -207,6 +207,47 @@
         "noBackup": "尚未設定異地備份",
         "refresh": "重新整理",
         "deliveryRate": "過去 7 日送達率"
+      },
+      "backup": {
+        "title": "異地備份設定",
+        "provider": "儲存提供商",
+        "bucket": "儲存桶名稱",
+        "regionEndpoint": "地區 / 端點",
+        "credentials": "憑證",
+        "encryptionKey": "加密金鑰",
+        "notConfigured": "尚未設定",
+        "configure": "設定",
+        "phase2Coming": "Phase 2 即將推出",
+        "retentionMonths": "備份保留期",
+        "retentionMin": "SWD 最低要求：84 個月",
+        "rpoHours": "RPO 目標（小時）",
+        "rtoHours": "RTO 目標（小時）",
+        "alertEmail": "故障警報電郵",
+        "storageWarnPct": "儲存警告閾值（%）",
+        "runNow": "立即備份",
+        "runStarted": "備份已開始",
+        "providers": {
+          "B2": "Backblaze B2",
+          "S3": "AWS S3",
+          "GCS": "Google Cloud Storage"
+        }
+      },
+      "retention": {
+        "title": "資料保留政策",
+        "legalNote": "根據安老院牌照條例（第 459 章）及個人資料（私隱）條例（第 486 章）",
+        "category": "資料類別",
+        "period": "保留期限",
+        "legalMinimum": "法定最低",
+        "notEditable": "不可修改",
+        "clinicalRecords": "院友臨床記錄",
+        "emar": "電子用藥記錄",
+        "incidents": "事故記錄",
+        "auditLogs": "審計記錄",
+        "notificationLogs": "通知記錄",
+        "systemLogs": "系統日誌",
+        "sevenYears": "7 年",
+        "days": "日",
+        "saveConfigurable": "儲存可設定項目"
       }
     }
   },

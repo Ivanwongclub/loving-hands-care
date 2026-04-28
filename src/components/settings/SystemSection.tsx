@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { RefreshCw, Pencil, Play } from "lucide-react";
+import { RefreshCw, Pencil, Play, Lock } from "lucide-react";
 import {
   Card, Stack, Inline, Text, Badge, Button, Switch, NumberField, FormField,
   Skeleton, ConfirmDialog, Modal, Select, TextField, EmptyState,
@@ -33,6 +33,8 @@ export function SystemSection() {
       <IcpTaskConfigSection />
       <WorkflowEngineSection isSysAdmin={isSysAdmin} />
       {isSysAdmin && <SystemHealthSection />}
+      {isSysAdmin && <BackupConfigSection />}
+      {isSysAdmin && <RetentionPolicySection />}
     </Stack>
   );
 }
@@ -425,6 +427,309 @@ function SystemHealthSection() {
             ))}
           </Stack>
         </Card>
+      </Stack>
+    </Card>
+  );
+}
+
+/* ────────── Backup Config ────────── */
+interface BackupCfg {
+  provider?: string;
+  bucket?: string;
+  region?: string;
+  retention_months?: number;
+  rpo_hours?: number;
+  rto_hours?: number;
+  alert_email?: string;
+  [k: string]: unknown;
+}
+interface SystemCfg {
+  backup?: BackupCfg;
+  storage_warn_pct?: number;
+  system_log_retention_days?: number;
+  [k: string]: unknown;
+}
+
+function BackupConfigSection() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const { logAction } = useAuditLog();
+  const { branches, isLoading } = useBranches();
+  const branch = branches[0] ?? null;
+
+  const [provider, setProvider] = useState("B2");
+  const [bucket, setBucket] = useState("");
+  const [region, setRegion] = useState("");
+  const [retentionMonths, setRetentionMonths] = useState(84);
+  const [rpoHours, setRpoHours] = useState(24);
+  const [rtoHours, setRtoHours] = useState(4);
+  const [alertEmail, setAlertEmail] = useState("");
+  const [storageWarnPct, setStorageWarnPct] = useState(75);
+  const [busy, setBusy] = useState(false);
+  const [running, setRunning] = useState(false);
+
+  const backupQ = useQuery({
+    queryKey: ["backup_log", "latest"],
+    staleTime: 30_000,
+    queryFn: async (): Promise<Tables<"backup_log"> | null> => {
+      const { data } = await supabase.from("backup_log").select("*").order("started_at", { ascending: false }).limit(1).maybeSingle();
+      return (data as Tables<"backup_log"> | null) ?? null;
+    },
+  });
+
+  useEffect(() => {
+    const sys = (branch?.system_config as SystemCfg | null) ?? {};
+    const b = sys.backup ?? {};
+    setProvider(b.provider ?? "B2");
+    setBucket(b.bucket ?? "");
+    setRegion(b.region ?? "");
+    setRetentionMonths(b.retention_months ?? 84);
+    setRpoHours(b.rpo_hours ?? 24);
+    setRtoHours(b.rto_hours ?? 4);
+    setAlertEmail(b.alert_email ?? "");
+    setStorageWarnPct(typeof sys.storage_warn_pct === "number" ? sys.storage_warn_pct : 75);
+  }, [branch?.id, branch?.system_config]);
+
+  if (isLoading) return <Card padding="lg"><Skeleton height={200} /></Card>;
+  if (!branch) return null;
+
+  const emailValid = !alertEmail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(alertEmail);
+  const retentionTooLow = retentionMonths < 84;
+  const bucketMissing = !!provider && !bucket.trim();
+
+  const save = async () => {
+    if (retentionTooLow || !emailValid || bucketMissing) {
+      toast.error("Invalid input");
+      return;
+    }
+    setBusy(true);
+    try {
+      const beforeSys = (branch.system_config as SystemCfg | null) ?? {};
+      const newSys: SystemCfg = {
+        ...beforeSys,
+        backup: {
+          ...(beforeSys.backup ?? {}),
+          provider,
+          bucket,
+          region,
+          retention_months: Math.max(84, retentionMonths),
+          rpo_hours: rpoHours,
+          rto_hours: rtoHours,
+          alert_email: alertEmail,
+        },
+        storage_warn_pct: storageWarnPct,
+      };
+      const { error } = await supabase.from("branches").update({ system_config: newSys as never }).eq("id", branch.id);
+      if (error) throw error;
+      await logAction({
+        action: "SETTINGS_UPDATE", entity_type: "branch_settings", entity_id: branch.id, branch_id: branch.id,
+        before_state: { system_config: beforeSys }, after_state: { system_config: newSys },
+      });
+      toast.success(t("common.saved"));
+      void qc.invalidateQueries({ queryKey: ["branches"] });
+    } catch (err) { toast.error((err as Error).message); }
+    finally { setBusy(false); }
+  };
+
+  const runNow = async () => {
+    setRunning(true);
+    try {
+      const { error } = await supabase.functions.invoke("run-offsite-backup", { body: { type: "manual", triggered_by: "MANUAL" } });
+      if (error) throw error;
+      toast.success(t("settings.system.backup.runStarted"));
+      void qc.invalidateQueries({ queryKey: ["backup_log"] });
+    } catch (err) { toast.error((err as Error).message); }
+    finally { setRunning(false); }
+  };
+
+  const phase2 = () => toast.info(t("settings.system.backup.phase2Coming"));
+  const latest = backupQ.data;
+
+  return (
+    <Card padding="md">
+      <Stack gap={3}>
+        <Text size="md" className="font-semibold">{t("settings.system.backup.title")}</Text>
+        <Card padding="md">
+          <Stack gap={1}>
+            <Text size="sm" color="secondary">{t("settings.system.health.backupStatus")}</Text>
+            <Text size="md">
+              {latest ? `${new Date(latest.started_at).toLocaleString()} · ${latest.status}` : t("settings.system.health.noBackup")}
+            </Text>
+          </Stack>
+        </Card>
+
+        <FormField label={t("settings.system.backup.provider")}>
+          <Select
+            value={provider}
+            onChange={(e) => setProvider((e.target as HTMLSelectElement).value)}
+            options={[
+              { value: "B2", label: t("settings.system.backup.providers.B2") },
+              { value: "S3", label: t("settings.system.backup.providers.S3") },
+              { value: "GCS", label: t("settings.system.backup.providers.GCS") },
+            ]}
+          />
+        </FormField>
+        <FormField label={t("settings.system.backup.bucket")} validation={bucketMissing ? { tone: "error", message: "Required" } : undefined}>
+          <TextField value={bucket} onChange={(e) => setBucket(e.target.value)} />
+        </FormField>
+        <FormField label={t("settings.system.backup.regionEndpoint")}>
+          <TextField value={region} onChange={(e) => setRegion(e.target.value)} />
+        </FormField>
+
+        <FormField label={t("settings.system.backup.credentials")}>
+          <Inline gap={2} align="center">
+            <Badge tone="neutral">{t("settings.system.backup.notConfigured")}</Badge>
+            <Button variant="ghost" size="compact" onClick={phase2}>{t("settings.system.backup.configure")} →</Button>
+          </Inline>
+        </FormField>
+        <FormField label={t("settings.system.backup.encryptionKey")}>
+          <Inline gap={2} align="center">
+            <Badge tone="neutral">{t("settings.system.backup.notConfigured")}</Badge>
+            <Button variant="ghost" size="compact" onClick={phase2}>{t("settings.system.backup.configure")} →</Button>
+          </Inline>
+        </FormField>
+
+        <FormField
+          label={t("settings.system.backup.retentionMonths")}
+          helper={t("settings.system.backup.retentionMin")}
+          validation={retentionTooLow ? { tone: "error", message: t("settings.system.backup.retentionMin") } : undefined}
+        >
+          <NumberField numericValue={retentionMonths} onValueChange={setRetentionMonths} min={84} step={1} unit="mo" />
+        </FormField>
+        <FormField label={t("settings.system.backup.rpoHours")}>
+          <NumberField numericValue={rpoHours} onValueChange={setRpoHours} min={1} step={1} unit="h" />
+        </FormField>
+        <FormField label={t("settings.system.backup.rtoHours")}>
+          <NumberField numericValue={rtoHours} onValueChange={setRtoHours} min={1} step={1} unit="h" />
+        </FormField>
+        <FormField label={t("settings.system.backup.alertEmail")} validation={!emailValid ? { tone: "error", message: "Invalid email" } : undefined}>
+          <TextField type="email" value={alertEmail} onChange={(e) => setAlertEmail(e.target.value)} />
+        </FormField>
+        <FormField label={t("settings.system.backup.storageWarnPct")}>
+          <NumberField numericValue={storageWarnPct} onValueChange={setStorageWarnPct} min={1} max={100} step={1} unit="%" />
+        </FormField>
+
+        <Inline gap={2}>
+          <Button variant="primary" onClick={save} disabled={busy}>{t("actions.save")}</Button>
+          <Button variant="soft" onClick={runNow} disabled={running} leadingIcon={<Play size={14} />}>
+            {t("settings.system.backup.runNow")}
+          </Button>
+        </Inline>
+      </Stack>
+    </Card>
+  );
+}
+
+/* ────────── Retention Policy ────────── */
+interface NotifCfg {
+  log_retention_days?: number;
+  [k: string]: unknown;
+}
+
+function RetentionPolicySection() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const { logAction } = useAuditLog();
+  const { branches, isLoading } = useBranches();
+  const branch = branches[0] ?? null;
+
+  const [notifDays, setNotifDays] = useState(90);
+  const [sysLogDays, setSysLogDays] = useState(30);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const notif = (branch?.notification_config as NotifCfg | null) ?? {};
+    const sys = (branch?.system_config as SystemCfg | null) ?? {};
+    setNotifDays(typeof notif.log_retention_days === "number" ? notif.log_retention_days : 90);
+    setSysLogDays(typeof sys.system_log_retention_days === "number" ? sys.system_log_retention_days : 30);
+  }, [branch?.id, branch?.notification_config, branch?.system_config]);
+
+  if (isLoading) return <Card padding="lg"><Skeleton height={160} /></Card>;
+  if (!branch) return null;
+
+  const notifValid = notifDays >= 30 && notifDays <= 365;
+  const sysValid = sysLogDays >= 7 && sysLogDays <= 90;
+
+  const save = async () => {
+    if (!notifValid || !sysValid) {
+      toast.error("Invalid input");
+      return;
+    }
+    setBusy(true);
+    try {
+      const beforeNotif = (branch.notification_config as NotifCfg | null) ?? {};
+      const beforeSys = (branch.system_config as SystemCfg | null) ?? {};
+      const newNotif: NotifCfg = { ...beforeNotif, log_retention_days: notifDays };
+      const newSys: SystemCfg = { ...beforeSys, system_log_retention_days: sysLogDays };
+      const { error } = await supabase.from("branches").update({
+        notification_config: newNotif as never,
+        system_config: newSys as never,
+      }).eq("id", branch.id);
+      if (error) throw error;
+      await logAction({
+        action: "SETTINGS_UPDATE", entity_type: "branch_settings", entity_id: branch.id, branch_id: branch.id,
+        before_state: { notification_config: beforeNotif, system_config: beforeSys },
+        after_state: { notification_config: newNotif, system_config: newSys },
+      });
+      toast.success(t("common.saved"));
+      void qc.invalidateQueries({ queryKey: ["branches"] });
+    } catch (err) { toast.error((err as Error).message); }
+    finally { setBusy(false); }
+  };
+
+  const lockedRows: { key: string; label: string }[] = [
+    { key: "clinicalRecords", label: t("settings.system.retention.clinicalRecords") },
+    { key: "emar", label: t("settings.system.retention.emar") },
+    { key: "incidents", label: t("settings.system.retention.incidents") },
+    { key: "auditLogs", label: t("settings.system.retention.auditLogs") },
+  ];
+
+  return (
+    <Card padding="md">
+      <Stack gap={3}>
+        <Text size="md" className="font-semibold">{t("settings.system.retention.title")}</Text>
+        <Text size="sm" color="secondary">{t("settings.system.retention.legalNote")}</Text>
+        <table className="w-full type-body-md" style={{ borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+              <th style={{ textAlign: "left", padding: 12, color: "var(--text-secondary)" }}>{t("settings.system.retention.category")}</th>
+              <th style={{ textAlign: "left", padding: 12, color: "var(--text-secondary)" }}>{t("settings.system.retention.period")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {lockedRows.map((r) => (
+              <tr key={r.key} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                <td style={{ padding: 12 }}>{r.label}</td>
+                <td style={{ padding: 12 }}>
+                  <Inline gap={2} align="center">
+                    <Lock size={12} style={{ color: "var(--text-tertiary)" }} />
+                    <Text size="sm">{t("settings.system.retention.sevenYears")}</Text>
+                    <Badge tone="neutral">{t("settings.system.retention.legalMinimum")}</Badge>
+                  </Inline>
+                </td>
+              </tr>
+            ))}
+            <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+              <td style={{ padding: 12 }}>{t("settings.system.retention.notificationLogs")}</td>
+              <td style={{ padding: 12 }}>
+                <Inline gap={2} align="center">
+                  <NumberField numericValue={notifDays} onValueChange={setNotifDays} min={30} max={365} step={1} unit={t("settings.system.retention.days")} />
+                </Inline>
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: 12 }}>{t("settings.system.retention.systemLogs")}</td>
+              <td style={{ padding: 12 }}>
+                <Inline gap={2} align="center">
+                  <NumberField numericValue={sysLogDays} onValueChange={setSysLogDays} min={7} max={90} step={1} unit={t("settings.system.retention.days")} />
+                </Inline>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          <Button variant="primary" onClick={save} disabled={busy}>{t("settings.system.retention.saveConfigurable")}</Button>
+        </div>
       </Stack>
     </Card>
   );
