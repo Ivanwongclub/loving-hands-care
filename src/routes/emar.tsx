@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Shield } from "lucide-react";
+import { Pill, Shield } from "lucide-react";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
@@ -14,6 +14,9 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
+import { useAuditLog } from "@/hooks/useAuditLog";
+import { AdministerModal } from "@/components/emar/AdministerModal";
+import { PassModeView, type PassModeRecord } from "@/components/emar/PassModeView";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/emar")({
