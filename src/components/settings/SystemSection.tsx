@@ -33,6 +33,8 @@ export function SystemSection() {
       <IcpTaskConfigSection />
       <WorkflowEngineSection isSysAdmin={isSysAdmin} />
       {isSysAdmin && <SystemHealthSection />}
+      {isSysAdmin && <BackupConfigSection />}
+      {isSysAdmin && <RetentionPolicySection />}
     </Stack>
   );
 }
