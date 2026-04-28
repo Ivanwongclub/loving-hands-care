@@ -8,6 +8,7 @@ import { KioskShell } from "@/components/shells/KioskShell";
 import {
   Stack, Inline, Heading, Text, Button, Badge, Banner,
   Drawer, SearchField, Radio, TextField, FormField, Avatar, Spinner,
+  ConfirmDialog,
 } from "@/components/hms";
 import { supabase } from "@/integrations/supabase/client";
 import { useBranches } from "@/hooks/useBranches";
