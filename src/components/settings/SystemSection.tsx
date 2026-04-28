@@ -569,7 +569,7 @@ function BackupConfigSection() {
             ]}
           />
         </FormField>
-        <FormField label={t("settings.system.backup.bucket")} error={bucketMissing ? "Required" : undefined}>
+        <FormField label={t("settings.system.backup.bucket")} validation={bucketMissing ? { tone: "error", message: "Required" } : undefined}>
           <TextField value={bucket} onChange={(e) => setBucket(e.target.value)} />
         </FormField>
         <FormField label={t("settings.system.backup.regionEndpoint")}>
@@ -591,8 +591,8 @@ function BackupConfigSection() {
 
         <FormField
           label={t("settings.system.backup.retentionMonths")}
-          hint={t("settings.system.backup.retentionMin")}
-          error={retentionTooLow ? t("settings.system.backup.retentionMin") : undefined}
+          helper={t("settings.system.backup.retentionMin")}
+          validation={retentionTooLow ? { tone: "error", message: t("settings.system.backup.retentionMin") } : undefined}
         >
           <NumberField numericValue={retentionMonths} onValueChange={setRetentionMonths} min={84} step={1} unit="mo" />
         </FormField>
@@ -602,7 +602,7 @@ function BackupConfigSection() {
         <FormField label={t("settings.system.backup.rtoHours")}>
           <NumberField numericValue={rtoHours} onValueChange={setRtoHours} min={1} step={1} unit="h" />
         </FormField>
-        <FormField label={t("settings.system.backup.alertEmail")} error={!emailValid ? "Invalid email" : undefined}>
+        <FormField label={t("settings.system.backup.alertEmail")} validation={!emailValid ? { tone: "error", message: "Invalid email" } : undefined}>
           <TextField type="email" value={alertEmail} onChange={(e) => setAlertEmail(e.target.value)} />
         </FormField>
         <FormField label={t("settings.system.backup.storageWarnPct")}>
