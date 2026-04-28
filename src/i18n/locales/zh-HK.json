@@ -1156,6 +1156,33 @@
     "detail": "員工詳情",
     "profile": "個人資料",
     "role": "職位",
+    "allRoles": "所有職位",
+    "allStatuses": "所有狀態",
+    "emptyTitle": "未有員工記錄",
+    "emptyDescription": "邀請員工以開始管理。",
+    "columns": {
+      "name": "姓名",
+      "role": "職位",
+      "type": "類型",
+      "branches": "分院",
+      "status": "狀態",
+      "resident": "院友",
+      "task": "任務",
+      "due": "到期",
+      "drug": "藥物",
+      "time": "時間",
+      "incidentRef": "事故編號",
+      "type2": "類別",
+      "severity": "嚴重程度"
+    },
+    "fields": {
+      "nameZh": "中文姓名",
+      "name": "英文姓名",
+      "email": "電郵",
+      "role": "職位",
+      "phone": "電話",
+      "branches": "分院"
+    },
     "roles": {
       "SYSTEM_ADMIN": "系統管理員",
       "BRANCH_ADMIN": "院舍管理員",
