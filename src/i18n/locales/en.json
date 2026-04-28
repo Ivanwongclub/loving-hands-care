@@ -131,6 +131,83 @@
       "confirmReassignDeactivate": "Reassign and deactivate",
       "auditTrail": "Activity log",
       "viewFullAudit": "View full audit trail"
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "tabs": {
+        "channels": "Channels",
+        "events": "Events",
+        "quietHours": "Quiet Hours",
+        "templates": "Message Templates",
+        "deliveryLog": "Delivery Log"
+      },
+      "placeholder": "Placeholder",
+      "configureCredentials": "Configure",
+      "testConnection": "Test Connection",
+      "phase2Coming": "Phase 2 — credential setup coming soon",
+      "fallbackDelay": "Fallback delay",
+      "maxAttempts": "Max retry attempts",
+      "retryWindow": "Retry window",
+      "quietHoursEnabled": "Enable quiet hours",
+      "quietHoursRange": "Do-not-disturb window",
+      "deliverySummary": "Delivery summary (last 30 days)",
+      "resend": "Resend",
+      "events": {
+        "dcu_checkin": "DCU Check-in",
+        "dcu_checkout": "DCU Check-out",
+        "alert_critical": "Critical Alert",
+        "alert_high": "High Alert",
+        "incident_high": "High-severity Incident"
+      }
+    },
+    "emar": {
+      "title": "eMAR Settings",
+      "passWindowBefore": "Pass window (before scheduled)",
+      "passWindowAfter": "Pass window (after scheduled)",
+      "pinLockoutAttempts": "PIN lockout threshold",
+      "prnIndicationRequired": "PRN indication required",
+      "prnOutcomeRequired": "PRN outcome notes required"
+    },
+    "system": {
+      "title": "System Config",
+      "icpTasks": "ICP & Tasks",
+      "icpApprovalRoles": "ICP Approval Roles",
+      "taskOverdue": "Task overdue escalation (minutes)",
+      "taskTypes": {
+        "VITALS": "Vitals",
+        "MEDICATION_PREP": "Medication Prep",
+        "WOUND_CARE": "Wound Care",
+        "ADL": "ADL",
+        "ASSESSMENT": "Assessment",
+        "OTHER": "Other"
+      },
+      "workflowEngine": "Workflow Engine",
+      "runNow": "Run Now",
+      "editSchedule": "Edit Schedule",
+      "disableJob": "Disable",
+      "enableJob": "Enable",
+      "disableConfirm": "Disabling will stop automatic runs. Confirm?",
+      "jobRunning": "Manual run started",
+      "schedulePresets": {
+        "every5": "Every 5 minutes",
+        "every15": "Every 15 minutes",
+        "every30": "Every 30 minutes",
+        "hourly": "Hourly",
+        "daily": "Daily",
+        "custom": "Custom"
+      },
+      "health": {
+        "title": "System Status",
+        "healthy": "System healthy",
+        "degraded": "Some functions degraded",
+        "edgeFunctions": "Edge Functions",
+        "scheduledJobs": "Scheduled Jobs",
+        "notificationHealth": "Notification Health",
+        "backupStatus": "Backup Status",
+        "noBackup": "Off-site backup not configured",
+        "refresh": "Refresh",
+        "deliveryRate": "Delivery rate (last 7 days)"
+      }
     }
   },
   "branches": {
