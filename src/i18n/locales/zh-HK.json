@@ -131,6 +131,83 @@
       "confirmReassignDeactivate": "確認重新分配並停用",
       "auditTrail": "操作記錄",
       "viewFullAudit": "查看完整記錄"
+    },
+    "notifications": {
+      "title": "通知設定",
+      "tabs": {
+        "channels": "渠道",
+        "events": "事件",
+        "quietHours": "靜音時段",
+        "templates": "訊息範本",
+        "deliveryLog": "發送記錄"
+      },
+      "placeholder": "佔位符",
+      "configureCredentials": "設定憑證",
+      "testConnection": "測試連線",
+      "phase2Coming": "Phase 2 — 憑證設定即將推出",
+      "fallbackDelay": "備用延遲",
+      "maxAttempts": "最多重試次數",
+      "retryWindow": "重試視窗",
+      "quietHoursEnabled": "啟用靜音時段",
+      "quietHoursRange": "不發送通知時段",
+      "deliverySummary": "過去 30 日送達摘要",
+      "resend": "重新發送",
+      "events": {
+        "dcu_checkin": "日間護理簽到",
+        "dcu_checkout": "日間護理簽退",
+        "alert_critical": "緊急警報",
+        "alert_high": "高級警報",
+        "incident_high": "高級事故"
+      }
+    },
+    "emar": {
+      "title": "電子用藥記錄設定",
+      "passWindowBefore": "給藥視窗（預設時間前）",
+      "passWindowAfter": "給藥視窗（預設時間後）",
+      "pinLockoutAttempts": "PIN 鎖定閾值",
+      "prnIndicationRequired": "PRN 需要說明",
+      "prnOutcomeRequired": "PRN 結果備注必填"
+    },
+    "system": {
+      "title": "系統設定",
+      "icpTasks": "照顧計劃 & 任務",
+      "icpApprovalRoles": "ICP 審批人角色",
+      "taskOverdue": "任務逾期升級（分鐘）",
+      "taskTypes": {
+        "VITALS": "生命體徵",
+        "MEDICATION_PREP": "藥物準備",
+        "WOUND_CARE": "傷口護理",
+        "ADL": "日常生活活動",
+        "ASSESSMENT": "評估",
+        "OTHER": "其他"
+      },
+      "workflowEngine": "工作流程引擎",
+      "runNow": "立即執行",
+      "editSchedule": "編輯排程",
+      "disableJob": "停用",
+      "enableJob": "啟用",
+      "disableConfirm": "停用後此作業將不再自動執行。確認？",
+      "jobRunning": "已手動執行",
+      "schedulePresets": {
+        "every5": "每 5 分鐘",
+        "every15": "每 15 分鐘",
+        "every30": "每 30 分鐘",
+        "hourly": "每小時",
+        "daily": "每日",
+        "custom": "自訂"
+      },
+      "health": {
+        "title": "系統狀態",
+        "healthy": "系統運作正常",
+        "degraded": "部分功能異常",
+        "edgeFunctions": "Edge Functions",
+        "scheduledJobs": "定時作業",
+        "notificationHealth": "通知健康狀況",
+        "backupStatus": "備份狀態",
+        "noBackup": "尚未設定異地備份",
+        "refresh": "重新整理",
+        "deliveryRate": "過去 7 日送達率"
+      }
     }
   },
   "branches": {
