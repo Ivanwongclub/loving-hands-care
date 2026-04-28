@@ -892,8 +892,7 @@ function PhotoUploadModal({
           ref={camRef}
           type="file"
           accept="image/*"
-          // @ts-expect-error capture is valid HTML attribute on file input
-          capture="environment"
+          {...({ capture: "environment" } as Record<string, string>)}
           hidden
           onChange={(e) => { void handleFile(e.target.files?.[0]); e.target.value = ""; }}
         />
@@ -1080,7 +1079,7 @@ function ResuscitationEditModal({
           {showLpoa && (
             <>
               <Divider />
-              <Heading level={4}>{t("residents.resuscitation.lpoa")}</Heading>
+              <Heading level={3}>{t("residents.resuscitation.lpoa")}</Heading>
               <FormField label={t("residents.resuscitation.lpoaName")}>
                 <TextField value={lpoaName} disabled={!canEdit}
                   onChange={(e) => setLpoaName(e.target.value)} />
@@ -1590,7 +1589,7 @@ function AllergyCard({
 
   const persist = async (next: AllergyRecord[], action: string) => {
     const before = { allergies: resident.allergies };
-    const after = { allergies: next };
+    const after = { allergies: next as unknown as Tables<"residents">["allergies"] };
     const { error } = await supabase.from("residents").update(after).eq("id", resident.id);
     if (error) {
       toast.error(error.message);
