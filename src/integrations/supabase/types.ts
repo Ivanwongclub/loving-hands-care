@@ -1821,6 +1821,10 @@ export type Database = {
           risk_level: Database["public"]["Enums"]["risk_level"] | null
           status: Database["public"]["Enums"]["resident_status"]
           updated_at: string
+          wandering_risk_assessed_at: string | null
+          wandering_risk_assessed_by: string | null
+          wandering_risk_level: string
+          wandering_risk_notes: string | null
         }
         Insert: {
           admission_date: string
@@ -1857,6 +1861,10 @@ export type Database = {
           risk_level?: Database["public"]["Enums"]["risk_level"] | null
           status?: Database["public"]["Enums"]["resident_status"]
           updated_at?: string
+          wandering_risk_assessed_at?: string | null
+          wandering_risk_assessed_by?: string | null
+          wandering_risk_level?: string
+          wandering_risk_notes?: string | null
         }
         Update: {
           admission_date?: string
@@ -1893,6 +1901,10 @@ export type Database = {
           risk_level?: Database["public"]["Enums"]["risk_level"] | null
           status?: Database["public"]["Enums"]["resident_status"]
           updated_at?: string
+          wandering_risk_assessed_at?: string | null
+          wandering_risk_assessed_by?: string | null
+          wandering_risk_level?: string
+          wandering_risk_notes?: string | null
         }
         Relationships: [
           {
@@ -1914,6 +1926,220 @@ export type Database = {
             columns: ["resuscitation_status_updated_by"]
             isOneToOne: false
             referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restraint_observations: {
+        Row: {
+          circulation_normal: boolean
+          created_at: string
+          id: string
+          in_use: boolean
+          notes: string | null
+          observed_at: string
+          observed_by_staff_id: string | null
+          released_for_minutes: number | null
+          resident_response: string | null
+          restraint_record_id: string
+          skin_condition: string
+        }
+        Insert: {
+          circulation_normal?: boolean
+          created_at?: string
+          id?: string
+          in_use: boolean
+          notes?: string | null
+          observed_at: string
+          observed_by_staff_id?: string | null
+          released_for_minutes?: number | null
+          resident_response?: string | null
+          restraint_record_id: string
+          skin_condition?: string
+        }
+        Update: {
+          circulation_normal?: boolean
+          created_at?: string
+          id?: string
+          in_use?: boolean
+          notes?: string | null
+          observed_at?: string
+          observed_by_staff_id?: string | null
+          released_for_minutes?: number | null
+          resident_response?: string | null
+          restraint_record_id?: string
+          skin_condition?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restraint_observations_observed_by_staff_id_fkey"
+            columns: ["observed_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restraint_observations_restraint_record_id_fkey"
+            columns: ["restraint_record_id"]
+            isOneToOne: false
+            referencedRelation: "restraint_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restraint_records: {
+        Row: {
+          alternatives_tried: string
+          assessment_by_role: string
+          assessment_by_staff_id: string | null
+          assessment_date: string
+          branch_id: string
+          consent_by: string | null
+          consent_date: string | null
+          consent_document_path: string | null
+          consent_obtained: boolean
+          consent_signatory_name: string | null
+          contributing_factors: string
+          created_at: string
+          created_by_staff_id: string | null
+          discontinued_by_staff_id: string | null
+          discontinued_date: string | null
+          discontinued_reason: string | null
+          doctor_name: string | null
+          doctor_order_date: string | null
+          doctor_order_required: boolean
+          duration_per_day_minutes: number | null
+          end_date: string | null
+          id: string
+          last_reviewed_at: string | null
+          last_reviewed_by_staff_id: string | null
+          least_restraint_principle: boolean
+          notes: string | null
+          resident_id: string
+          restraint_specification: string | null
+          restraint_type: string
+          review_due_date: string
+          risk_to_others: boolean
+          risk_to_self: boolean
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          alternatives_tried: string
+          assessment_by_role: string
+          assessment_by_staff_id?: string | null
+          assessment_date: string
+          branch_id: string
+          consent_by?: string | null
+          consent_date?: string | null
+          consent_document_path?: string | null
+          consent_obtained?: boolean
+          consent_signatory_name?: string | null
+          contributing_factors: string
+          created_at?: string
+          created_by_staff_id?: string | null
+          discontinued_by_staff_id?: string | null
+          discontinued_date?: string | null
+          discontinued_reason?: string | null
+          doctor_name?: string | null
+          doctor_order_date?: string | null
+          doctor_order_required?: boolean
+          duration_per_day_minutes?: number | null
+          end_date?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          last_reviewed_by_staff_id?: string | null
+          least_restraint_principle?: boolean
+          notes?: string | null
+          resident_id: string
+          restraint_specification?: string | null
+          restraint_type: string
+          review_due_date: string
+          risk_to_others?: boolean
+          risk_to_self?: boolean
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          alternatives_tried?: string
+          assessment_by_role?: string
+          assessment_by_staff_id?: string | null
+          assessment_date?: string
+          branch_id?: string
+          consent_by?: string | null
+          consent_date?: string | null
+          consent_document_path?: string | null
+          consent_obtained?: boolean
+          consent_signatory_name?: string | null
+          contributing_factors?: string
+          created_at?: string
+          created_by_staff_id?: string | null
+          discontinued_by_staff_id?: string | null
+          discontinued_date?: string | null
+          discontinued_reason?: string | null
+          doctor_name?: string | null
+          doctor_order_date?: string | null
+          doctor_order_required?: boolean
+          duration_per_day_minutes?: number | null
+          end_date?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          last_reviewed_by_staff_id?: string | null
+          least_restraint_principle?: boolean
+          notes?: string | null
+          resident_id?: string
+          restraint_specification?: string | null
+          restraint_type?: string
+          review_due_date?: string
+          risk_to_others?: boolean
+          risk_to_self?: boolean
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restraint_records_assessment_by_staff_id_fkey"
+            columns: ["assessment_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restraint_records_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restraint_records_created_by_staff_id_fkey"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restraint_records_discontinued_by_staff_id_fkey"
+            columns: ["discontinued_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restraint_records_last_reviewed_by_staff_id_fkey"
+            columns: ["last_reviewed_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restraint_records_resident_id_fkey"
+            columns: ["resident_id"]
+            isOneToOne: false
+            referencedRelation: "residents"
             referencedColumns: ["id"]
           },
         ]
@@ -2221,6 +2447,107 @@ export type Database = {
           },
           {
             foreignKeyName: "tasks_resident_id_fkey"
+            columns: ["resident_id"]
+            isOneToOne: false
+            referencedRelation: "residents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vaccination_records: {
+        Row: {
+          administered_by_doctor: string | null
+          administered_by_staff_id: string | null
+          administered_date: string
+          adverse_reaction: boolean
+          adverse_reaction_notes: string | null
+          batch_number: string
+          branch_id: string
+          consent_by: string | null
+          consent_date: string | null
+          consent_obtained: boolean
+          created_at: string
+          created_by_staff_id: string | null
+          expiry_relevant_date: string | null
+          id: string
+          injection_site: string | null
+          next_dose_due_date: string | null
+          notes: string | null
+          resident_id: string
+          updated_at: string
+          vaccine_brand: string | null
+          vaccine_type: string
+        }
+        Insert: {
+          administered_by_doctor?: string | null
+          administered_by_staff_id?: string | null
+          administered_date: string
+          adverse_reaction?: boolean
+          adverse_reaction_notes?: string | null
+          batch_number: string
+          branch_id: string
+          consent_by?: string | null
+          consent_date?: string | null
+          consent_obtained?: boolean
+          created_at?: string
+          created_by_staff_id?: string | null
+          expiry_relevant_date?: string | null
+          id?: string
+          injection_site?: string | null
+          next_dose_due_date?: string | null
+          notes?: string | null
+          resident_id: string
+          updated_at?: string
+          vaccine_brand?: string | null
+          vaccine_type: string
+        }
+        Update: {
+          administered_by_doctor?: string | null
+          administered_by_staff_id?: string | null
+          administered_date?: string
+          adverse_reaction?: boolean
+          adverse_reaction_notes?: string | null
+          batch_number?: string
+          branch_id?: string
+          consent_by?: string | null
+          consent_date?: string | null
+          consent_obtained?: boolean
+          created_at?: string
+          created_by_staff_id?: string | null
+          expiry_relevant_date?: string | null
+          id?: string
+          injection_site?: string | null
+          next_dose_due_date?: string | null
+          notes?: string | null
+          resident_id?: string
+          updated_at?: string
+          vaccine_brand?: string | null
+          vaccine_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaccination_records_administered_by_staff_id_fkey"
+            columns: ["administered_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaccination_records_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaccination_records_created_by_staff_id_fkey"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaccination_records_resident_id_fkey"
             columns: ["resident_id"]
             isOneToOne: false
             referencedRelation: "residents"
