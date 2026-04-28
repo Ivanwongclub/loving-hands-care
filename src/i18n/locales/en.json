@@ -35,7 +35,7 @@
     "done": "Done", "close": "Close", "add": "Add", "remove": "Remove",
     "deactivate": "Deactivate", "activate": "Activate", "unlock": "Unlock", "override": "Override",
     "signIn": "Sign In", "signOut": "Sign Out", "rescan": "Rescan", "retry": "Retry",
-    "print": "Print"
+    "print": "Print", "copy": "Copy", "regenerate": "Regenerate"
   },
   "alertStatus": {
     "open": "Open", "acknowledged": "Acknowledged", "assigned": "Assigned",
@@ -89,7 +89,7 @@
   },
   "common": {
     "comingSoon": "Coming in next sprint",
-    "branch": "Branch", "ward": "Ward", "shift": "Shift",
+    "branch": "Branch", "branches": "Branches", "ward": "Ward", "shift": "Shift",
     "morningShift": "Morning Shift",
     "language": "Language",
     "retry": "Retry",
