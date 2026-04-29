@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Languages } from "lucide-react";
@@ -79,6 +79,13 @@ function LoginPage() {
               <button type="button" className="type-body-sm text-center hover:underline" style={{ color: "var(--text-link)" }}>
                 {t("auth.forgotPassword")}
               </button>
+              <Link
+                to="/family/login"
+                className="type-body-sm text-center hover:underline"
+                style={{ color: "var(--text-link)" }}
+              >
+                {t("familyPortal.switchToFamilyLogin")}
+              </Link>
             </Stack>
           </form>
         </Stack>
