@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { TFunction } from "i18next";
+import { formatAuditAction } from "@/lib/auditFormat";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import {
   PageHeader,
@@ -78,33 +78,6 @@ interface ActivityRow {
 }
 
 /* ──────────────── helpers ──────────────── */
-
-function formatAuditAction(action: string, t: TFunction): string {
-  const known: Record<string, string> = {
-    RESIDENT_ADMITTED: t("audit.actions.RESIDENT_ADMITTED", { defaultValue: "Resident admitted" }),
-    RESIDENT_DISCHARGED: t("audit.actions.RESIDENT_DISCHARGED", { defaultValue: "Resident discharged" }),
-    RESIDENT_UPDATED: t("audit.actions.RESIDENT_UPDATED", { defaultValue: "Resident updated" }),
-    RESIDENT_TRANSFERRED: t("audit.actions.RESIDENT_TRANSFERRED", { defaultValue: "Bed transfer" }),
-    EMAR_ADMINISTERED: t("audit.actions.EMAR_ADMINISTERED", { defaultValue: "Medication administered" }),
-    EMAR_REFUSED: t("audit.actions.EMAR_REFUSED", { defaultValue: "Medication refused" }),
-    EMAR_HELD: t("audit.actions.EMAR_HELD", { defaultValue: "Medication held" }),
-    ALERT_TRIGGERED: t("audit.actions.ALERT_TRIGGERED", { defaultValue: "Alert triggered" }),
-    ALERT_ACKNOWLEDGED: t("audit.actions.ALERT_ACKNOWLEDGED", { defaultValue: "Alert acknowledged" }),
-    ALERT_RESOLVED: t("audit.actions.ALERT_RESOLVED", { defaultValue: "Alert resolved" }),
-    ALERT_ESCALATED: t("audit.actions.ALERT_ESCALATED", { defaultValue: "Alert escalated" }),
-    ALERT_AUTO_ESCALATED: t("audit.actions.ALERT_AUTO_ESCALATED", { defaultValue: "Alert auto-escalated" }),
-    TASK_COMPLETED: t("audit.actions.TASK_COMPLETED", { defaultValue: "Task completed" }),
-    TASK_CANCELLED: t("audit.actions.TASK_CANCELLED", { defaultValue: "Task cancelled" }),
-    INCIDENT_REPORTED: t("audit.actions.INCIDENT_REPORTED", { defaultValue: "Incident reported" }),
-    INCIDENT_RESOLVED: t("audit.actions.INCIDENT_RESOLVED", { defaultValue: "Incident resolved" }),
-    VITALS_RECORDED: t("audit.actions.VITALS_RECORDED", { defaultValue: "Vitals recorded" }),
-    WOUND_RECORDED: t("audit.actions.WOUND_RECORDED", { defaultValue: "Wound recorded" }),
-    STAFF_LOGIN: t("audit.actions.STAFF_LOGIN", { defaultValue: "Staff login" }),
-    STAFF_INVITED: t("audit.actions.STAFF_INVITED", { defaultValue: "Staff invited" }),
-  };
-  if (known[action]) return known[action];
-  return action.replace(/_/g, " ").toLowerCase();
-}
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("zh-HK", { hour: "2-digit", minute: "2-digit" });
