@@ -1838,5 +1838,78 @@
       "RIGHT_DELTOID": "Right deltoid",
       "OTHER": "Other"
     }
+  },
+  "familyPortal": {
+    "title": "Family Portal",
+    "welcome": "Welcome",
+    "yourResident": "Your family member",
+    "alertsCount": "{{count}} alert(s)",
+    "alerts": "Alerts",
+    "activity": "Recent Activity",
+    "noActivity": "No recent activity",
+    "contactHome": "Contact home",
+    "callHome": "Call the home",
+    "urgentNote": "For urgent matters, please contact the home directly",
+    "questionNote": "For questions, please contact the home",
+    "loading": "Loading...",
+    "noResident": "No information available at this time",
+    "switchToStaffLogin": "Staff login",
+    "switchToFamilyLogin": "Family member login",
+    "signOut": "Sign out",
+    "settings": {
+      "title": "Family Portal Management",
+      "description": "Invite family members to view their loved one's status",
+      "addUser": "Invite family member",
+      "noUsers": "No family portal users yet",
+      "noUsersDescription": "Click \"Invite family member\" to get started",
+      "columns": {
+        "resident": "Resident",
+        "contact": "Contact",
+        "email": "Email",
+        "status": "Status",
+        "lastLogin": "Last login",
+        "invitedBy": "Invited by",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Invited, pending login",
+        "active": "Active",
+        "revoked": "Revoked"
+      },
+      "invite": {
+        "title": "Invite family member to portal",
+        "step1": "Select resident",
+        "step2": "Select contact",
+        "step3": "Confirm email",
+        "selectResident": "Please select a resident",
+        "selectResidentPlaceholder": "Select a resident",
+        "selectContact": "Please select a contact",
+        "selectContactExisting": "Existing contact",
+        "selectContactNew": "Add new contact",
+        "selectContactOrAddNew": "Or add new contact",
+        "contactName": "Chinese name",
+        "contactNameEn": "English name",
+        "relationship": "Relationship",
+        "phone": "Phone",
+        "portalEmail": "Portal login email",
+        "portalEmailHelper": "The invitation link will be sent to this email",
+        "send": "Send invitation",
+        "success": "Invitation sent",
+        "warning": "After invitation, the family member can log in to view the resident's status. Please ensure consent has been obtained from the resident or family."
+      },
+      "actions": {
+        "resend": "Resend invitation",
+        "revoke": "Revoke portal access",
+        "viewResident": "View resident"
+      },
+      "resend": "Resend invitation",
+      "revoke": {
+        "title": "Revoke portal access",
+        "confirmMessage": "After revoking, this family member will no longer be able to log in. Confirm revoke?",
+        "success": "Portal access revoked"
+      },
+      "revokeConfirm": "Confirm revoke",
+      "revokeWarning": "After revoking, this family member will no longer be able to log in. Confirm revoke?"
+    }
   }
 }
