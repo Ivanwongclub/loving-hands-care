@@ -11,13 +11,16 @@ serve(async (_req: Request) => {
   const runId = crypto.randomUUID()
   const startMs = Date.now()
 
-  await supabase.from('system_job_runs').insert({
-    id: runId,
-    job_name: 'session-reconcile',
-    started_at: new Date().toISOString(),
-    status: 'RUNNING',
-    triggered_by: 'CRON',
-  }).catch(console.error)
+  {
+    const { error: jobRunInsertErr } = await supabase.from('system_job_runs').insert({
+      id: runId,
+      job_name: 'session-reconcile',
+      started_at: new Date().toISOString(),
+      status: 'RUNNING',
+      triggered_by: 'CRON',
+    })
+    if (jobRunInsertErr) console.error('[system_job_runs insert]', jobRunInsertErr.message)
+  }
 
   try {
     const { data: incompleteSessions, error: fetchErr } = await supabase
