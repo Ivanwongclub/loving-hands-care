@@ -1670,50 +1670,71 @@ export type Database = {
       }
       resident_contacts: {
         Row: {
+          auth_user_id: string | null
           consent_notifications: boolean
           created_at: string
           deleted_at: string | null
           email: string | null
           id: string
           is_emergency: boolean
+          is_portal_user: boolean
           is_primary: boolean
           name: string
           name_zh: string | null
           notes: string | null
           phone_sms: string | null
           phone_whatsapp: string | null
+          portal_email: string | null
+          portal_first_login_at: string | null
+          portal_invited_at: string | null
+          portal_invited_by_staff_id: string | null
+          portal_last_login_at: string | null
           relationship: string
           resident_id: string
         }
         Insert: {
+          auth_user_id?: string | null
           consent_notifications?: boolean
           created_at?: string
           deleted_at?: string | null
           email?: string | null
           id?: string
           is_emergency?: boolean
+          is_portal_user?: boolean
           is_primary?: boolean
           name: string
           name_zh?: string | null
           notes?: string | null
           phone_sms?: string | null
           phone_whatsapp?: string | null
+          portal_email?: string | null
+          portal_first_login_at?: string | null
+          portal_invited_at?: string | null
+          portal_invited_by_staff_id?: string | null
+          portal_last_login_at?: string | null
           relationship: string
           resident_id: string
         }
         Update: {
+          auth_user_id?: string | null
           consent_notifications?: boolean
           created_at?: string
           deleted_at?: string | null
           email?: string | null
           id?: string
           is_emergency?: boolean
+          is_portal_user?: boolean
           is_primary?: boolean
           name?: string
           name_zh?: string | null
           notes?: string | null
           phone_sms?: string | null
           phone_whatsapp?: string | null
+          portal_email?: string | null
+          portal_first_login_at?: string | null
+          portal_invited_at?: string | null
+          portal_invited_by_staff_id?: string | null
+          portal_last_login_at?: string | null
           relationship?: string
           resident_id?: string
         }
@@ -2848,7 +2869,15 @@ export type Database = {
         Args: { object_name: string }
         Returns: boolean
       }
+      family_resident_ids: {
+        Args: never
+        Returns: string[]
+      }
       has_branch_access: { Args: { p_branch_id: string }; Returns: boolean }
+      is_family_portal_user: {
+        Args: never
+        Returns: boolean
+      }
       increment_system_job_counter: {
         Args: { p_job_name: string; p_success: boolean }
         Returns: undefined
