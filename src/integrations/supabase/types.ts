@@ -1740,6 +1740,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "resident_contacts_portal_invited_by_staff_id_fkey"
+            columns: ["portal_invited_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "resident_contacts_resident_id_fkey"
             columns: ["resident_id"]
             isOneToOne: false
@@ -2869,19 +2876,13 @@ export type Database = {
         Args: { object_name: string }
         Returns: boolean
       }
-      family_resident_ids: {
-        Args: never
-        Returns: string[]
-      }
+      family_resident_ids: { Args: never; Returns: string[] }
       has_branch_access: { Args: { p_branch_id: string }; Returns: boolean }
-      is_family_portal_user: {
-        Args: never
-        Returns: boolean
-      }
       increment_system_job_counter: {
         Args: { p_job_name: string; p_success: boolean }
         Returns: undefined
       }
+      is_family_portal_user: { Args: never; Returns: boolean }
       reschedule_job: {
         Args: { p_command: string; p_job_name: string; p_schedule: string }
         Returns: undefined
