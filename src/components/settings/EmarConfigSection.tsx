@@ -78,7 +78,7 @@ export function EmarConfigSection() {
       <Stack gap={4}>
         <Text size="md" className="font-semibold">{t("settings.emar.title")}</Text>
         {branches.length > 1 && (
-          <FormField label="設定分院 / Configure branch:">
+          <FormField label={t("settings.emar.configBranch")}>
             <Select
               value={selectedBranchId}
               onChange={(e) => setSelectedBranchId((e.target as HTMLSelectElement).value)}

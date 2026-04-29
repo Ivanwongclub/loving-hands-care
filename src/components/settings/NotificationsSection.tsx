@@ -320,7 +320,7 @@ function TemplatesTab() {
         />
       )}
       <Card padding="md">
-        <EmptyState title={t("settings.comingSoon")} description="自訂分院範本 — 即將推出" />
+        <EmptyState title={t("settings.comingSoon")} description={t("settings.notifications.customTemplatesComingSoon")} />
       </Card>
       <Modal open={!!view} onClose={() => setView(null)} title={view ? `${view.event_type} · ${view.channel} · ${view.language}` : ""}>
         {view && (

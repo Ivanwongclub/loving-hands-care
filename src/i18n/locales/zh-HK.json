@@ -116,7 +116,9 @@
     "pinConfirm": "確認密碼",
     "pinMismatch": "密碼不相符",
     "pinAttemptsRemaining": "{{count}} 次剩餘",
-    "pinConfirmIdentity": "確認身份"
+    "pinConfirmIdentity": "確認身份",
+    "accountConfigError": "帳戶設定錯誤",
+    "accountNotLinked": "你的帳戶未連結至任何員工記錄。請聯絡系統管理員。"
   },
   "dashboard": {
     "title": "控制台",
@@ -221,6 +223,7 @@
       "quietHoursRange": "不發送通知時段",
       "deliverySummary": "過去 30 日送達摘要",
       "resend": "重新發送",
+      "customTemplatesComingSoon": "自訂分院範本 — 即將推出",
       "events": {
         "dcu_checkin": "日間護理簽到",
         "dcu_checkout": "日間護理簽退",
@@ -235,7 +238,8 @@
       "passWindowAfter": "給藥視窗（預設時間後）",
       "pinLockoutAttempts": "PIN 鎖定閾值",
       "prnIndicationRequired": "PRN 需要說明",
-      "prnOutcomeRequired": "PRN 結果備注必填"
+      "prnOutcomeRequired": "PRN 結果備注必填",
+      "configBranch": "設定分院"
     },
     "system": {
       "title": "系統設定",

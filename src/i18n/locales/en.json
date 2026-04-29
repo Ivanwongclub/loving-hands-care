@@ -116,7 +116,9 @@
     "pinConfirm": "Confirm PIN",
     "pinMismatch": "PINs do not match",
     "pinAttemptsRemaining": "{{count}} attempts remaining",
-    "pinConfirmIdentity": "Confirm Identity"
+    "pinConfirmIdentity": "Confirm Identity",
+    "accountConfigError": "Account configuration error",
+    "accountNotLinked": "Your account is not linked to a staff record. Please contact the system administrator."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -221,6 +223,7 @@
       "quietHoursRange": "Do-not-disturb window",
       "deliverySummary": "Delivery summary (last 30 days)",
       "resend": "Resend",
+      "customTemplatesComingSoon": "Custom branch templates — coming soon",
       "events": {
         "dcu_checkin": "DCU Check-in",
         "dcu_checkout": "DCU Check-out",
@@ -235,7 +238,8 @@
       "passWindowAfter": "Pass window (after scheduled)",
       "pinLockoutAttempts": "PIN lockout threshold",
       "prnIndicationRequired": "PRN indication required",
-      "prnOutcomeRequired": "PRN outcome notes required"
+      "prnOutcomeRequired": "PRN outcome notes required",
+      "configBranch": "Configure branch"
     },
     "system": {
       "title": "System Config",

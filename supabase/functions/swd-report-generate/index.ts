@@ -8,14 +8,23 @@ interface ReportRequest {
   date_to: string    // YYYY-MM-DD
 }
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: CORS_HEADERS })
+  }
+
   try {
     const { branch_id, date_from, date_to }: ReportRequest = await req.json()
 
     if (!branch_id || !date_from || !date_to) {
       return new Response(
         JSON.stringify({ error: 'branch_id, date_from, date_to are required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -109,6 +118,7 @@ serve(async (req: Request) => {
     return new Response(buf, {
       status: 200,
       headers: {
+        ...CORS_HEADERS,
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="${filename}"`,
       },
@@ -118,7 +128,7 @@ serve(async (req: Request) => {
     console.error('[swd-report-generate] Error:', err)
     return new Response(
       JSON.stringify({ error: String(err) }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
     )
   }
 })

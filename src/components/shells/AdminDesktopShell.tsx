@@ -88,8 +88,8 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
       <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-8">
         <Alert
           severity="error"
-          title="帳戶設定錯誤"
-          description="你的帳戶未連結至任何員工記錄。請聯絡系統管理員。"
+          title={t("auth.accountConfigError")}
+          description={t("auth.accountNotLinked")}
         />
         <Button variant="ghost" onClick={handleSignOut}>登出</Button>
       </div>
