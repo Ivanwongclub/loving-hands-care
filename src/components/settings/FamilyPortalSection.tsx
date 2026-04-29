@@ -254,14 +254,14 @@ export function FamilyPortalSection() {
           }
         />
       ) : (
-        <Table columns={columns} data={portalUsers} rowKey={(r) => r.id} />
+        <Table<PortalUserRow> columns={columns} rows={portalUsers} rowKey={(r) => r.id} />
       )}
 
       <InvitePortalUserModal
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
         branchId={branchId}
-        onInvited={refetch}
+        onInvited={async () => { await refetch(); }}
       />
 
       <ConfirmDialog
