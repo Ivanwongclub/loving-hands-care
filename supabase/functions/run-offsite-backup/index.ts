@@ -30,13 +30,16 @@ serve(async (req: Request) => {
     backupType === 'monthly' ? 'offsite-backup-monthly' :
     'offsite-backup-daily'
 
-  await supabase.from('system_job_runs').insert({
-    id: runId,
-    job_name: jobName,
-    started_at: new Date().toISOString(),
-    status: 'RUNNING',
-    triggered_by: triggeredBy,
-  }).catch(console.error)
+  {
+    const { error: jobRunInsertErr } = await supabase.from('system_job_runs').insert({
+      id: runId,
+      job_name: jobName,
+      started_at: new Date().toISOString(),
+      status: 'RUNNING',
+      triggered_by: triggeredBy,
+    })
+    if (jobRunInsertErr) console.error('[system_job_runs insert]', jobRunInsertErr.message)
+  }
 
   try {
     // Check if backup credentials are configured in any branch's system_config
