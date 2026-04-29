@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Languages } from "lucide-react";
@@ -61,6 +61,13 @@ function FamilyLoginPage() {
                 <TextField type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </FormField>
               <Button type="submit" fullWidth loading={loading}>{t("auth.magicLinkSend")}</Button>
+              <Link
+                to="/login"
+                className="type-body-sm text-center hover:underline"
+                style={{ color: "var(--text-link)" }}
+              >
+                {t("familyPortal.switchToStaffLogin")}
+              </Link>
             </Stack>
           </form>
         </Stack>

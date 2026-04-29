@@ -1838,5 +1838,78 @@
       "RIGHT_DELTOID": "右三角肌",
       "OTHER": "其他"
     }
+  },
+  "familyPortal": {
+    "title": "家庭門戶",
+    "welcome": "歡迎",
+    "yourResident": "您的家屬",
+    "alertsCount": "{{count}} 項警報",
+    "alerts": "警報",
+    "activity": "最近活動",
+    "noActivity": "尚無近期活動",
+    "contactHome": "聯絡院舍",
+    "callHome": "致電院舍",
+    "urgentNote": "如需即時協助，請致電院舍",
+    "questionNote": "如有疑問，請致電院舍",
+    "loading": "載入中...",
+    "noResident": "目前未有可顯示的資訊",
+    "switchToStaffLogin": "員工登入",
+    "switchToFamilyLogin": "家屬登入",
+    "signOut": "登出",
+    "settings": {
+      "title": "家庭門戶管理",
+      "description": "邀請家屬查看院友狀態",
+      "addUser": "邀請家屬",
+      "noUsers": "尚未邀請家屬",
+      "noUsersDescription": "點擊「邀請家屬」開始",
+      "columns": {
+        "resident": "院友",
+        "contact": "聯絡人",
+        "email": "電郵",
+        "status": "狀態",
+        "lastLogin": "最近登入",
+        "invitedBy": "邀請人",
+        "actions": "操作"
+      },
+      "status": {
+        "pending": "已邀請，待登入",
+        "active": "已啟用",
+        "revoked": "已撤銷"
+      },
+      "invite": {
+        "title": "邀請家屬使用門戶",
+        "step1": "選擇院友",
+        "step2": "選擇聯絡人",
+        "step3": "確認電郵",
+        "selectResident": "請選擇院友",
+        "selectResidentPlaceholder": "請選擇院友",
+        "selectContact": "請選擇聯絡人",
+        "selectContactExisting": "現有聯絡人",
+        "selectContactNew": "新增聯絡人",
+        "selectContactOrAddNew": "或新增聯絡人",
+        "contactName": "中文姓名",
+        "contactNameEn": "英文姓名",
+        "relationship": "關係",
+        "phone": "聯絡電話",
+        "portalEmail": "門戶登入電郵",
+        "portalEmailHelper": "邀請連結將發送到此電郵",
+        "send": "發送邀請",
+        "success": "邀請已發送",
+        "warning": "邀請後，家屬可登入門戶查看院友狀態。請確保已獲院友或家屬同意。"
+      },
+      "actions": {
+        "resend": "重新發送邀請",
+        "revoke": "撤銷門戶權限",
+        "viewResident": "檢視院友"
+      },
+      "resend": "重新發送邀請",
+      "revoke": {
+        "title": "撤銷門戶權限",
+        "confirmMessage": "撤銷後，此家屬將無法再登入門戶。確認撤銷？",
+        "success": "已撤銷門戶權限"
+      },
+      "revokeConfirm": "確認撤銷",
+      "revokeWarning": "撤銷後，此家屬將無法再登入門戶。確認撤銷？"
+    }
   }
 }

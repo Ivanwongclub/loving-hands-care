@@ -9,18 +9,25 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const navigate = useNavigate();
-  const { session, loading } = useAuth();
+  const { session, loading, isFamilyPortalUser } = useAuth();
+
   useEffect(() => {
     if (loading) return;
-    void navigate({ to: session ? "/dashboard" : "/login", replace: true });
-  }, [loading, session, navigate]);
+    if (!session) {
+      void navigate({ to: "/login", replace: true });
+      return;
+    }
+    // Wait for portal status before bouncing
+    if (isFamilyPortalUser === null) return;
+    void navigate({
+      to: isFamilyPortalUser ? "/family/dashboard" : "/dashboard",
+      replace: true,
+    });
+  }, [loading, session, isFamilyPortalUser, navigate]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen w-full grid place-items-center" style={{ backgroundColor: "var(--bg-page)" }}>
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-  return null;
+  return (
+    <div className="min-h-screen w-full grid place-items-center" style={{ backgroundColor: "var(--bg-page)" }}>
+      <Spinner size="lg" />
+    </div>
+  );
 }
