@@ -108,7 +108,7 @@ CREATE POLICY "audit_logs_family_select"
   USING (
     public.is_family_portal_user()
     AND entity_type = 'residents'
-    AND entity_id IN (SELECT public.family_resident_ids()::text)
+    AND entity_id::uuid IN (SELECT public.family_resident_ids())
     AND action IN (
       'RESIDENT_ADMITTED',
       'RESIDENT_TRANSFERRED',
