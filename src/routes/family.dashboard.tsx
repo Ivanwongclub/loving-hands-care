@@ -157,7 +157,9 @@ function FamilyDashboardContent() {
         .maybeSingle();
       if (cancelled || !contact) return;
       const now = new Date().toISOString();
-      const patch: Record<string, string> = { portal_last_login_at: now };
+      const patch: { portal_last_login_at: string; portal_first_login_at?: string } = {
+        portal_last_login_at: now,
+      };
       if (!contact.portal_first_login_at) patch.portal_first_login_at = now;
       await supabase.from("resident_contacts").update(patch).eq("id", contact.id);
     };
