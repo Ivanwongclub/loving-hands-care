@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Eye, Inbox, AlertCircle, Bell, Pill, SlidersHorizontal, Building, Users } from "lucide-react";
+import { Plus, Eye, Inbox, AlertCircle, Bell, Pill, SlidersHorizontal, Building, Users, UserPlus } from "lucide-react";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import {
@@ -15,13 +15,14 @@ import { StaffSection } from "@/components/settings/StaffSection";
 import { NotificationsSection } from "@/components/settings/NotificationsSection";
 import { EmarConfigSection } from "@/components/settings/EmarConfigSection";
 import { SystemSection } from "@/components/settings/SystemSection";
+import { FamilyPortalSection } from "@/components/settings/FamilyPortalSection";
 import { AlertSLASection } from "@/components/alerts/AlertSLASection";
 import { EscalationEngineCard } from "@/components/alerts/EscalationEngineCard";
 import type { Enums } from "@/integrations/supabase/types";
 
 type BranchType = Enums<"branch_type">;
 
-type SectionKey = "branches" | "staff" | "alerts" | "notifications" | "emar" | "system";
+type SectionKey = "branches" | "staff" | "alerts" | "notifications" | "emar" | "familyPortal" | "system";
 
 const BRANCH_TYPE_TONE: Record<BranchType, "info" | "success" | "neutral" | "warning"> = {
   CARE_HOME: "info",
@@ -44,6 +45,7 @@ function SettingsPage() {
     { key: "alerts" as SectionKey, label: t("settings.sections.alerts"), icon: <AlertCircle size={16} /> },
     { key: "notifications" as SectionKey, label: t("settings.sections.notifications"), icon: <Bell size={16} /> },
     { key: "emar" as SectionKey, label: t("settings.sections.emar"), icon: <Pill size={16} /> },
+    { key: "familyPortal" as SectionKey, label: t("settings.sections.familyPortal"), icon: <UserPlus size={16} />, gated: !canManageStaff },
     { key: "system" as SectionKey, label: t("settings.sections.system"), icon: <SlidersHorizontal size={16} /> },
   ]).filter((s) => !s.gated);
 
@@ -62,6 +64,7 @@ function SettingsPage() {
             {section === "alerts" && <AlertsSettingsSection />}
             {section === "notifications" && <NotificationsSection />}
             {section === "emar" && <EmarConfigSection />}
+            {section === "familyPortal" && canManageStaff && <FamilyPortalSection />}
             {section === "system" && <SystemSection />}
           </div>
         </div>
