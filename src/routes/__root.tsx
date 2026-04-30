@@ -1,5 +1,12 @@
 import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
-import { Suspense, useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
+
+// Dynamic import preserves tree-shaking when the flag is off.
+const FeedbackProvider = import.meta.env.VITE_ENABLE_FEEDBACK === "true"
+  ? lazy(() =>
+      import("@/features/feedback").then((m) => ({ default: m.FeedbackProvider })),
+    )
+  : null;
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 
 import "@/i18n";
@@ -165,7 +172,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  return (
+  const inner = (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <PrefetchWarmup />
@@ -179,4 +186,13 @@ function RootComponent() {
       </AuthProvider>
     </QueryClientProvider>
   );
+
+  if (FeedbackProvider) {
+    return (
+      <Suspense fallback={inner}>
+        <FeedbackProvider>{inner}</FeedbackProvider>
+      </Suspense>
+    );
+  }
+  return inner;
 }
