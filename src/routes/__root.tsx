@@ -1,5 +1,12 @@
 import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
-import { Suspense, useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
+
+// Dynamic import preserves tree-shaking when the flag is off.
+const FeedbackProvider = import.meta.env.VITE_ENABLE_FEEDBACK === "true"
+  ? lazy(() =>
+      import("@/features/feedback").then((m) => ({ default: m.FeedbackProvider })),
+    )
+  : null;
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 
 import "@/i18n";
