@@ -171,9 +171,9 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
 
         {/* Nav */}
         <nav className="flex-1 overflow-auto" style={{ padding: collapsed ? "4px 6px 16px" : "4px 10px 16px" }}>
-          {sections.map((sec) => (
-            <div key={sec.titleKey} className="mb-4">
-              {!collapsed && (
+          {sections.map((sec, idx) => (
+            <div key={sec.titleKey ?? `section-${idx}`} className="mb-4">
+              {!collapsed && sec.titleKey && (
                 <div className="type-label px-3 py-2" style={{ color: "var(--text-tertiary)" }}>{t(sec.titleKey)}</div>
               )}
               <ul className="flex flex-col gap-0.5">
@@ -205,7 +205,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
                           style={sharedStyle}
                           onMouseEnter={onEnter}
                           onMouseLeave={onLeave}
-                          title={collapsed ? t(it.labelKey) : undefined}
+                          title={collapsed ? t(it.labelKey) : (it.descKey ? t(it.descKey) : undefined)}
                         >
                           {inner}
                         </button>
@@ -216,7 +216,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
                           style={sharedStyle}
                           onMouseEnter={onEnter}
                           onMouseLeave={onLeave}
-                          title={collapsed ? t(it.labelKey) : undefined}
+                          title={collapsed ? t(it.labelKey) : (it.descKey ? t(it.descKey) : undefined)}
                         >
                           {inner}
                         </Link>
