@@ -172,7 +172,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  return (
+  const inner = (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <PrefetchWarmup />
@@ -186,4 +186,13 @@ function RootComponent() {
       </AuthProvider>
     </QueryClientProvider>
   );
+
+  if (FeedbackProvider) {
+    return (
+      <Suspense fallback={inner}>
+        <FeedbackProvider>{inner}</FeedbackProvider>
+      </Suspense>
+    );
+  }
+  return inner;
 }
