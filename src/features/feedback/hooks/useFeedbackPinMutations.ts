@@ -1,8 +1,9 @@
 // Mutations for creating pins. Author fields snapshotted at pin time.
 //
-// FLAG: pin_number is required in the DB Insert type (not auto-generated).
-// The mutation fetches the current max pin_number for the route and increments.
-// Race condition possible with concurrent inserts but acceptable for internal tooling.
+// pin_number is assigned by the feedback_pins_assign_number BEFORE INSERT trigger
+// (MAX+1 per page_route, atomic). We pass pin_number: 0 as a placeholder to
+// satisfy the generated types.ts schema — the trigger overwrites it before the
+// row is committed.
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,16 +22,6 @@ export function useFeedbackPinMutations() {
         throw new Error("Not authenticated or no staff record");
       }
 
-      // Compute next pin_number: max existing for this route + 1
-      const { data: existing } = await supabase
-        .from("feedback_pins")
-        .select("pin_number")
-        .eq("page_route", input.page_route)
-        .order("pin_number", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      const nextPinNumber = ((existing?.pin_number as number | null) ?? 0) + 1;
-
       const { data, error } = await supabase
         .from("feedback_pins")
         .insert({
@@ -43,7 +34,7 @@ export function useFeedbackPinMutations() {
           viewport_width: input.viewport_width,
           element_html: input.element_html,
           comment_text: input.comment_text,
-          pin_number: nextPinNumber,
+          pin_number: 0, // placeholder — overwritten by feedback_pins_assign_number trigger
           author_id: user.id,
           author_name: staff.name_zh ?? staff.name ?? "Unknown",
           author_role: staff.role,

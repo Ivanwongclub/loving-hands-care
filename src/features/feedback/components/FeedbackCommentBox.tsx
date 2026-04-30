@@ -17,6 +17,8 @@ type Props = {
 };
 
 export function FeedbackCommentBox({ target, position, onClose }: Props) {
+  // eslint-disable-next-line no-console
+  console.log("[F4 DIAG] FeedbackCommentBox MOUNTED with target:", target, "position:", position);
   const { t } = useTranslation();
   const { createPin } = useFeedbackPinMutations();
   const [text, setText] = useState("");
