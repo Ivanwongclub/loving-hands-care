@@ -84,19 +84,16 @@ export function NotificationBell() {
         type="button"
         aria-label={t("alerts.notificationBell")}
         onClick={() => setOpen(true)}
-        className={`relative grid place-items-center ${unread > 0 ? "animate-pulse" : ""}`}
+        className={`relative grid place-items-center hover:bg-[var(--bg-hover-subtle)] ${unread > 0 ? "animate-pulse" : ""}`}
         style={{
-          position: "fixed",
-          top: 12,
-          right: 80,
+          position: "relative",
           width: 40,
           height: 40,
           borderRadius: "var(--radius-md)",
-          backgroundColor: "var(--bg-surface)",
-          border: "1px solid var(--border-subtle)",
-          boxShadow: "var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))",
+          backgroundColor: "transparent",
+          border: "none",
+          boxShadow: "none",
           color: "var(--text-secondary)",
-          zIndex: 100,
           cursor: "pointer",
         }}
       >
