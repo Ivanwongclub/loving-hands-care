@@ -26,11 +26,17 @@ function isCurrentRouteExcluded(): boolean {
 }
 
 export function FeedbackProvider({ children }: { children: ReactNode }) {
-  const [excluded, setExcluded] = useState(() => isCurrentRouteExcluded());
+  // Defer ALL feedback UI to after hydration to avoid SSR/client mismatch.
+  // The overlay, toggle, pins layer, and side panel are purely client-side
+  // interactive UI — they must not render during SSR.
+  const [hydrated, setHydrated] = useState(false);
+  const [excluded, setExcluded] = useState(true);
   const { staff } = useCurrentStaff();
 
   useEffect(() => {
+    setHydrated(true);
     const check = () => setExcluded(isCurrentRouteExcluded());
+    check();
     window.addEventListener("popstate", check);
     const interval = window.setInterval(check, 500);
     return () => {
@@ -43,9 +49,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
     ? FEEDBACK_VISIBLE_TO_ROLES.includes(staff.role as never)
     : false;
 
-  // Hide overlay/toggle when route is excluded or role isn't permitted —
-  // children always render so the underlying app is never blocked.
-  if (excluded || !roleAllowed) return <>{children}</>;
+  if (!hydrated || excluded || !roleAllowed) return <>{children}</>;
 
   return (
     <FeedbackModeProvider>
