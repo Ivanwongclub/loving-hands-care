@@ -14,39 +14,48 @@ import { useBranches } from "@/hooks/useBranches";
 import { NotificationBell } from "@/components/alerts/NotificationBell";
 import logoUrl from "@/assets/helping-hand-logo.webp";
 
-interface NavItem { to: string; labelKey: string; icon: ReactNode; external?: boolean }
-interface NavSection { titleKey: string; items: NavItem[] }
+interface NavItem { to: string; labelKey: string; descKey?: string; icon: ReactNode; external?: boolean }
+interface NavSection { titleKey?: string; items: NavItem[] }
 
 const sections: NavSection[] = [
   {
-    titleKey: "nav.operations",
     items: [
       { to: "/dashboard", labelKey: "nav.dashboard", icon: <LayoutDashboard size={16} /> },
-      { to: "/residents", labelKey: "nav.residents", icon: <Users size={16} /> },
-      { to: "/attendance/register", labelKey: "nav.attendanceRegister", icon: <ClipboardCheck size={16} /> },
-      { to: "/attendance/enrollments", labelKey: "nav.enrollmentMgmt", icon: <UserPlus size={16} /> },
-      { to: "/attendance/kiosk", labelKey: "nav.dcuKiosk", icon: <ExternalLink size={16} />, external: true },
-      { to: "/tasks", labelKey: "nav.careTasks", icon: <ListTodo size={16} /> },
-      { to: "/incidents", labelKey: "nav.incidents", icon: <AlertTriangle size={16} /> },
-      { to: "/vitals", labelKey: "nav.vitals", icon: <Activity size={16} /> },
-      { to: "/emar", labelKey: "nav.emar", icon: <Pill size={16} /> },
-      { to: "/alerts", labelKey: "nav.alerts", icon: <BellRing size={16} /> },
+    ],
+  },
+  {
+    titleKey: "nav.clinical",
+    items: [
+      { to: "/residents", labelKey: "nav.residents", descKey: "nav.residents.desc", icon: <Users size={16} /> },
+      { to: "/vitals", labelKey: "nav.vitals", descKey: "nav.vitals.desc", icon: <Activity size={16} /> },
+      { to: "/emar", labelKey: "nav.emar", descKey: "nav.emar.desc", icon: <Pill size={16} /> },
+      { to: "/tasks", labelKey: "nav.careTasks", descKey: "nav.careTasks.desc", icon: <ListTodo size={16} /> },
+      { to: "/incidents", labelKey: "nav.incidents", descKey: "nav.incidents.desc", icon: <AlertTriangle size={16} /> },
+      { to: "/alerts", labelKey: "nav.alerts", descKey: "nav.alerts.desc", icon: <BellRing size={16} /> },
+    ],
+  },
+  {
+    titleKey: "nav.dcu",
+    items: [
+      { to: "/attendance/register", labelKey: "nav.dcuAttendance", descKey: "nav.dcuAttendance.desc", icon: <ClipboardCheck size={16} /> },
+      { to: "/attendance/enrollments", labelKey: "nav.dcuEnrollment", descKey: "nav.dcuEnrollment.desc", icon: <UserPlus size={16} /> },
+      { to: "/attendance/kiosk", labelKey: "nav.dcuKiosk", descKey: "nav.dcuKiosk.desc", icon: <ExternalLink size={16} />, external: true },
     ],
   },
   {
     titleKey: "nav.management",
     items: [
-      { to: "/care-plans", labelKey: "nav.carePlans", icon: <ClipboardList size={16} /> },
-      { to: "/staff", labelKey: "nav.staff", icon: <UserCog size={16} /> },
-      { to: "/reports", labelKey: "nav.reports", icon: <FileBarChart2 size={16} /> },
-      { to: "/audit", labelKey: "nav.audit", icon: <ScrollText size={16} /> },
+      { to: "/care-plans", labelKey: "nav.carePlans", descKey: "nav.carePlans.desc", icon: <ClipboardList size={16} /> },
+      { to: "/staff", labelKey: "nav.staff", descKey: "nav.staff.desc", icon: <UserCog size={16} /> },
+      { to: "/reports", labelKey: "nav.reports", descKey: "nav.reports.desc", icon: <FileBarChart2 size={16} /> },
+      { to: "/audit", labelKey: "nav.audit", descKey: "nav.audit.desc", icon: <ScrollText size={16} /> },
     ],
   },
   {
     titleKey: "nav.system",
     items: [
-      { to: "/import", labelKey: "nav.import", icon: <Upload size={16} /> },
-      { to: "/settings", labelKey: "nav.settings", icon: <Settings size={16} /> },
+      { to: "/import", labelKey: "nav.import", descKey: "nav.import.desc", icon: <Upload size={16} /> },
+      { to: "/settings", labelKey: "nav.settings", descKey: "nav.settings.desc", icon: <Settings size={16} /> },
     ],
   },
 ];
@@ -162,9 +171,9 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
 
         {/* Nav */}
         <nav className="flex-1 overflow-auto" style={{ padding: collapsed ? "4px 6px 16px" : "4px 10px 16px" }}>
-          {sections.map((sec) => (
-            <div key={sec.titleKey} className="mb-4">
-              {!collapsed && (
+          {sections.map((sec, idx) => (
+            <div key={sec.titleKey ?? `section-${idx}`} className="mb-4">
+              {!collapsed && sec.titleKey && (
                 <div className="type-label px-3 py-2" style={{ color: "var(--text-tertiary)" }}>{t(sec.titleKey)}</div>
               )}
               <ul className="flex flex-col gap-0.5">
@@ -196,7 +205,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
                           style={sharedStyle}
                           onMouseEnter={onEnter}
                           onMouseLeave={onLeave}
-                          title={collapsed ? t(it.labelKey) : undefined}
+                          title={collapsed ? t(it.labelKey) : (it.descKey ? t(it.descKey) : undefined)}
                         >
                           {inner}
                         </button>
@@ -207,7 +216,7 @@ export function AdminDesktopShell({ pageTitle, children }: AdminDesktopShellProp
                           style={sharedStyle}
                           onMouseEnter={onEnter}
                           onMouseLeave={onLeave}
-                          title={collapsed ? t(it.labelKey) : undefined}
+                          title={collapsed ? t(it.labelKey) : (it.descKey ? t(it.descKey) : undefined)}
                         >
                           {inner}
                         </Link>
