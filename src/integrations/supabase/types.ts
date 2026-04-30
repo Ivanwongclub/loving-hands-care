@@ -934,6 +934,166 @@ export type Database = {
           },
         ]
       }
+      feedback_comments: {
+        Row: {
+          author_branch_id: string | null
+          author_id: string
+          author_name: string
+          author_role: string
+          comment_text: string
+          comment_type: string
+          created_at: string
+          id: string
+          pin_id: string
+        }
+        Insert: {
+          author_branch_id?: string | null
+          author_id: string
+          author_name: string
+          author_role: string
+          comment_text: string
+          comment_type?: string
+          created_at?: string
+          id?: string
+          pin_id: string
+        }
+        Update: {
+          author_branch_id?: string | null
+          author_id?: string
+          author_name?: string
+          author_role?: string
+          comment_text?: string
+          comment_type?: string
+          created_at?: string
+          id?: string
+          pin_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_comments_pin_id_fkey"
+            columns: ["pin_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_pins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_pins: {
+        Row: {
+          ai_category: string | null
+          ai_severity: string | null
+          author_branch_id: string | null
+          author_id: string
+          author_name: string
+          author_role: string
+          comment_text: string
+          created_at: string
+          element_html: string | null
+          feedback_id: string | null
+          hotspot_group_id: string | null
+          id: string
+          page_route: string
+          page_title: string | null
+          pin_number: number
+          reopened_count: number
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          selector_fallback: string | null
+          status: string
+          updated_at: string
+          viewport_width: number | null
+          x_percent: number | null
+          y_percent: number | null
+        }
+        Insert: {
+          ai_category?: string | null
+          ai_severity?: string | null
+          author_branch_id?: string | null
+          author_id: string
+          author_name: string
+          author_role: string
+          comment_text: string
+          created_at?: string
+          element_html?: string | null
+          feedback_id?: string | null
+          hotspot_group_id?: string | null
+          id?: string
+          page_route: string
+          page_title?: string | null
+          pin_number: number
+          reopened_count?: number
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          selector_fallback?: string | null
+          status?: string
+          updated_at?: string
+          viewport_width?: number | null
+          x_percent?: number | null
+          y_percent?: number | null
+        }
+        Update: {
+          ai_category?: string | null
+          ai_severity?: string | null
+          author_branch_id?: string | null
+          author_id?: string
+          author_name?: string
+          author_role?: string
+          comment_text?: string
+          created_at?: string
+          element_html?: string | null
+          feedback_id?: string | null
+          hotspot_group_id?: string | null
+          id?: string
+          page_route?: string
+          page_title?: string | null
+          pin_number?: number
+          reopened_count?: number
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          selector_fallback?: string | null
+          status?: string
+          updated_at?: string
+          viewport_width?: number | null
+          x_percent?: number | null
+          y_percent?: number | null
+        }
+        Relationships: []
+      }
+      feedback_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          pin_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pin_id: string
+          reaction_type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pin_id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_reactions_pin_id_fkey"
+            columns: ["pin_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_pins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_reports: {
         Row: {
           branch_id: string
@@ -2877,6 +3037,9 @@ export type Database = {
         Returns: boolean
       }
       family_resident_ids: { Args: never; Returns: string[] }
+      feedback_user_is_dev: { Args: never; Returns: boolean }
+      feedback_user_is_manager: { Args: never; Returns: boolean }
+      feedback_user_role: { Args: never; Returns: string }
       has_branch_access: { Args: { p_branch_id: string }; Returns: boolean }
       increment_system_job_counter: {
         Args: { p_job_name: string; p_success: boolean }
