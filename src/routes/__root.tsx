@@ -173,27 +173,28 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const inner = (
+  const outlet = (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-64 w-full">
+        <Spinner size="lg" />
+      </div>
+    }>
+      <Outlet />
+    </Suspense>
+  );
+
+  return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <PrefetchWarmup />
-        <Suspense fallback={
-          <div className="flex items-center justify-center h-64 w-full">
-            <Spinner size="lg" />
-          </div>
-        }>
-          <Outlet />
-        </Suspense>
+        {FeedbackProvider ? (
+          <Suspense fallback={outlet}>
+            <FeedbackProvider>{outlet}</FeedbackProvider>
+          </Suspense>
+        ) : (
+          outlet
+        )}
       </AuthProvider>
     </QueryClientProvider>
   );
-
-  if (FeedbackProvider) {
-    return (
-      <Suspense fallback={inner}>
-        <FeedbackProvider>{inner}</FeedbackProvider>
-      </Suspense>
-    );
-  }
-  return inner;
 }
