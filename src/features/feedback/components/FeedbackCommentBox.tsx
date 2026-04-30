@@ -17,8 +17,6 @@ type Props = {
 };
 
 export function FeedbackCommentBox({ target, position, onClose }: Props) {
-  // eslint-disable-next-line no-console
-  console.log("[F4 DIAG] FeedbackCommentBox MOUNTED with target:", target, "position:", position);
   const { t } = useTranslation();
   const { createPin } = useFeedbackPinMutations();
   const [text, setText] = useState("");
@@ -61,9 +59,10 @@ export function FeedbackCommentBox({ target, position, onClose }: Props) {
 
   const BOX_WIDTH = 320;
   const BOX_HEIGHT = 200;
+  const SIDE_PANEL_WIDTH = 320; // matches FeedbackSidePanel width
   const rawLeft = position.x - window.scrollX;
   const rawTop = position.y - window.scrollY + 16;
-  const left = Math.max(16, Math.min(rawLeft, window.innerWidth - BOX_WIDTH - 16));
+  const left = Math.max(16, Math.min(rawLeft, window.innerWidth - SIDE_PANEL_WIDTH - BOX_WIDTH - 16));
   const top = Math.max(16, Math.min(rawTop, window.innerHeight - BOX_HEIGHT - 16));
 
   return (

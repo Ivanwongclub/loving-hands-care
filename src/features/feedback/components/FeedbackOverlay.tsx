@@ -35,8 +35,6 @@ export function FeedbackOverlay() {
   // When user clicks an element, capture targeting data and open comment box
   useEffect(() => {
     if (!capturedClick) return;
-    // eslint-disable-next-line no-console
-    console.log("[F4 DIAG] capturedClick triggered:", capturedClick);
     const target = captureTarget(capturedClick.element, {
       x: capturedClick.x,
       y: capturedClick.y,
@@ -45,13 +43,8 @@ export function FeedbackOverlay() {
       target,
       position: { x: capturedClick.x, y: capturedClick.y },
     });
-    // eslint-disable-next-line no-console
-    console.log("[F4 DIAG] pending set, target:", target);
     reset();
   }, [capturedClick, reset]);
-
-  // eslint-disable-next-line no-console
-  console.log("[F4 DIAG] render — isOn:", isOn, "hoveredEl:", hoveredEl?.tagName, "pending:", pending);
 
   return (
     <div data-feedback-ui="true">
