@@ -2,9 +2,7 @@ import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "
 import { Suspense, lazy, useEffect } from "react";
 
 // Dynamic import preserves tree-shaking when the flag is off.
-// (touched to trigger Vite restart so .env.local is re-read)
-console.log("[F3 DIAG] VITE_ENABLE_FEEDBACK value:", JSON.stringify(import.meta.env.VITE_ENABLE_FEEDBACK), "type:", typeof import.meta.env.VITE_ENABLE_FEEDBACK);
-const FeedbackProvider = true // FIXME revert after F3 verification
+const FeedbackProvider = import.meta.env.VITE_ENABLE_FEEDBACK === "true"
   ? lazy(() =>
       import("@/features/feedback").then((m) => ({ default: m.FeedbackProvider })),
     )
