@@ -1,8 +1,9 @@
 import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
 import { Suspense, lazy, useEffect } from "react";
+import { FEEDBACK_ENABLED } from "@/features/feedback/config";
 
-// Dynamic import preserves tree-shaking when the flag is off.
-const FeedbackProvider = import.meta.env.VITE_ENABLE_FEEDBACK === "true"
+// Dead-code-eliminated when FEEDBACK_ENABLED is false.
+const FeedbackProvider = FEEDBACK_ENABLED
   ? lazy(() =>
       import("@/features/feedback").then((m) => ({ default: m.FeedbackProvider })),
     )
