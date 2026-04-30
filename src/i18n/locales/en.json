@@ -1863,6 +1863,33 @@
       "OTHER": "Other"
     }
   },
+  "feedback": {
+    "toast": {
+      "pinCreated": "Feedback recorded"
+    },
+    "commentBox": {
+      "title": "Submit feedback",
+      "placeholder": "Describe your feedback...",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "cmdEnter": "⌘+Enter to save"
+    },
+    "sidePanel": {
+      "title": "Feedback on this page",
+      "openCount_one": "{{count}} item",
+      "openCount_other": "{{count}} items",
+      "empty": "No feedback on this page yet",
+      "close": "Close"
+    },
+    "status": {
+      "new": "New",
+      "triaged": "Triaged",
+      "inProgress": "In progress",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    }
+  },
   "familyPortal": {
     "title": "Family Portal",
     "welcome": "Welcome",

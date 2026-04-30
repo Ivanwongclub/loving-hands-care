@@ -1863,6 +1863,33 @@
       "OTHER": "其他"
     }
   },
+  "feedback": {
+    "toast": {
+      "pinCreated": "意見已記錄"
+    },
+    "commentBox": {
+      "title": "提交意見",
+      "placeholder": "請描述您的意見...",
+      "save": "儲存",
+      "saving": "儲存中...",
+      "cancel": "取消",
+      "cmdEnter": "⌘+Enter 儲存"
+    },
+    "sidePanel": {
+      "title": "本頁意見",
+      "openCount_one": "{{count}} 項意見",
+      "openCount_other": "{{count}} 項意見",
+      "empty": "本頁尚無意見",
+      "close": "關閉"
+    },
+    "status": {
+      "new": "新",
+      "triaged": "已分流",
+      "inProgress": "處理中",
+      "resolved": "已解決",
+      "closed": "已關閉"
+    }
+  },
   "familyPortal": {
     "title": "家庭門戶",
     "welcome": "歡迎",

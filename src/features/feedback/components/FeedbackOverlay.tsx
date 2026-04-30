@@ -1,50 +1,66 @@
 // Hosts the element picker and visual highlight when feedback mode is on.
-// In F3: clicks log captured target to console (no DB write yet).
-// F4 will replace the console.log with comment box + DB save.
+// F4: captured click opens FeedbackCommentBox inline at click point.
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFeedbackMode } from "../hooks/useFeedbackMode";
 import { useElementPicker } from "../hooks/useElementPicker";
 import { FeedbackElementHighlight } from "./FeedbackElementHighlight";
+import { FeedbackCommentBox } from "./FeedbackCommentBox";
 import { captureTarget } from "../lib/elementTargeting";
-import { getCurrentRoute, getCurrentPageTitle } from "../lib/routeMatching";
+import type { TargetingResult } from "../types";
+
+type PendingCapture = {
+  target: TargetingResult;
+  position: { x: number; y: number };
+};
 
 export function FeedbackOverlay() {
   const { isOn, setOn } = useFeedbackMode();
   const { hoveredEl, capturedClick, reset } = useElementPicker(isOn);
+  const [pending, setPending] = useState<PendingCapture | null>(null);
 
-  // ESC exits feedback mode
+  // ESC exits feedback mode and clears any open comment box
   useEffect(() => {
-    if (!isOn) return;
+    if (!isOn && !pending) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOn(false);
+      if (e.key === "Escape") {
+        setPending(null);
+        setOn(false);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isOn, setOn]);
+  }, [isOn, pending, setOn]);
 
-  // F3: handle captured click by logging to console (F4 will open comment box)
+  // When user clicks an element, capture targeting data and open comment box
   useEffect(() => {
     if (!capturedClick) return;
-    const result = captureTarget(capturedClick.element, {
+    const target = captureTarget(capturedClick.element, {
       x: capturedClick.x,
       y: capturedClick.y,
     });
-
-    // eslint-disable-next-line no-console
-    console.log("[feedback F3] captured target:", {
-      route: getCurrentRoute(),
-      title: getCurrentPageTitle(),
-      ...result,
+    setPending({
+      target,
+      position: { x: capturedClick.x, y: capturedClick.y },
     });
-
     reset();
-    setOn(false);
-  }, [capturedClick, reset, setOn]);
+  }, [capturedClick, reset]);
 
   return (
     <div data-feedback-ui="true">
-      {isOn && hoveredEl && <FeedbackElementHighlight element={hoveredEl} />}
+      {isOn && hoveredEl && !pending && (
+        <FeedbackElementHighlight element={hoveredEl} />
+      )}
+      {pending && (
+        <FeedbackCommentBox
+          target={pending.target}
+          position={pending.position}
+          onClose={() => {
+            setPending(null);
+            setOn(false);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -12,6 +12,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { FeedbackModeProvider } from "../hooks/useFeedbackMode";
 import { FeedbackToggleButton } from "./FeedbackToggleButton";
 import { FeedbackOverlay } from "./FeedbackOverlay";
+import { FeedbackPinsLayer } from "./FeedbackPinsLayer";
+import { FeedbackSidePanel } from "./FeedbackSidePanel";
 import { FEEDBACK_VISIBLE_TO_ROLES } from "../config";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 
@@ -48,8 +50,10 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
   return (
     <FeedbackModeProvider>
       {children}
-      <FeedbackToggleButton />
+      <FeedbackPinsLayer />
       <FeedbackOverlay />
+      <FeedbackToggleButton />
+      <FeedbackSidePanel />
     </FeedbackModeProvider>
   );
 }

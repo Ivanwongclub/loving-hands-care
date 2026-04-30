@@ -1,5 +1,5 @@
 # STARTUP_REPORT.md
-**Audit Date:** 2026-04-27  
+**Audit Date:** 2026-05-01  
 **Project:** Loving Hands Care — HMS (Helping Hand 伸手助人協會)  
 **Stack:** TanStack Start + React 19 + Tailwind v4 + Supabase + Lovable.dev
 
@@ -12,180 +12,206 @@
 ```css
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+HK:wght@400;500;600;700;800&display=swap');
 ```
-**Impact:** Adds 300–500ms to initial render. Fonts are render-blocking on first load. Violates LCP and FCP targets.  
-**Fix:** Self-host both Inter and Noto Sans HK in `src/assets/fonts/`, replace with `@font-face` declarations, add `<link rel="preload">` tags in `__root.tsx`.
+**Impact:** 300–500ms added to initial render. Render-blocking on first load. Violates LCP and FCP targets.  
+**Fix:** Self-host Inter and Noto Sans HK in `src/assets/fonts/`. Replace import with `@font-face` declarations. Add `<link rel="preload">` tags in `__root.tsx`.
 
 ---
 
 ### C2 — No font preload in document head
-**File:** `src/routes/__root.tsx`  
-The `head()` function includes only the CSS stylesheet link. No `<link rel="preload" as="font">` tags are present.  
-**Impact:** Even if fonts were self-hosted, they would not be discovered and loaded early — causing FOUT (Flash of Unstyled Text) on every page load.  
-**Fix:** Add preload links for each font file variant actually used (woff2 format).
+**File:** `src/routes/__root.tsx` — `head()` function  
+No `<link rel="preload" as="font" crossOrigin="anonymous">` tags. FOUT (Flash of Unstyled Text) on every page load even once fonts are self-hosted.  
+**Fix:** Add preload links for each `.woff2` variant used, inside the `links: []` array in `head()`.
 
 ---
 
 ### C3 — No route-based code splitting
-**Checked:** `src/router.tsx`, all `src/routes/*.tsx`  
-No `React.lazy()` or `<Suspense>` wrappers found anywhere. All routes are statically imported and bundled together.  
-**Impact:** Full bundle must be parsed before any page renders. As the app grows this will directly harm TTI and TBT scores.  
-**Fix:** Wrap each route-level component in `React.lazy()` + `<Suspense fallback={<PageSkeleton />}>`.
+**File:** `src/routeTree.gen.ts`  
+All route imports are static. Zero `createLazyFileRoute()` entries. Every route ships in the initial JS bundle.  
+**Impact:** Entire app must be parsed before any page renders. Directly harms TTI and TBT as the app grows.  
+**Fix:** Convert route files to use `createLazyFileRoute` (TanStack Router's built-in per-route code splitting).
 
 ---
 
-### C4 — No page transition / PageWrapper (white flash risk)
-**Checked:** `src/components/layout/` — **directory does not exist**  
-There is no `PageWrapper`, `AnimatePresence`, or any CSS transition applied on route changes. TanStack Router performs instant DOM swaps between routes.  
-**Impact:** Users see raw white flash between navigations, degrading perceived performance.  
-**Fix:** Create `src/components/layout/PageWrapper.tsx` with at minimum a CSS opacity fade (150ms) using `useTransitionState` or Framer Motion `AnimatePresence`.
+### C4 — No PageWrapper / no page transitions
+`src/components/layout/` directory does not exist. No opacity fade, no `AnimatePresence`. TanStack Router performs instant DOM swaps — visible white flash between every navigation.  
+**Fix:** Create `src/components/layout/PageWrapper.tsx` with a minimum 150ms CSS opacity fade applied on route entry.
 
 ---
 
-### C6 — 4 routes missing ProtectedRoute (unauthenticated access possible)
-**Files:**
-- `src/routes/care-plans.tsx`
-- `src/routes/emar.$residentId.tsx`
-- `src/routes/tasks.handover.tsx`
-- `src/routes/vitals.assessments.tsx`
+### C5 — Hardcoded hex colors across components and new feedback feature
+**Existing violations (hms components + routes):**
 
-These routes render their full page content with no auth guard. A user who navigates directly to `/care-plans`, `/emar/:residentId`, `/tasks/handover`, or `/vitals/assessments` without a valid session will see real patient data — or hit Supabase with no auth token.  
-**Contrast:** `alerts.wallboard.tsx` wraps its component in `<ProtectedRoute>` correctly.  
-**Fix:** Wrap the root component of each affected route in `<ProtectedRoute>`.
+| File | Line(s) | Value | Fix |
+|------|---------|-------|-----|
+| `src/components/hms/Feedback.tsx` | 29, 37 | `#fff` | → `var(--text-inverse)` |
+| `src/components/hms/Patterns.tsx` | 233 | `#fff` | → `var(--text-inverse)` |
+| `src/components/hms/Data.tsx` | 289 | `#fff` | → `var(--text-inverse)` |
+| `src/components/hms/Data.tsx` | 46 | `fontSize: 32` | → use `type-h1` class |
+| `src/routes/alerts.wallboard.tsx` | 27 | `#fff` | → `var(--text-inverse)` |
+
+**New violations in feedback feature — wrong token names (fallback hex always renders):**
+
+| File | Line | Token used | Problem | Correct token |
+|------|------|-----------|---------|--------------|
+| `FeedbackToggleButton.tsx` | 39 | `var(--color-primary, #4f46e5)` | `--color-primary` doesn't exist in HMS | `var(--action-primary)` |
+| `FeedbackToggleButton.tsx` | 40 | `var(--text-on-primary, #fff)` | `--text-on-primary` doesn't exist | `var(--text-inverse)` |
+| `FeedbackElementHighlight.tsx` | 32 | `var(--color-primary, #4f46e5)` | Same — doesn't exist | `var(--action-primary)` |
+| `FeedbackElementHighlight.tsx` | 34 | `rgba(79, 70, 229, 0.08)` | Pure hardcoded RGBA | `rgba from --action-primary` |
+
+**Root cause:** Feedback uses generic token names not present in the HMS system. The correct mappings are `--color-primary` → `var(--action-primary)`, `--text-on-primary` → `var(--text-inverse)`, `--radius-full` → `var(--radius-pill)`.
 
 ---
 
-### C5 — Hardcoded hex colors in multiple components
-The following files contain hardcoded hex values instead of CSS custom property references:
+### C6 — `FEEDBACK_ENABLED = true` hardcoded + `console.log` in production path
+**Files:** `src/features/feedback/config.ts:5`, `src/features/feedback/components/FeedbackOverlay.tsx:35`
 
-| File | Instances | Values |
-|------|-----------|--------|
-| `src/components/dcu/QRCard.tsx` | 8 | `#ffffff`, `#cccccc`, `#111111`, `#444`, `#eee`, `#555`, `#666`, `#999`, `#111` |
-| `src/components/hms/Feedback.tsx:29,37` | 2 | `#fff` (in Badge strong emphasis) |
-| `src/components/hms/Patterns.tsx:233` | 1 | `#fff` |
-| `src/components/hms/Data.tsx:289` | 1 | `#fff` |
-| `src/components/alerts/NotificationBell.tsx:114` | 1 | `#fff` |
-| `src/components/ui/chart.tsx:51` | 2 | `#ccc` (recharts internal selectors) |
+```ts
+// config.ts — never flipped for production
+export const FEEDBACK_ENABLED = true;
 
-**Note:** `QRCard.tsx` uses inline styles intentionally for print-faithful rendering (documented in its comment). The `#fff` usages in `Feedback.tsx`, `Patterns.tsx`, `Data.tsx`, and `NotificationBell.tsx` should reference `var(--text-inverse)` or `var(--color-neutral-0)` instead. The recharts `#ccc` selectors are third-party library internals and are acceptable.  
-**Fix:** Replace all non-print `#fff` hardcodes with `var(--text-inverse)`. Leave `QRCard.tsx` intentionally exempt (print card).
+// FeedbackOverlay.tsx:35 — fires every time staff click in feedback mode
+console.log("[feedback F3] captured target:", {
+  route: getCurrentRoute(),
+  element_html: ...,   // ≤2KB of DOM content
+  selector_fallback: ...,
+  x_percent, y_percent, viewport_width,
+});
+```
+
+**Impact:**  
+1. Internal DOM structure, CSS selectors, page routes, and coordinates are logged to the browser console in production.  
+2. The `console.log` is explicitly an F3 placeholder — unfinished feature code is live.  
+3. `index.tsx` documents the flag should read from `VITE_ENABLE_FEEDBACK` env var, but `config.ts` ignores env vars entirely.
+
+**Fix:**
+```ts
+// config.ts
+export const FEEDBACK_ENABLED = import.meta.env.VITE_ENABLE_FEEDBACK === "true";
+```
+Set `VITE_ENABLE_FEEDBACK=false` in the Lovable.dev production env until F4 (comment box + DB save) is complete. This dead-code-eliminates the entire feedback module from the production bundle.
+
+---
+
+### C7 — Dashboard bypasses React Query for all data — no error states
+**File:** `src/routes/dashboard.tsx:108–199`  
+The `refreshAll()` function fetches census, today's tasks, DCU check-ins, meds due next 2h, incidents, and activity via raw `useEffect` + `Promise.all` + `setState`. None go through React Query.
+
+**Consequences:**
+- Data is **not cached** — full 6× Supabase round-trip on every dashboard mount
+- **Zero error state** — a silent query failure shows "0" in every stat card (clinical staff may miss critical alerts)
+- **No stale-while-revalidate** — full spinner on every revisit
+- 60-second polling continues while tab is backgrounded
+
+**Contrast:** Every other data-heavy route uses `useQuery` with `staleTime: 5min`.  
+**Fix:** Extract each source into a `useQuery` hook (`useDashboardCensus`, `useTodayTasks`, `useMedsDue`, etc.). Add an error banner when any query fails.
 
 ---
 
 ## 🟠 HIGH (ask approval before fixing)
 
 ### H1 — No layout component directory
-**Expected:** `src/components/layout/Header.tsx`, `Footer.tsx`, `PageWrapper.tsx`, `Container.tsx`  
-**Found:** None. Shell components (`AdminDesktopShell`, `FamilyShell`, etc.) duplicate nav/header/layout logic internally.  
-**Impact:** Any header/nav change requires editing multiple shell files. No shared Container means max-width handling is inconsistent.  
-**Fix:** Extract shared concerns into layout primitives; shells can consume them.
+`src/components/layout/` does not exist. Shell components (`AdminDesktopShell`, `FamilyShell`, `WardTabletShell`, `KioskShell`) duplicate nav/header/layout logic independently.  
+**Fix:** Extract shared layout primitives; shells consume them.
 
 ---
 
-### H2 — Dashboard page missing loading and error states
-**File:** `src/routes/dashboard.tsx`  
-The dashboard calls `useResidents()`, `useTasks()`, `useAlerts()`, and `useBranches()` but never checks `isLoading` or `error` from any of them. While data is fetching, stats render as `"0"` silently. No skeleton, no error banner.  
-**Contrast:** Other routes (residents, staff, tasks, alerts, incidents, settings) all correctly show `<Skeleton>` rows during loading.  
-**Fix:** Add loading skeleton for the 4 stat cards and recent tasks table. Add error banner if any query fails.
-
----
-
-### H3 — Vitals page uses raw `useEffect` + `useState` for server data
+### H2 — Vitals page uses raw `useEffect` + `useState` for server data
 **File:** `src/routes/vitals.tsx:45–63`  
-`abnormal` vitals are fetched via a manual `useEffect` + `supabase` call + local `useState`, bypassing React Query. This means no caching, no stale-while-revalidate, no error state, and the data re-fetches from scratch every time the component mounts.  
-**Contrast:** All other data hooks use `useQuery` consistently.  
-**Fix:** Move this into a `useAbnormalVitals(branchId)` hook that uses `useQuery`.
+Abnormal vitals fetched via manual `useEffect`. Error is silently swallowed (no UI feedback). No caching, no stale-while-revalidate.  
+**Fix:** `useAbnormalVitals(branchId)` hook backed by `useQuery`.
 
 ---
 
-### H4 — 5 font weights loaded (exceeds recommended 3 max)
-Both Inter and Noto Sans HK load weights 400, 500, 600, 700, 800 via Google Fonts.  
-The actual design system uses 4 weights (regular, medium, semibold, bold/extrabold). Weight 500 (medium) is rarely used in the codebase.  
-**Fix:** When self-hosting (C1), subset to 400, 600, 800 for Inter; 400, 700 for Noto Sans HK.
+### H3 — 5 font weights loaded (max 3 recommended)
+Both Inter and Noto Sans HK load weights 400, 500, 600, 700, 800.  
+**Fix:** When self-hosting (C1), subset to weights 400, 600, 800 for Inter; 400, 700 for Noto Sans HK.
 
 ---
 
-### H6 — Hardcoded staff name in WardTabletShell
-**File:** `src/components/shells/WardTabletShell.tsx:37`
-```jsx
-<Avatar name="Wong KM" />
+### H4 — No design-system/tokens TypeScript directory
+`src/design-system/tokens/` does not exist. Tokens exist only as CSS custom properties — no type safety, no IDE autocomplete in JS/TS context.  
+**Fix:** Generate `colors.ts`, `typography.ts`, `spacing.ts`, `index.ts` mirroring `styles.css`.
+
+---
+
+### H5 — No branch selection context — `branches[0]` hardwired in 25 files
+`branches[0]` used as the active branch everywhere. Every new route added continues the pattern. Orgs with multiple branches are silently locked to the first branch Supabase returns.
+
+**Affected files (sample):** `dashboard.tsx`, `residents.tsx`, `staff.tsx`, `tasks.tsx`, `alerts.tsx`, `incidents.tsx`, `vitals.tsx`, `emar.tsx`, `audit.tsx`, `reports.tsx`, `settings.tsx`, `attendance.kiosk.tsx`, `attendance.register.tsx`, `attendance.enrollments.tsx`, `AdminDesktopShell.tsx`, `KioskShell.tsx`, `WardTabletShell.tsx` + 8 more.  
+**Fix:** `BranchContext` storing selected branch ID (default: `branches[0]`), a switcher in the sidebar, all consumers read from context.
+
+---
+
+### H6 — Kiosk route loads resident data without auth guard
+**File:** `src/routes/attendance.kiosk.tsx`  
+The kiosk QR scanner loads resident names, photos, and high-risk flags via `useResidents()` with no `<ProtectedRoute>`. An unauthenticated user navigating directly to `/attendance/kiosk` can see resident personal data in the manual-override search drawer. Supabase RLS is the only barrier.  
+**Fix:** Wrap in `<ProtectedRoute>` or add a kiosk PIN/session check before resident data loads.
+
+---
+
+### H7 — `FeedbackProvider` polls route via `setInterval(500ms)`
+**File:** `src/features/feedback/components/FeedbackProvider.tsx:33`
+```ts
+const interval = window.setInterval(check, 500);
 ```
-The ward tablet shell renders a hardcoded name instead of reading from `useCurrentStaff()`. Every device running the ward tablet will show "Wong KM" regardless of who is logged in.  
-**Fix:** Import `useCurrentStaff` and replace with the live `staff?.name` value (same pattern as `AdminDesktopShell.tsx:70`).
+Detects route changes by polling `window.location.pathname` every 500ms. Fires continuously on every page for every logged-in staff member while `FEEDBACK_ENABLED=true`.  
+**Impact:** 2 DOM reads/sec, indefinitely, while the app is open — unnecessary CPU/battery drain on tablets.  
+**Fix:** Replace with `useLocation()` from `@tanstack/react-router`:
+```ts
+const location = useLocation();
+useEffect(() => {
+  setExcluded(isCurrentRouteExcluded());
+}, [location.pathname]);
+```
 
 ---
 
-### H7 — No branch selection context — `branches[0]` hardwired in 19 files
-`branches[0]` is used as the active branch in every route and shell component (19 occurrences). There is no branch-selection context or persisted preference. For any org with more than one branch, every user is silently locked to whichever branch Supabase returns first.  
-**Affected files (sample):** `dashboard.tsx`, `residents.tsx`, `staff.tsx`, `tasks.tsx`, `alerts.tsx`, `incidents.tsx`, `vitals.tsx`, `emar.tsx`, `audit.tsx`, `reports.tsx`, `AdminDesktopShell.tsx`, `KioskShell.tsx`, `NotificationBell.tsx`, and 6 more.  
-**Fix:** Create a `BranchContext` that stores the selected branch ID (default: `branches[0]`), expose a switcher in the sidebar, and read from context instead of `branches[0]` directly.
+## 🟡 MEDIUM
 
----
-
-### H5 — No design-system tokens directory
-**Expected:** `src/design-system/tokens/colors.ts`, `typography.ts`, `spacing.ts`, `index.ts`  
-**Found:** Design tokens exist only as CSS custom properties in `styles.css`. There are no corresponding TypeScript token files.  
-**Impact:** No type safety on token usage, no IDE autocomplete for design values in JS/TS context.  
-**Fix:** Generate token TS files mirroring the CSS custom properties in `styles.css`.
-
----
-
-## 🟡 MEDIUM (optional improvements)
-
-### M1 — Arbitrary font sizes in shadcn/ui base components
+### M1 — Arbitrary `text-[0.8rem]` in shadcn/ui base components
 **Files:** `src/components/ui/calendar.tsx:79,85`, `src/components/ui/form.tsx:131,153`  
-```
-text-[0.8rem]
-```
-These are Lovable.dev / shadcn generated defaults. They won't break anything but violate the no-arbitrary-font-sizes rule.  
-**Fix:** Map `text-[0.8rem]` → `type-caption` utility class (12px/16px, closest match).
+**Fix:** Replace with `type-caption` utility class (12px/16px).
 
----
+### M2 — Missing standard CSS token aliases
+`--color-primary`, `--text-on-primary`, `--radius-full` and other CLAUDE.md standard names are absent from `styles.css`. Any code using these names (including the feedback feature) silently falls back to hardcoded hex.  
+**Fix:** Add alias custom properties in `:root` mapping to HMS equivalents. This also resolves C5 feedback token fallbacks.
 
-### M2 — Missing CSS token aliases for CLAUDE.md standard names
-The global design system spec requires tokens named `--color-primary`, `--color-secondary`, `--color-accent`, `--color-background`, `--color-surface`, `--color-border`, `--font-heading`, `--font-mono`, `--ease-spring`, `--radius-full`, and `--spacing-*` (vs current `--space-*`).  
-The project uses a valid but differently-named HMS design system. These aliases don't exist.  
-**Fix:** Add alias custom properties to `:root` in `styles.css` that map to the HMS equivalents (e.g., `--color-primary: var(--action-primary)`).
-
----
-
-### M3 — No list virtualization (not yet critical at current data volumes)
+### M3 — No list virtualization
 **Files:** `src/routes/residents.tsx`, `src/routes/staff.tsx`, `src/routes/tasks.tsx`  
-Lists are rendered with `pageSize: 20–200` rows without virtualization. At current scale this is fine, but the tasks list fetches up to `pageSize: 200` items.  
-**Fix:** Monitor in production; add `@tanstack/react-virtual` if row counts regularly exceed 100.
+Tasks list fetches up to `pageSize: 200` rows with no virtualization.  
+**Fix:** Add `@tanstack/react-virtual` when row counts regularly exceed 100.
 
----
+### M4 — Logo image missing explicit width (CLS risk)
+**File:** `src/routes/login.tsx:64` — `width: "auto"` prevents the browser reserving space before load.  
+**Fix:** Add explicit `width={112}` (or actual pixel width).
 
-### M4 — Dashboard task table and activity feed are entirely mock data
-**File:** `src/routes/dashboard.tsx:39–44, 96–100`  
-Two full UI sections render hardcoded placeholder content while real data sits unused:
-- **Recent Tasks table** (lines 39–44): 5 fake rows (`T-1041` through `T-1045`) with names like "Chan Tai Man · 陳大文" and assignee "RN Lee". Real `useTasks()` is called but only used for the overdue *count* in the stat card.
-- **Recent Activity feed** (lines 96–100): 5 hardcoded `ActivityItem` entries with fixed timestamps (`09:42`, `09:38`, etc.) and fake actors ("RN Lee", "HCA Tam", "Dr. Cheung"). No real audit log data is wired in.
+### M5 — `residents.$id.tsx` is 2,560 lines
+Single route file contains resident profile, ICP, DNACPR, vitals, medications, incidents, photo management, wandering risk, and advance directive. Entire component is parsed even for sections not visited.  
+**Fix:** Extract each tab panel into `src/components/residents/`. Route file should be < 200 lines of wiring.
 
-Real data is fetched (`useResidents`, `useTasks`, `useAlerts`) but never rendered in the main content area.  
-**Fix:** Replace mock rows with real `tasks` from `useTasks()`. Wire the activity feed to the audit log hook (`useAuditLog`) already present in `src/hooks/useAuditLog.ts`.
+### M6 — Dashboard silent failure on data fetch error
+Related to C7. If any of the 6 raw `useEffect` fetches fail, all stat cards silently show "0". Clinical staff relying on "0 open alerts" could miss a critical event.  
+**Fix:** Add `try/catch` around `refreshAll()` and surface an error banner. (Full fix: migrate to `useQuery` per C7.)
 
----
-
-### M5 — Logo image lacks explicit width attribute (minor CLS risk)
-**File:** `src/routes/login.tsx:64`  
-```jsx
-<img src={helpingHandLogo} alt="Helping Hand" style={{ height: 140, width: "auto" }} />
-```
-Height is set but width is `"auto"`. During the loading phase the browser can't calculate the reserved space without knowing aspect ratio. A small CLS shift may occur on slow connections.  
-**Fix:** Add explicit `width={112}` (or actual pixel width) to pre-allocate space.
+### M7 — Feedback F3 gives no visible feedback to user on click
+**File:** `src/features/feedback/components/FeedbackOverlay.tsx`  
+Staff click an element in feedback mode — nothing visible happens (just a `console.log`). The UX is confusing until F4 (comment box) is built.  
+**Fix:** Either gate with `VITE_ENABLE_FEEDBACK` flag (preferred, per C6), or show a temporary toast: "Feedback captured — comment box coming soon."
 
 ---
 
 ## 🟢 LOW
 
 ### L1 — Font subsetting not applied
-Both Inter and Noto Sans HK are loaded as full character sets. For an HMS used primarily with Latin + Traditional Chinese (HK), subsetting to `unicode-range` `U+0000-00FF` (Latin) and the relevant CJK range would reduce file size by ~40%.
+Inter and Noto Sans HK load full character sets. Subsetting to Latin + Traditional Chinese (HK) would reduce file size ~40%.
 
-### L2 — Missing `skip to main content` accessibility link
-No skip-nav link exists at the top of any shell component. Required for keyboard/screen reader accessibility compliance.
+### L2 — No skip-to-main-content link
+No skip-nav link in any shell component. Required for keyboard / screen reader accessibility.
 
-### L3 — No `aria-label` on some icon-only buttons
-The sidebar collapse button (`AdminDesktopShell.tsx:115`) has `aria-label` ✓. The language toggle button (`type-body-sm` button) does not have a descriptive ARIA label — it shows text but no `aria-label` for screen readers.
+### L3 — Language toggle button missing `aria-label`
+**File:** `src/components/shells/AdminDesktopShell.tsx:273`  
+`<button onClick={toggleLang}>` has no `aria-label`.  
+**Fix:** `aria-label={i18n.language === "en" ? "Switch to Chinese" : "切換至英文"}`
 
 ---
 
@@ -195,38 +221,53 @@ The sidebar collapse button (`AdminDesktopShell.tsx:115`) has `aria-label` ✓. 
 |---|----------|-------|---------|
 | C1 | 🔴 Critical | Google Fonts at runtime | `styles.css:1` |
 | C2 | 🔴 Critical | No font preload in `<head>` | `__root.tsx` |
-| C3 | 🔴 Critical | No route code splitting | all `routes/*.tsx` |
-| C4 | 🔴 Critical | No PageWrapper / page transitions | (missing file) |
-| C5 | 🔴 Critical | Hardcoded hex colors | `Feedback.tsx`, `Patterns.tsx`, `Data.tsx`, `NotificationBell.tsx` |
-| C6 | 🔴 Critical | 4 routes missing ProtectedRoute — auth bypass | `care-plans.tsx`, `emar.$residentId.tsx`, `tasks.handover.tsx`, `vitals.assessments.tsx` |
+| C3 | 🔴 Critical | No route code splitting | `routeTree.gen.ts` |
+| C4 | 🔴 Critical | No PageWrapper / page transitions | (missing) |
+| C5 | 🔴 Critical | Hardcoded hex + wrong token names | `hms/Feedback.tsx`, `hms/Patterns.tsx`, `hms/Data.tsx`, `alerts.wallboard.tsx`, `FeedbackToggleButton.tsx`, `FeedbackElementHighlight.tsx` |
+| C6 | 🔴 Critical | `FEEDBACK_ENABLED=true` + `console.log` in production | `feedback/config.ts`, `FeedbackOverlay.tsx` |
+| C7 | 🔴 Critical | Dashboard bypasses React Query — no error states | `routes/dashboard.tsx` |
 | H1 | 🟠 High | No layout component directory | (missing) |
-| H2 | 🟠 High | Dashboard missing loading/error states | `routes/dashboard.tsx` |
-| H3 | 🟠 High | Vitals uses raw useEffect for server data | `routes/vitals.tsx` |
-| H4 | 🟠 High | 5 font weights (max 3 recommended) | `styles.css:1` |
-| H5 | 🟠 High | No design-system/tokens TS directory | (missing) |
-| H6 | 🟠 High | Hardcoded staff name "Wong KM" in WardTabletShell | `WardTabletShell.tsx:37` |
-| H7 | 🟠 High | No branch selection context — `branches[0]` in 19 files | systemic |
-| M1 | 🟡 Medium | Arbitrary `text-[0.8rem]` in shadcn components | `calendar.tsx`, `form.tsx` |
+| H2 | 🟠 High | Vitals raw `useEffect` for server data | `routes/vitals.tsx` |
+| H3 | 🟠 High | 5 font weights loaded | `styles.css:1` |
+| H4 | 🟠 High | No design-system/tokens TS directory | (missing) |
+| H5 | 🟠 High | `branches[0]` hardwired in 25 files | systemic |
+| H6 | 🟠 High | Kiosk route loads resident data without auth guard | `attendance.kiosk.tsx` |
+| H7 | 🟠 High | FeedbackProvider polls route every 500ms | `FeedbackProvider.tsx:33` |
+| M1 | 🟡 Medium | Arbitrary `text-[0.8rem]` | `calendar.tsx`, `form.tsx` |
 | M2 | 🟡 Medium | Missing standard CSS token aliases | `styles.css` |
 | M3 | 🟡 Medium | No list virtualization | `residents.tsx`, `tasks.tsx` |
-| M4 | 🟡 Medium | Dashboard task table + activity feed are mock data | `dashboard.tsx:39–100` |
-| M5 | 🟡 Medium | Logo img missing explicit width (CLS risk) | `login.tsx:64` |
+| M4 | 🟡 Medium | Logo img missing explicit width | `login.tsx:64` |
+| M5 | 🟡 Medium | `residents.$id.tsx` 2,560 lines | `routes/residents.$id.tsx` |
+| M6 | 🟡 Medium | Dashboard silent failure on fetch error | `routes/dashboard.tsx` |
+| M7 | 🟡 Medium | Feedback F3 no visible user feedback | `FeedbackOverlay.tsx` |
 | L1 | 🟢 Low | Font subsetting not applied | `styles.css` |
 | L2 | 🟢 Low | No skip-to-main-content link | shell components |
-| L3 | 🟢 Low | Language toggle button missing aria-label | `AdminDesktopShell.tsx` |
+| L3 | 🟢 Low | Language toggle missing `aria-label` | `AdminDesktopShell.tsx:273` |
 
 ---
 
 ## WHAT'S GOOD ✅
 
-- Design tokens are comprehensive and well-structured in `styles.css` (CSS custom properties + `@theme inline`)
-- All data hooks use TanStack React Query with caching (`staleTime: 60s`, `gcTime: 5min`) — no raw useEffect/setState data fetching (except vitals)
-- Search inputs are debounced at 300ms (`residents.tsx:108–121`)
-- Loading states (Skeleton rows) implemented on all major lists EXCEPT dashboard
-- Error handling present on all mutations (toast.error)
-- EmptyState components in use across all list views
-- Single icon library (Lucide React) — consistent ✓
-- Avatar, Badge, Skeleton, Modal/Dialog, Tooltip, Select all present in hms/ and ui/ ✓
-- Supabase queries have proper pagination (range-based) ✓
-- `scrollRestoration: true` on router ✓
-- i18n (EN/ZH-HK) implemented ✓
+- All previously unguarded routes now protected via `<ProtectedRoute>` or `AdminStubPage` ✅
+- WardTabletShell reads live staff name from `useCurrentStaff()` ✅
+- Dashboard has full Skeleton coverage on stat cards, tasks table, and handover ✅
+- Dashboard task table and activity feed show real Supabase data ✅
+- Family Portal uses `FamilyProtectedRoute` correctly ✅
+- `family.dashboard.tsx` uses `useQuery` for all data ✅
+- Feedback feature is correctly lazy-loaded via `React.lazy()` + `Suspense` in `__root.tsx` ✅
+- Feedback correctly excludes `/family/*` and `/attendance/kiosk` routes ✅
+- Feedback is role-gated (`FEEDBACK_VISIBLE_TO_ROLES`) ✅
+- `FeedbackToggleButton` has correct `aria-label` ✅
+- `FeedbackElementHighlight` uses `requestAnimationFrame` for position tracking ✅
+- Sidebar reorganized into logical sections (Clinical / DCU / Management / System) ✅
+- All data hooks except dashboard + vitals use React Query with `staleTime: 5min` ✅
+- Search inputs debounced at 300ms ✅
+- Skeleton loading on all major list views ✅
+- EmptyState components on all list views ✅
+- Error handling on all mutations via `toast.error` ✅
+- Single icon library (Lucide React) ✅
+- Supabase queries paginated (range-based) ✅
+- `scrollRestoration: true`, `defaultPreload: "intent"` on router ✅
+- `defaultPendingComponent` + `defaultPendingMs: 100` configured ✅
+- i18n EN/ZH-HK implemented ✅
+- Design tokens comprehensive and well-structured in `styles.css` ✅
