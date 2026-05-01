@@ -8,8 +8,10 @@ import { computePinPosition } from "../lib/pinPositioning";
 import { FeedbackPin } from "./FeedbackPin";
 import type { FeedbackPinRow, PinPosition } from "../types";
 
+const EMPTY_PINS: FeedbackPinRow[] = [];
+
 export function FeedbackPinsLayer() {
-  const { data: pins = [] } = useFeedbackPins();
+  const { data: pins = EMPTY_PINS } = useFeedbackPins();
   const [positions, setPositions] = useState<Record<string, PinPosition>>({});
   const [mounted, setMounted] = useState(false);
 
@@ -19,7 +21,7 @@ export function FeedbackPinsLayer() {
 
   useEffect(() => {
     if (!pins.length) {
-      setPositions({});
+      setPositions((prev) => Object.keys(prev).length === 0 ? prev : {});
       return;
     }
     let raf = 0;
