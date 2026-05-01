@@ -74,7 +74,7 @@ export function RestraintsTab({
   }
 
   return (
-    <Stack gap={4}>
+    <Stack gap={4} data-feedback-id="resident-tab-restraints">
       <Inline justify="between" align="center">
         <Heading level={3}>{t("restraints.title")}</Heading>
         {canEdit && (

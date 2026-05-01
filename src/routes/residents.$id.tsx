@@ -319,7 +319,7 @@ function ResidentDetailPage() {
   return (
     <ProtectedRoute>
       <AdminDesktopShell pageTitle={t("nav.residents")}>
-        <Stack gap={4}>
+        <Stack gap={4} data-feedback-id="resident-detail-root">
           <ProfileHeader
             resident={resident}
             canEditProfile={canEditProfile}
@@ -344,6 +344,7 @@ function ResidentDetailPage() {
           />
 
           <TabGroup
+            feedbackId="resident-detail-tabs"
             label={t("residents.tabGroups.clinical")}
             value={(CLINICAL_TABS as readonly string[]).includes(tab) ? tab : null}
             onChange={(v) => handleTabChange(v as TabKey)}
@@ -515,14 +516,16 @@ function TabGroup({
   value,
   onChange,
   items,
+  feedbackId,
 }: {
   label: string;
   value: string | null;
   onChange: (v: string) => void;
   items: { value: string; label: React.ReactNode }[];
+  feedbackId?: string;
 }) {
   return (
-    <Stack gap={1}>
+    <Stack gap={1} data-feedback-id={feedbackId}>
       <Text size="label" color="tertiary">{label}</Text>
       <Tabs
         style="line"
@@ -588,7 +591,7 @@ function ProfileHeader({
   const resus = (resident.resuscitation_status as ResusStatus | null) ?? "FULL_RESUSCITATION";
 
   return (
-    <Surface padding="none">
+    <Surface padding="none" data-feedback-id="resident-detail-header">
       <div style={{ padding: 24, width: "100%" }}>
         <Inline justify="between" align="start" className="w-full">
           <Inline gap={4} align="start">
@@ -743,6 +746,7 @@ function ResidentPhoto({
 
   return (
     <div
+      data-feedback-id="resident-detail-photo"
       style={{ position: "relative" }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -1490,7 +1494,7 @@ function ProfileTab({ resident, canEdit, canEditAdmin, canEditClinical, editMode
   const diagnoses = medical && typeof medical === "object" && "diagnoses" in medical ? String(medical.diagnoses) : null;
 
   return (
-    <Stack gap={4}>
+    <Stack gap={4} data-feedback-id="resident-tab-profile">
       {/* Card 1 — Demographics */}
       <Card padding="md">
         <Inline justify="between" className="mb-3">
@@ -2147,7 +2151,7 @@ function ContactsTab({ residentId, branchId, doNotShareFamily, contacts, refetch
   ];
 
   return (
-    <Stack gap={3}>
+    <Stack gap={3} data-feedback-id="resident-tab-contacts">
       {doNotShareFamily && (
         <Alert
           severity="error"
@@ -2539,7 +2543,7 @@ function ActivityTab({ rows }: { rows: AuditLogRow[] }) {
   const { t } = useTranslation();
   if (rows.length === 0) return <EmptyState title={t("activity.empty")} />;
   return (
-    <Card padding="md">
+    <Card padding="md" data-feedback-id="resident-tab-audit">
       <Timeline>
         {rows.map((r) => (
           <ActivityItem

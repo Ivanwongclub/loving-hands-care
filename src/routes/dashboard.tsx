@@ -387,6 +387,7 @@ function DashboardPage() {
           {statCards.map((c) => (
             <div
               key={c.key}
+              data-feedback-id={`dashboard-stat-${c.key}`}
               role="button"
               tabIndex={0}
               onClick={c.onClick}
@@ -436,7 +437,7 @@ function DashboardPage() {
           className="grid grid-cols-1 lg:grid-cols-5 w-full"
           style={{ gap: "var(--space-5)", marginBottom: "var(--space-5)" }}
         >
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3" data-feedback-id="dashboard-tasks">
             <Card padding="md">
               <Inline justify="between" align="center" style={{ marginBottom: "var(--space-3)" }}>
                 <Heading level={3}>{t("dashboard.todayTasks")}</Heading>
@@ -488,7 +489,7 @@ function DashboardPage() {
             </Card>
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2" data-feedback-id="dashboard-recent-activity">
             <Card padding="md">
               <Heading level={3} style={{ marginBottom: "var(--space-3)" }}>
                 {t("dashboard.handover.title")}

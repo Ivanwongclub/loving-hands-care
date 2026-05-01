@@ -105,7 +105,7 @@ export function ICPTab({ residentId, branchId, staffId, staffRole, logAction }: 
   const activeContent = readContent(activeICP);
 
   return (
-    <Stack gap={4}>
+    <Stack gap={4} data-feedback-id="resident-tab-care-plan">
       <Card padding="md">
         <Stack gap={3}>
           <Inline justify="between" align="start">

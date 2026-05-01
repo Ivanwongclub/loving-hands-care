@@ -50,7 +50,7 @@ export function VaccinationsTab({
   };
 
   return (
-    <Stack gap={4}>
+    <Stack gap={4} data-feedback-id="resident-tab-vaccinations">
       <Inline justify="between" align="center">
         <Heading level={3}>{t("vaccinations.title")}</Heading>
         {canAdd && (

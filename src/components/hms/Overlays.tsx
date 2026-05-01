@@ -12,8 +12,9 @@ interface ModalProps {
   footer?: ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
   tone?: "default" | "destructive-confirmation" | "approval";
+  "data-feedback-id"?: string;
 }
-export function Modal({ open, onClose, title, children, footer, size = "md" }: ModalProps) {
+export function Modal({ open, onClose, title, children, footer, size = "md", "data-feedback-id": feedbackId }: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -31,6 +32,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
       <div
         onClick={(e) => e.stopPropagation()}
         className="w-full animate-in fade-in zoom-in-95"
+        data-feedback-id={feedbackId}
         style={{
           maxWidth: widthMap[size],
           backgroundColor: "var(--bg-surface)",

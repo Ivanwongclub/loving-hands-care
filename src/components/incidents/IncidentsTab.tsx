@@ -61,7 +61,7 @@ export function IncidentsTab({ residentId, branchId, staffId, logAction }: Incid
   }
 
   return (
-    <Stack gap={4}>
+    <Stack gap={4} data-feedback-id="resident-tab-incidents">
       <Inline justify="between" align="center">
         <Heading level={3}>{t("incidents.title")}</Heading>
         <Button variant="primary" onClick={() => setNewOpen(true)} disabled={!staffId}>

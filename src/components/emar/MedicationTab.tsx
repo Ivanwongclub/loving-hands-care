@@ -156,7 +156,7 @@ export function MedicationTab({
   };
 
   return (
-    <Stack gap={4}>
+    <Stack gap={4} data-feedback-id="resident-tab-medications">
       <Tabs
         style="line"
         value={tab}

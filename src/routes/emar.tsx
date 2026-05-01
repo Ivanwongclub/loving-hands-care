@@ -241,7 +241,7 @@ function DashboardBody({ branchId, staffId }: { branchId: string; staffId: strin
   }, [rows, search, statusFilter]);
 
   return (
-    <Stack gap={4}>
+    <Stack gap={4} data-feedback-id="emar-root">
       <PageHeader
         title={t("emar.dashboardTitle")}
         description={passMode ? branchName : `${branchName} · ${t("emar.pass.viewHistory")}`}
@@ -254,6 +254,7 @@ function DashboardBody({ branchId, staffId }: { branchId: string; staffId: strin
             </div>
             {passMode ? (
               <Button
+                data-feedback-id="emar-pass-mode-toggle"
                 variant="ghost"
                 leadingIcon={<List size={16} />}
                 onClick={() => setPassMode(false)}
@@ -262,6 +263,7 @@ function DashboardBody({ branchId, staffId }: { branchId: string; staffId: strin
               </Button>
             ) : (
               <Button
+                data-feedback-id="emar-pass-mode-toggle"
                 variant="primary"
                 leadingIcon={<Pill size={16} />}
                 onClick={() => { setPassMode(true); setSessionCompleted(new Set()); }}
@@ -309,7 +311,7 @@ function DashboardBody({ branchId, staffId }: { branchId: string; staffId: strin
             />
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 w-full" data-feedback-id="emar-stat-bar">
             <StatCard label={t("emar.dueCount")} value={counts.DUE} tone="warning" />
             <StatCard label={t("emar.lateCount")} value={counts.LATE} tone="error" />
             <StatCard label={t("emar.administeredCount")} value={counts.ADMINISTERED} tone="success" />
@@ -344,9 +346,10 @@ function DashboardBody({ branchId, staffId }: { branchId: string; staffId: strin
             </Stack>
           </Card>
 
-          <FilterBar>
+          <FilterBar data-feedback-id="emar-filter-bar">
             <div style={{ minWidth: 280, flex: 1 }}>
               <SearchField
+                data-feedback-id="emar-search"
                 placeholder={t("emar.filterByDrug")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

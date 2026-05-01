@@ -251,7 +251,7 @@ export function VitalsTab({ residentId, branchId, staffId, logAction }: VitalsTa
   const allEmpty = Object.keys(form).length === 0;
 
   return (
-    <Stack gap={4}>
+    <Stack gap={4} data-feedback-id="resident-tab-vitals">
       {/* Section 1: Record */}
       <Card padding="md">
         <Stack gap={3}>

@@ -80,9 +80,9 @@ export function ContextSwitcher({ label, current }: ContextSwitcherProps) {
 }
 
 /* ── Enterprise patterns ── */
-export function FilterBar({ children }: { children: ReactNode }) {
+export function FilterBar({ children, "data-feedback-id": feedbackId }: { children: ReactNode; "data-feedback-id"?: string }) {
   return (
-    <div className="w-full flex items-center gap-2 flex-wrap" style={{ marginBottom: "var(--space-4)" }}>
+    <div className="w-full flex items-center gap-2 flex-wrap" style={{ marginBottom: "var(--space-4)" }} data-feedback-id={feedbackId}>
       {children}
     </div>
   );

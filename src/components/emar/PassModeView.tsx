@@ -95,7 +95,7 @@ export function PassModeView({
   const allDoneInSession = pendingCount === 0 && completedCount > 0;
 
   return (
-    <Stack gap={4}>
+    <Stack gap={4} data-feedback-id="emar-pass-mode-view">
       {/* Session bar */}
       <Card padding="md">
         <Inline justify="between" align="center" className="w-full" wrap>
@@ -222,7 +222,7 @@ function TallCard({ resident, records, isDismissed, onAdminister }: TallCardProp
   const hasLate = records.some((r) => r.status === "LATE");
 
   const cardInner = (
-    <Card padding="none" className="overflow-hidden">
+    <Card padding="none" className="overflow-hidden" data-feedback-id={`emar-resident-card-${resident?.id ?? records[0]?.resident_id}`}>
       <Stack gap={1}>
         {/* Identity */}
         <div style={{ padding: 16, paddingBottom: 12 }}>
@@ -307,6 +307,7 @@ function TallCard({ resident, records, isDismissed, onAdminister }: TallCardProp
               return (
                 <Stack
                   key={rec.id}
+                  data-feedback-id={`emar-medication-row-${rec.id}`}
                   gap={1}
                   style={{
                     paddingTop: i > 0 ? 8 : 0,

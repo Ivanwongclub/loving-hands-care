@@ -251,7 +251,7 @@ export function AdministerModal({
   else if (step === "CONFIRM") title = t("emar.step3Confirm");
 
   return (
-    <Modal open={open} onClose={handleClose} title={title} size="lg">
+    <Modal open={open} onClose={handleClose} title={title} size="lg" data-feedback-id="emar-pin-dialog">
       <ResidentPhotoIdBanner
         residentNameZh={residentNameZh}
         residentName={residentName}
@@ -437,7 +437,7 @@ export function AdministerModal({
             </FormField>
           )}
 
-          <Button variant="primary" onClick={handleFinalise} className="w-full">
+          <Button variant="primary" onClick={handleFinalise} className="w-full" data-feedback-id="emar-confirm-given">
             {t("emar.adminFinalise")}
           </Button>
         </Stack>
