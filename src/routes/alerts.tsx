@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { BellRing, History } from "lucide-react";
 import { AdminDesktopShell } from "@/components/shells/AdminDesktopShell";
@@ -199,6 +199,9 @@ function AlertsDashboardPage() {
     toast.success(t("alerts.dismissSuccess"));
     void qc.invalidateQueries({ queryKey: ["alerts"] });
   };
+
+  const { pathname } = useLocation();
+  if (pathname !== "/alerts") return <Outlet />;
 
   return (
     <ProtectedRoute>

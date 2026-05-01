@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Outlet, useLocation } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Lock, MoreHorizontal, ExternalLink, Inbox } from "lucide-react";
@@ -51,6 +51,9 @@ function ResidentsListPage() {
   const { branches } = useBranches();
   const branchId = branches[0]?.id ?? null;
   const [tab, setTab] = useState<"list" | "board">("list");
+
+  const { pathname } = useLocation();
+  if (pathname !== "/residents") return <Outlet />;
 
   return (
     <ProtectedRoute>

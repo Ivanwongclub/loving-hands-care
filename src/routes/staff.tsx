@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Outlet, useLocation } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -228,6 +228,9 @@ function StaffManagementPage() {
       ),
     },
   ];
+
+  const { pathname } = useLocation();
+  if (pathname !== "/staff") return <Outlet />;
 
   return (
     <ProtectedRoute>
