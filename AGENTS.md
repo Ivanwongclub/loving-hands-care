@@ -1,4 +1,4 @@
-# AGENTS.md — HMS Helping Hand
+# AGENTS.md — HMS Cereb
 
 This file documents the conventions, constraints, and architecture decisions for AI agents (Lovable, Codex) and human contributors working on this project.
 
@@ -6,7 +6,7 @@ This file documents the conventions, constraints, and architecture decisions for
 
 ## Project
 
-**Helping Hand HMS** — single-tenant enterprise Elderly Home Management System for 伸手助人協會 (a Hong Kong elderly care NGO).
+**Cereb HMS** — single-tenant enterprise Elderly Home Management System for a Hong Kong elderly care NGO.
 
 - Bilingual: Traditional Chinese (`zh-HK`, default) + English (`en`)
 - Sprint cadence: S1-A (foundation, Lovable), S1-B (backend wiring, Codex), S2+ (modules)
