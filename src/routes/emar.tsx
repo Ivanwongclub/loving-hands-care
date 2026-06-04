@@ -66,9 +66,11 @@ function formatTime(d?: string | null): string {
 
 function EMARDashboardPage() {
   const { t } = useTranslation();
-  const { staff } = useCurrentStaff();
-  const branchId = staff?.branch_ids?.[0] ?? null;
+  const { staff, isLoading: staffLoading } = useCurrentStaff();
+  const { branches, isLoading: branchesLoading } = useBranches();
+  const branchId = branches[0]?.id ?? null;
   const staffId = staff?.id ?? null;
+  const loading = staffLoading || branchesLoading;
 
   return (
     <ProtectedRoute>
@@ -77,7 +79,13 @@ function EMARDashboardPage() {
           <DashboardBody branchId={branchId} staffId={staffId} />
         ) : (
           <Card padding="lg">
-            <EmptyState title={t("common.loading")} />
+            <EmptyState
+              title={
+                loading
+                  ? t("common.loading")
+                  : t("common.noBranchAssigned", "No branch assigned. Please contact your administrator.")
+              }
+            />
           </Card>
         )}
       </AdminDesktopShell>
