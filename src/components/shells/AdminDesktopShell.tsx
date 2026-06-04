@@ -12,7 +12,8 @@ import { useAuth } from "@/lib/AuthContext";
 import { useCurrentStaff } from "@/hooks/useCurrentStaff";
 import { useBranches } from "@/hooks/useBranches";
 import { NotificationBell } from "@/components/alerts/NotificationBell";
-import logoUrl from "@/assets/helping-hand-logo.webp";
+import logoAsset from "@/assets/cereb-logo.png.asset.json";
+const logoUrl = logoAsset.url;
 
 interface NavItem { to: string; labelKey: string; descKey?: string; icon: ReactNode; external?: boolean }
 interface NavSection { titleKey?: string; items: NavItem[] }

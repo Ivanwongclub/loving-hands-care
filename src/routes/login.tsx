@@ -7,7 +7,7 @@ import {
   Button, Alert,
 } from "@/components/hms";
 import { useAuth } from "@/lib/AuthContext";
-import helpingHandLogo from "@/assets/helping-hand-logo.webp";
+import cerebLogo from "@/assets/cereb-logo.png.asset.json";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -61,7 +61,7 @@ function LoginPage() {
       >
         <Stack gap={6}>
           <Stack gap={4} align="center">
-            <img src={helpingHandLogo} alt="Helping Hand" style={{ height: 140, width: "auto", marginTop: 16 }} />
+            <img src={cerebLogo.url} alt="Cereb" style={{ height: 140, width: "auto", marginTop: 16 }} />
             <div className="font-extrabold tracking-tight" style={{ fontSize: 32, color: "var(--color-onyx-900)" }}>HMS</div>
           </Stack>
 
@@ -70,7 +70,7 @@ function LoginPage() {
           <form onSubmit={submit}>
             <Stack gap={4}>
               <FormField label={t("auth.email")} required>
-                <TextField type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@helpinghand.org.hk" required />
+                <TextField type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" required />
               </FormField>
               <FormField label={t("auth.password")} required>
                 <PasswordField value={password} onChange={(e) => setPassword(e.target.value)} required />
