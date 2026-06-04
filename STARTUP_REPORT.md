@@ -1,6 +1,6 @@
 # STARTUP_REPORT.md
 **Audit Date:** 2026-05-01  
-**Project:** Loving Hands Care — HMS (Helping Hand 伸手助人協會)  
+**Project:** Cereb HMS  
 **Stack:** TanStack Start + React 19 + Tailwind v4 + Supabase + Lovable.dev
 
 ---
