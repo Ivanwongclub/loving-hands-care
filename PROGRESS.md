@@ -1,103 +1,92 @@
 # HMS Progress Log
 
-## Session: 2026-05-01
+## Session: 2026-05-02
 
 ---
 
 ## ✅ Completed this session
 
-### HMS Feedback Layer — F4 (carried over from previous session)
-- Built `useFeedbackPins.ts` — useQuery with 60s polling, filters out closed pins
-- Built `useFeedbackPinMutations.ts` — createPin mutation; passes `pin_number: 0` as placeholder (DB trigger `feedback_pins_assign_number` overwrites before commit)
-- Built `FeedbackCommentBox.tsx` — fixed-position comment box, clamps left position to avoid overlap with 320px side panel
-- Built `FeedbackPin.tsx` — numbered circular pin marker with status colour map
-- Built `FeedbackPinsLayer.tsx` — createPortal to document.body, rAF position tracking, `pointerEvents: none` wrapper
-- Built `FeedbackSidePanel.tsx` — fixed right panel (320px), opens when `isOn || activePinId !== null`
-- Updated `FeedbackOverlay.tsx` — replaced console.log with PendingCapture state → mounts FeedbackCommentBox on element click
-- Updated `FeedbackProvider.tsx` — added FeedbackPinsLayer + FeedbackSidePanel; SSR guard via `hydrated` state (setHydrated in useEffect)
-- Updated `en.json` + `zh-HK.json` — full `feedback.*` i18n namespace added (parity confirmed)
+### HMS F5 — Retrofit `data-feedback-id` attributes
 
-### F4 Bug Fixes
-- **pin_number race condition**: Removed manual MAX(pin_number)+1 query; now passes `pin_number: 0` and lets the DB trigger handle assignment atomically
-- **Comment box hidden behind side panel**: Added `SIDE_PANEL_WIDTH = 320` constant; updated left-clamp formula to `Math.max(16, Math.min(rawLeft, window.innerWidth - SIDE_PANEL_WIDTH - BOX_WIDTH - 16))`
+**Phase 1 — Attribute sprint (3 pages)**
 
-### Pre-F5 Audit (read-only)
-- Full sprint completion audit (S1–S15, F1–F4) delivered
-- Corrected previous audit errors:
-  - Pass Mode IS implemented — lives in `emar.tsx` + `src/components/emar/`, not in `emar.$residentId.tsx`
-  - Settings has **7 sections** (branches, staff, alerts, notifications, emar, familyPortal, system) — not 4 as previously thought
-  - `system_job_runs` table confirmed present in migration `20260428_system_jobs_tables.sql` and `types.ts` — S15-A is complete
+- **`src/routes/dashboard.tsx`** — added `data-feedback-id` to 4 stat card wrappers (dynamic IDs per `c.key`), tasks panel, and recent-activity panel
+- **`src/routes/emar.tsx`** — added to outer Stack (`emar-root`), pass-mode toggle buttons (`emar-pass-mode-toggle`), stats grid (`emar-stat-bar`), FilterBar (`emar-filter-bar`), SearchField (`emar-search`)
+- **`src/routes/residents.$id.tsx`** — extended internal `TabGroup` function with optional `feedbackId` prop forwarded as `data-feedback-id`; added to root Stack, ProfileHeader Surface, ResidentPhoto div, clinical tab group, ProfileTab Stack, ContactsTab Stack, ActivityTab Card
 
-### Critical Bug Fix — TanStack Router missing `<Outlet />`
-- **Root cause diagnosed**: All dotted child routes (e.g. `residents.$id`, `staff.$id`) have `getParentRoute: () => ParentRoute` in `routeTree.gen.ts`. Parent components never rendered `<Outlet />`, so clicking a row updated the URL but the child component never mounted — appeared as "nothing happens".
-- **Fix pattern**: Add `useLocation` + `Outlet` to imports, insert pathname guard after all hooks and before the main `return (`:
-  ```tsx
-  const { pathname } = useLocation();
-  if (pathname !== "/residents") return <Outlet />;
-  ```
-- **Applied to**:
-  - `src/routes/residents.tsx` — unlocks `residents.$id.tsx` (2,560 lines) and `residents.new.tsx` (839 lines)
-  - `src/routes/staff.tsx` — unlocks `staff.$id.tsx` (418 lines)
-  - `src/routes/alerts.tsx` — unlocks `alerts.wallboard.tsx` (43 lines)
-- **Skipped** (children are true stubs): `emar.tsx`, `care-plans.tsx`, `vitals.tsx`, `tasks.tsx`
-- **git diff --stat**: `3 files changed, 12 insertions(+), 3 deletions(-)` — surgical, no side effects
+**Phase 2 — Audit (read-only)**
+- Confirmed Stack/Surface/Card/Button/Badge all extend `HTMLAttributes<T>` and forward `data-*` — safe to annotate
+- Confirmed Modal and FilterBar do NOT forward `data-*` — interface gap (critical fixes C1, C2)
+- Confirmed `PassModeView.tsx` used static repeating IDs on per-item elements — bug C3
+- Confirmed 5 tab components (vitals, icp, incidents, restraints, vaccinations) were excluded from F5 scope — C4
 
-### Stub verification (Phase 1 of bug fix)
-Confirmed which "stubs" were real pages hidden by the Outlet bug:
+**Phase 3 — Cleanup fixes (4 critical issues resolved)**
 
-| File | Lines | Status |
-|------|-------|--------|
-| `residents.$id.tsx` | 2,560 | REAL — was always built |
-| `staff.$id.tsx` | 418 | REAL — was always built |
-| `alerts.wallboard.tsx` | 43 | REAL — was always built |
-| `residents.new.tsx` | 839 | REAL — was always built |
-| `emar.$residentId.tsx` | 6 | TRUE STUB |
-| `care-plans.tsx` | 6 | TRUE STUB |
-| `care-plans.$id.tsx` | 6 | TRUE STUB |
-| `vitals.assessments.tsx` | 6 | TRUE STUB |
-| `tasks.handover.tsx` | 6 | TRUE STUB |
+- **C1+C3 — `src/components/hms/Overlays.tsx` (Modal):** Added `"data-feedback-id"?: string` to `ModalProps`, destructured as `feedbackId`, applied to inner panel `<div>` (not backdrop). Confirmed `emar-pin-dialog` now lands on the correct DOM node.
+- **C2+C3 — `src/components/hms/Patterns.tsx` (FilterBar):** Added `"data-feedback-id"?: string` prop + forwarded to wrapper div. Removed accidental `HTMLAttributes` import that caused TS error.
+- **C3 — `src/components/emar/PassModeView.tsx`:** Switched from static `"emar-resident-card"` / `"emar-medication-row"` to per-item unique IDs using resident UUID and record UUID. Added `"emar-pass-mode-view"` to outer Stack.
+- **C4 — 5 tab components:** Added `data-feedback-id` to outer Stack/Card in `VitalsTab`, `ICPTab`, `IncidentsTab`, `RestraintsTab`, `VaccinationsTab`.
+
+**Phase 4 — Infinite loop diagnosis (read-only)**
+
+Diagnosed two "Maximum update depth exceeded" errors in `FeedbackPinsLayer.tsx`:
+
+- **Bug 1:** `const { data: pins = [] }` — destructuring default `[]` creates a NEW array reference every render when `data` is `undefined` (loading state). This makes `pins` change identity each render, re-triggering the `useEffect([pins])`.
+- **Bug 2:** `setPositions({})` — creates a NEW object reference each call; React cannot bail out (no same-reference check). Combined with Bug 1, creates a tight synchronous re-render loop (~50 iterations → crash).
+- **Why two errors:** React 18 Strict Mode double-mounts effects (mount → unmount → re-mount), so the loop fires twice independently.
+
+**Phase 5 — Infinite loop fixes applied**
+
+Fixed `src/features/feedback/components/FeedbackPinsLayer.tsx`:
+
+- **Fix 1:** Added `const EMPTY_PINS: FeedbackPinRow[] = [];` at module level (after imports). Changed destructure to `const { data: pins = EMPTY_PINS } = useFeedbackPins();`. Module-level constant has stable identity across all renders — React's `useEffect` dep comparison now bails out correctly when data is still loading.
+- **Fix 2:** Changed `setPositions({})` to `setPositions((prev) => Object.keys(prev).length === 0 ? prev : {});`. Functional updater returns `prev` unchanged when already empty — React bails out (same reference, no re-render). Only allocates a new `{}` on the first call when positions actually need clearing.
+
+Verified with grep: lines 11, 14, 24 all correct.
 
 ---
 
 ## 🔄 In progress
 
-- **F4 feedback layer** — code complete and committed; awaiting user verification in preview that pins, comment box, and side panel work end-to-end
-- **Outlet fix** — code complete (`git diff` clean, 3 files only); awaiting push + preview verification
+- **F5 + feedback layer fixes** — all code changes complete, not yet pushed to GitHub / verified in Lovable.dev preview
+- **Infinite loop fix** — applied locally; needs browser verification that "Maximum update depth exceeded" errors no longer appear in console when feedback mode loads
 
 ---
 
 ## ⏭️ Next steps
 
 ### Immediate (verify this session's work)
-1. Push to GitHub → Lovable.dev preview
-2. Test resident row click → `/residents/[id]` → detail page renders
-3. Test staff row click → `/staff/[id]` → detail page renders
-4. Test alerts wallboard link → `/alerts/wallboard` → wallboard renders
-5. Test new admission button → `/residents/new` → form renders
-6. Test F4 feedback: toggle feedback mode on, click element, type comment, submit → pin appears
+1. Push to GitHub via GitHub Desktop → Lovable.dev preview
+2. Open browser console — confirm zero "Maximum update depth exceeded" errors
+3. Toggle feedback mode on → confirm pins render and no crash
+4. Spot-check `data-feedback-id` attributes in DevTools Elements panel on dashboard, eMAR, and resident detail
 
-### F5 Sprint (next sprint — not yet planned)
-Remaining true stubs to build:
-- **`emar.$residentId.tsx`** — per-resident eMAR administration (Pass Mode is in `emar.tsx` but per-resident sub-route is unbuilt)
-- **`care-plans.tsx` + `care-plans.$id.tsx`** — standalone care plan routes (ICP data exists in DB and `residents.$id.tsx`, routes are stubs)
-- **`vitals.assessments.tsx`** — vitals assessments route
-- **`tasks.handover.tsx`** — shift handover report
-- **`import.tsx`** — bulk import
+### Fix #3 (explicitly deferred, not blocking)
+- `FeedbackElementHighlight.tsx` runs a 60fps rAF loop calling `setRect` — not an infinite loop crash but causes unnecessary re-renders when the highlight is active. Consider switching to ResizeObserver + scroll listener for position tracking. Low priority — address separately.
 
-### STARTUP_REPORT.md
-- Still has open Critical/High/Medium issues (C1–C8, H1–H9, M1–M7)
-- Key outstanding: `FEEDBACK_ENABLED` hardcoded `true` in config — needs env var gate before wider rollout (C8)
+### F6 Sprint (next planned sprint)
+- Build the feedback side panel interactions (pin threading, reply, resolve/close flows)
+- Add `FEEDBACK_ENABLED` env var gate (currently hardcoded `true` in config — C8 from STARTUP_REPORT)
+
+### Remaining true stubs to build (unchanged from previous session)
+- `emar.$residentId.tsx` — per-resident eMAR sub-route
+- `care-plans.tsx` + `care-plans.$id.tsx` — standalone care plan routes
+- `vitals.assessments.tsx` — vitals assessments route
+- `tasks.handover.tsx` — shift handover report
+- `import.tsx` — bulk import
 
 ---
 
 ## 🚧 Blockers & decisions
 
 ### Decisions made this session
-- **`pin_number` assignment**: DB trigger (`feedback_pins_assign_number`) handles MAX+1 atomically; client always passes `0` as placeholder. Do not revert to client-side MAX query.
-- **Outlet pattern**: Used `useLocation().pathname` check rather than `useChildMatches()` (unavailable without node_modules to verify) or `useMatch` (ambiguous strict/non-strict behavior). Pathname check is simple and correct for all routes in this project.
-- **Stub routes not fixed**: `emar.tsx`, `vitals.tsx`, `tasks.tsx`, `care-plans.tsx` Outlet fix intentionally skipped — their child routes are true stubs and adding Outlet would have no visible effect.
+- **`EMPTY_PINS` pattern over inline default:** Module-level constant chosen over `useMemo(() => [], [])` — simpler, no hook overhead, identical stability guarantee. Only viable because the array is never mutated.
+- **Functional `setPositions` updater:** Chosen over `useRef` to track previous positions — keeps positions as reactive state (needed for render), avoids an extra ref, and the cost is just one `Object.keys()` call per effect tick when pins are empty.
+- **Fix #3 deferred:** 60fps rAF in `FeedbackElementHighlight.tsx` is a performance concern but NOT the crash root cause. Excluded from this fix to keep scope minimal and not risk introducing regressions in the highlight UX.
+- **FilterBar `"data-feedback-id"?: string` pattern:** Explicit typed prop chosen over `Pick<HTMLAttributes<HTMLDivElement>, "data-feedback-id">` — `Pick` on index signatures does not work cleanly in TypeScript; explicit string prop is simpler and consistent with Modal pattern.
 
 ### Known gaps / watch items
-- `bun` is not on PATH in the Claude Code shell session — TypeScript checks must be run manually (`bun tsc --noEmit`) or via Lovable.dev preview build
-- `emar.$residentId.tsx` is a TRUE STUB — if someone navigates to `/emar/[residentId]` they get "Coming Soon". The Outlet fix was NOT applied to `emar.tsx` since the child is unbuilt.
-- Family portal routes (`/family/*`) are excluded from FeedbackProvider — intentional, confirmed in `FeedbackProvider.tsx` EXCLUDED_PREFIXES.
+- `bun` is not on PATH in Claude Code shell — TypeScript checks must be run manually or via Lovable.dev preview build
+- `emar.$residentId.tsx` is a TRUE STUB — navigating to `/emar/[residentId]` shows "Coming Soon"
+- Family portal routes (`/family/*`) are excluded from FeedbackProvider — intentional, confirmed in `EXCLUDED_PREFIXES`
+- STARTUP_REPORT.md still has open C1–C8, H1–H9, M1–M7 items; C8 (`FEEDBACK_ENABLED` hardcoded) is the most urgent before wider rollout
